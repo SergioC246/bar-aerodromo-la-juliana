@@ -476,11 +476,11 @@ function setLang(l) {
 // SPLASH
 // ════════════════════════════════════════════════════════════
 function renderSplash() {
-  const keys = ['starters','breakfast','mains','drinks'];
-  document.getElementById('catsGrid').innerHTML = keys.map((k,i) => {
+  const keys = ['breakfast','starters','mains','drinks'];
+  document.getElementById('catsGrid').innerHTML = keys.map((k) => {
     const d = MENU[k];
     const cnt = d.items ? d.items.length : d.subsections.reduce((a,s)=>a+s.items.length,0);
-    return `<div class="cat-tile${i===3?' wide':''}" onclick="openSec('${k}')">
+    return `<div class="cat-tile" onclick="openSec('${k}')">
       <div class="ct-ico">${d.emoji}</div>
       <div class="ct-name">${d[lang]}</div>
       <div class="ct-cnt">${cnt} ${t('items')}</div>
@@ -769,38 +769,31 @@ function qrBgClick(e) { if (e.target===document.getElementById('qbg')) closeQR()
 
 function printQR() {
   const base = window.location.origin + window.location.pathname;
-  const html = `<html><head>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,700;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Inter,sans-serif;background:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-  .card{border:2px solid #e5e0d8;border-radius:16px;padding:32px 28px;text-align:center;max-width:300px;width:100%}
-  h1{font-family:'Cormorant Garamond',serif;font-size:24px;color:#c9a84c;margin-bottom:2px}
-  h2{font-family:'Cormorant Garamond',serif;font-size:17px;color:#c9a84c;font-style:italic;margin-bottom:20px;font-weight:400}
-  #qrc{display:flex;justify-content:center;margin-bottom:16px}
-  p{font-size:13px;color:#666;line-height:1.6;margin-bottom:4px}
-  .url{font-size:9px;color:#bbb;margin-top:10px;word-break:break-all}
-  @media print{@page{size:A5;margin:10mm}}
-</style></head><body>
-<div class="card">
-  <h1>Bar Aeródromo</h1><h2>La Juliana</h2>
-  <div id="qrc"></div>
-  <p>📱 Escanea para ver la carta y pedir</p>
-  <p>📱 Scan to browse the menu & order</p>
-  <div class="url">${base}</div>
-</div>
-<script>
-  new QRCode(document.getElementById('qrc'),{text:'${base}',width:200,height:200,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});
-  setTimeout(()=>window.print(),900);
-<\/script></body></html>`;
-  const w = window.open('','_blank'); w.document.write(html); w.document.close();
+  const w = window.open('','_blank');
+  w.document.write('<html><head>'
+    + '<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}'
+    + '.card{border:2px solid #e5e0d8;border-radius:16px;padding:32px;text-align:center;max-width:300px}'
+    + 'h1{font-size:22px;color:#c9a84c;margin-bottom:2px}h2{font-size:16px;color:#c9a84c;font-style:italic;margin-bottom:20px}'
+    + '#qrc{display:flex;justify-content:center;margin-bottom:12px}'
+    + 'p{font-size:13px;color:#666;margin-bottom:4px}.url{font-size:9px;color:#bbb;margin-top:8px;word-break:break-all}'
+    + '@media print{@page{size:A5;margin:10mm}}</style>'
+    + '<sc'+'ript src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><'+'/sc'+'ript>'
+    + '</head><body><div class="card">'
+    + '<h1>Bar Aer\u00f3dromo</h1><h2>La Juliana</h2>'
+    + '<div id="qrc"></div>'
+    + '<p>\uD83D\uDCF1 Escanea para ver la carta y pedir</p>'
+    + '<p>\uD83D\uDCF1 Scan to browse the menu & order</p>'
+    + '<div class="url">'+base+'</div>'
+    + '</div>'
+    + '<sc'+'ript>new QRCode(document.getElementById("qrc"),{text:"'+base+'",width:200,height:200,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.H});setTimeout(()=>window.print(),900);<'+'/sc'+'ript>'
+    + '</body></html>');
+  w.document.close();
 }
 
 // ════════════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════════════
-renderSplash();
+document.addEventListener('DOMContentLoaded', renderSplash);
 </script>
 </body>
 </html>
