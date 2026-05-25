@@ -213,4 +213,4 @@ El panel de cocina muestra en tiempo real los pedidos con estado `en_cocina`, co
 
 ## 👤 Autor
 
-Proyecto desarrollado por **Sergi** para el Bar Aeródromo La Juliana.
+Proyecto desarrollado por **Sergio Córdoba** para el Bar Aeródromo La Juliana.
