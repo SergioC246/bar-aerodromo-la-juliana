@@ -700,7 +700,6 @@ function delItem(id) {
 // PLACE ORDER
 // ════════════════════════════════════════════════════════════
 function placeOrder() {
-  // Validate name
   const nameInput  = document.getElementById('custName');
   const phoneInput = document.getElementById('custPhone');
   const nameErr    = document.getElementById('nameErr');
@@ -712,25 +711,57 @@ function placeOrder() {
   let valid = true;
 
   if (!name) {
-    if (nameErr)  { nameErr.style.display='block'; }
+    if (nameErr) nameErr.style.display = 'block';
     if (nameInput) nameInput.focus();
     valid = false;
   } else {
-    if (nameErr) nameErr.style.display='none';
+    if (nameErr) nameErr.style.display = 'none';
   }
 
   if (!phone || phone.replace(/\D/g,'').length < 6) {
-    if (phoneErr) { phoneErr.style.display='block'; }
+    if (phoneErr) phoneErr.style.display = 'block';
     if (valid && phoneInput) phoneInput.focus();
     valid = false;
   } else {
-    if (phoneErr) phoneErr.style.display='none';
+    if (phoneErr) phoneErr.style.display = 'none';
   }
 
   if (!valid) return;
 
   const pickup = document.getElementById('pTime')?.value || '';
-  showSuccess(name, phone, pickup);
+
+  const items = Object.values(cart).map(function(item) {
+    return { nombre: item.name, cantidad: item.qty, precio: item.price };
+  });
+
+  const payload = {
+    customerName: name,
+    phone: phone,
+    pickupTime: pickup || null,
+    items: items
+  };
+
+  const btn = document.getElementById('orderBtn');
+  btn.disabled = true;
+  btn.textContent = lang === 'es' ? 'Enviando...' : 'Sending...';
+
+  fetch('http://localhost:5000/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Error');
+    return res.json();
+  })
+  .then(function() {
+    showSuccess(name, phone, pickup);
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.textContent = t('placeOrder');
+    alert(lang === 'es' ? 'Error al enviar el pedido. Inténtalo de nuevo.' : 'Error sending order. Please try again.');
+  });
 }
 
 function showSuccess(name, phone, pickup) {
