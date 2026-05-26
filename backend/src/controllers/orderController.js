@@ -9,9 +9,12 @@ exports.createOrder = async (req, res, next) => {
     }
 
     const order = await Order.create({ customerName, phone, items, pickupTime });
+// Emitir a cocina via WebSocket
+    const emitir = req.app.get('emitNuevoPedido');
+    if (emitir) emitir(order);
     res.status(201).json(order);
-  } catch (err) {
-    next(err);
+    } catch (err) {
+      next(err);
   }
 };
 
