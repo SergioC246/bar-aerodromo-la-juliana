@@ -1,5 +1,6 @@
 require('dotenv').config();
 const app = require('./app');
+const initDb = require('./config/initDb');
 const { WebSocketServer } = require('ws');
 const http = require('http');
 
@@ -32,7 +33,10 @@ app.set('emitNuevoPedido', (pedido) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
-});
+(async () => {
+  await initDb();
+  server.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+  });
+})();
