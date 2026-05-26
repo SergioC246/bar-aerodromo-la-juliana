@@ -745,7 +745,7 @@ function placeOrder() {
   btn.disabled = true;
   btn.textContent = lang === 'es' ? 'Enviando...' : 'Sending...';
 
-  fetch('http://localhost:5000/api/orders', {
+  fetch('/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)

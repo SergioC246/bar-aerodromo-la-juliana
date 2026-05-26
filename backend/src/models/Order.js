@@ -4,55 +4,122 @@ const pool = require('../config/database');
 class Order {
   static async create(orderData) {
     const id = uuidv4();
-    const { customerName, phone, items, pickupTime, status = 'pending' } = orderData;
+    const { customerName, phone, items, pickupTime, status = 'pendiente' } = orderData;
     const createdAt = new Date();
 
-    const query = `
-      INSERT INTO orders (id, customer_name, phone, items, pickup_time, status, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING *;
-    `;
-
-    const values = [id, customerName, phone, JSON.stringify(items), pickupTime || null, status, createdAt];
-
+    const client = await pool.connect();
     try {
-      const result = await pool.query(query, values);
-      return result.rows[0];
+      await client.query('BEGIN');
+
+      const pedidoQuery = `
+        INSERT INTO pedidos (id, customer_name, phone, pickup_time, status, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *;
+      `;
+      const pedidoValues = [id, customerName, phone, pickupTime || null, status, createdAt, createdAt];
+      const pedidoResult = await client.query(pedidoQuery, pedidoValues);
+
+      for (const item of items) {
+        const lineaQuery = `
+          INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad, precio_unitario, notas)
+          VALUES ($1, NULL, $2, $3, $4);
+        `;
+        // Guardamos el nombre del producto en la columna notas
+        await client.query(lineaQuery, [id, item.cantidad, item.precio, item.nombre]);
+      }
+
+      await client.query('COMMIT');
+      return pedidoResult.rows[0];
     } catch (err) {
+      await client.query('ROLLBACK');
       throw new Error(`Database error: ${err.message}`);
+    } finally {
+      client.release();
     }
   }
 
   static async getAll(status = null) {
-    let query = 'SELECT * FROM orders ORDER BY created_at DESC';
+    let query = `
+      SELECT
+        p.id,
+        p.customer_name,
+        p.phone,
+        p.pickup_time,
+        p.status,
+        p.created_at,
+        json_agg(
+          json_build_object(
+            'id',       lp.id,
+            'nombre',   lp.notas,
+            'cantidad', lp.cantidad,
+            'precio',   lp.precio_unitario
+          ) ORDER BY lp.id
+        ) FILTER (WHERE lp.id IS NOT NULL) as items
+      FROM pedidos p
+      LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
+    `;
     const values = [];
 
     if (status) {
-      query = 'SELECT * FROM orders WHERE status = $1 ORDER BY created_at DESC';
+      query += ' WHERE p.status = $1';
       values.push(status);
     }
 
+    query += ' GROUP BY p.id ORDER BY p.created_at DESC';
+
     try {
       const result = await pool.query(query, values);
-      return result.rows;
+      // Garantizar que items nunca sea null
+      return result.rows.map(row => ({
+        ...row,
+        items: row.items || []
+      }));
     } catch (err) {
       throw new Error(`Database error: ${err.message}`);
     }
   }
 
   static async getById(id) {
-    const query = 'SELECT * FROM orders WHERE id = $1';
+    const query = `
+      SELECT
+        p.id,
+        p.customer_name,
+        p.phone,
+        p.pickup_time,
+        p.status,
+        p.created_at,
+        json_agg(
+          json_build_object(
+            'id',       lp.id,
+            'nombre',   lp.notas,
+            'cantidad', lp.cantidad,
+            'precio',   lp.precio_unitario
+          ) ORDER BY lp.id
+        ) FILTER (WHERE lp.id IS NOT NULL) as items
+      FROM pedidos p
+      LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
+      WHERE p.id = $1
+      GROUP BY p.id
+    `;
 
     try {
       const result = await pool.query(query, [id]);
-      return result.rows[0];
+      if (!result.rows[0]) return null;
+      return {
+        ...result.rows[0],
+        items: result.rows[0].items || []
+      };
     } catch (err) {
       throw new Error(`Database error: ${err.message}`);
     }
   }
 
   static async updateStatus(id, status) {
-    const query = 'UPDATE orders SET status = $1, updated_at = $2 WHERE id = $3 RETURNING *';
+    const query = `
+      UPDATE pedidos SET status = $1, updated_at = $2
+      WHERE id = $3
+      RETURNING *
+    `;
     const values = [status, new Date(), id];
 
     try {
