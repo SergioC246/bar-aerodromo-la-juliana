@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cocina — Bar Aeródromo La Juliana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0e0d0b;
+      --surface:   #1a1814;
+      --card:      #211f1b;
+      --border:    #2e2b24;
+      --gold:      #c9943a;
+      --gold-dim:  #7a5a20;
+      --text:      #f0ead8;
+      --muted:     #7a7060;
+      --green:     #3a8a5c;
+      --green-bg:  #1a3326;
+      --red:       #8a3a3a;
+      --red-bg:    #331a1a;
+      --pending:   #c9943a;
+      --pending-bg:#3a2e10;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-brand .plane {
+      font-size: 1.4rem;
+      filter: drop-shadow(0 0 6px var(--gold));
+    }
+
+    .header-brand h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    .header-brand span {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .live-dot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .live-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .clock {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── STATS BAR ── */
+    .stats {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      display: flex;
+      gap: 2rem;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .stat strong {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .stat .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot-pending { background: var(--pending); }
+    .dot-done    { background: var(--green); }
+
+    /* ── FILTER TABS ── */
+    .filters {
+      padding: 1.25rem 2rem 0;
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      border: 1px solid transparent;
+      border-bottom: none;
+      font-size: 0.8rem;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      background: var(--card);
+      border-color: var(--border);
+      color: var(--gold);
+    }
+
+    /* ── MAIN GRID ── */
+    main {
+      padding: 1.5rem 2rem 3rem;
+    }
+
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      gap: 1rem;
+      color: var(--muted);
+    }
+
+    .empty-state .icon { font-size: 3rem; opacity: 0.4; }
+    .empty-state p { font-size: 0.9rem; }
+
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.85rem;
+    }
+
+    /* ── ORDER CARD ── */
+    .order-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: slideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: border-color 0.2s;
+    }
+
+    .order-card:hover { border-color: var(--gold-dim); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .order-card.done {
+      opacity: 0.55;
+      border-color: var(--border);
+    }
+
+    /* card header */
+    .card-header {
+      padding: 0.65rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-left { display: flex; align-items: center; gap: 8px; }
+
+    .order-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    .customer-info { display: flex; flex-direction: column; }
+
+    .customer-name {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .customer-phone {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+
+    .status-badge {
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 20px;
+    }
+
+    .status-pending {
+      background: var(--pending-bg);
+      color: var(--pending);
+      border: 1px solid var(--gold-dim);
+    }
+
+    .status-done {
+      background: var(--green-bg);
+      color: #5abf8a;
+      border: 1px solid #2a6644;
+    }
+
+    .order-time {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* elapsed timer */
+    .elapsed {
+      font-size: 0.7rem;
+      font-variant-numeric: tabular-nums;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .elapsed.warning { color: #e09a3a; background: #3a2a10; }
+    .elapsed.alert   { color: #e05a5a; background: #3a1010; }
+
+    /* pickup time */
+    .pickup-row {
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pickup-row .icon { font-size: 0.9rem; }
+    .pickup-row strong { color: var(--gold); }
+
+    /* items list */
+    .card-items {
+      padding: 0.6rem 1rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .item-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .item-qty {
+      min-width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .item-name {
+      font-size: 0.78rem;
+      color: var(--text);
+      line-height: 1.35;
+      padding-top: 3px;
+    }
+
+    .item-notes {
+      font-size: 0.68rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* card footer */
+    .card-footer {
+      padding: 0.6rem 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .total-label {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .total-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.9rem;
+      color: var(--gold);
+    }
+
+    .btn-ready {
+      padding: 0.45rem 1rem;
+      border-radius: 7px;
+      border: none;
+      background: var(--gold);
+      color: #0e0d0b;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-ready:hover  { background: #e0aa50; }
+    .btn-ready:active { transform: scale(0.97); }
+
+    .btn-undo {
+      padding: 0.38rem 0.85rem;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .btn-undo:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── NOTIFICATION TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--card);
+      border: 1px solid var(--gold-dim);
+      border-left: 3px solid var(--gold);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      max-width: 300px;
+      z-index: 999;
+      transform: translateY(120%);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    #toast.show { transform: translateY(0); }
+
+    .toast-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 3px;
+    }
+
+    .toast-body { font-size: 0.78rem; color: var(--muted); }
+
+    /* ── WS STATUS BAR ── */
+    #ws-status {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.4rem 2rem;
+      font-size: 0.7rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      color: var(--muted);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 50;
+    }
+
+    #ws-status .ws-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--muted);
+      transition: background 0.3s;
+    }
+
+    #ws-status.connected .ws-dot   { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    #ws-status.demo     .ws-dot    { background: var(--gold);  box-shadow: 0 0 6px var(--gold); }
+    #ws-status.error    .ws-dot    { background: var(--red);   }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-brand">
+    <span class="plane">✈️</span>
+    <h1>Bar Aeródromo <span>La Juliana</span> &mdash; Cocina</h1>
+  </div>
+  <div class="header-meta">
+    <div class="live-dot" id="live-label">En vivo</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <span class="dot dot-pending"></span>
+    <strong id="count-pending">0</strong> pendientes
+  </div>
+  <div class="stat">
+    <span class="dot dot-done"></span>
+    <strong id="count-done">0</strong> listos hoy
+  </div>
+</div>
+
+<!-- FILTER TABS -->
+<div class="filters">
+  <button class="tab active" data-filter="pending" onclick="setFilter('pending', this)">Pendientes</button>
+  <button class="tab"        data-filter="done"    onclick="setFilter('done', this)">Listos</button>
+  <button class="tab"        data-filter="all"     onclick="setFilter('all', this)">Todos</button>
+</div>
+
+<!-- MAIN -->
+<main>
+  <div class="empty-state" id="empty">
+    <div class="icon">🍳</div>
+    <p>No hay pedidos en este momento</p>
+  </div>
+  <div class="orders-grid" id="orders-grid"></div>
+</main>
+
+<!-- TOAST -->
+<div id="toast">
+  <div class="toast-title" id="toast-title">Nuevo pedido</div>
+  <div class="toast-body"  id="toast-body"></div>
+</div>
+
+<!-- WS STATUS -->
+<div id="ws-status" class="demo">
+  <span class="ws-dot"></span>
+  <span id="ws-label">Modo demo — conecta el backend para recibir pedidos en tiempo real</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════════════════
+let orders  = [];
+let filter  = 'pending';
+let doneCount = 0;
+
+// ═══════════════════════════════════════════════
+//  RELOJ
+// ═══════════════════════════════════════════════
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('es-ES');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══════════════════════════════════════════════
+//  WEBSOCKET  (se conecta automáticamente cuando el backend esté listo)
+// ═══════════════════════════════════════════════
+const WS_URL = 'ws://localhost:3000';   // ← cambia si el puerto es diferente
+
+function connectWS() {
+  let ws;
+  try {
+    ws = new WebSocket(WS_URL);
+  } catch(e) {
+    setWsStatus('error', 'No se pudo conectar al backend');
+    return;
+  }
+
+  ws.onopen = () => {
+    setWsStatus('connected', 'Conectado al servidor — pedidos en tiempo real');
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'nuevo_pedido') {
+        addOrder(data.pedido);
+        showToast(`Mesa ${data.pedido.mesa ?? '—'} · ${data.pedido.cliente}`,
+                  `${data.pedido.items.length} producto(s) · Recogida: ${data.pedido.horaRecogida}`);
+      }
+      if (data.type === 'pedidos_iniciales') {
+        data.pedidos.forEach(addOrder);
+      }
+    } catch(e) { console.warn('WS message parse error', e); }
+  };
+
+  ws.onerror = () => setWsStatus('error', 'Error de conexión WebSocket');
+
+  ws.onclose = () => {
+    setWsStatus('demo', 'Desconectado — reintentando en 5s…');
+    setTimeout(connectWS, 5000);
+  };
+}
+
+// Intenta conectar; si falla (backend no arrancado) se queda en modo demo
+try { connectWS(); } catch(e) {}
+
+function setWsStatus(cls, msg) {
+  const el = document.getElementById('ws-status');
+  el.className = cls;
+  document.getElementById('ws-label').textContent = msg;
+}
+
+// ═══════════════════════════════════════════════
+//  DATOS DE DEMO  (se muestran hasta que llegue el backend)
+// ═══════════════════════════════════════════════
+const DEMO_ORDERS = [
+  {
+    id: 1,
+    mesa: 3,
+    cliente: 'Sergio',
+    telefono: '612 345 678',
+    horaRecogida: '13:15',
+    hora: new Date(Date.now() - 4 * 60000).toISOString(),
+    estado: 'pendiente',
+    items: [
+      { nombre: 'Tostada con Mermelada', cantidad: 2 },
+      { nombre: 'Tostada con Mantequilla', cantidad: 1 },
+      { nombre: 'Café con Leche', cantidad: 2 },
+    ],
+    total: 7.50
+  },
+  {
+    id: 2,
+    mesa: 7,
+    cliente: 'Ana',
+    telefono: '699 876 543',
+    horaRecogida: '13:20',
+    hora: new Date(Date.now() - 1 * 60000).toISOString(),
+    estado: 'pendiente',
+    items: [
+      { nombre: 'Entrante mixto', cantidad: 1 },
+      { nombre: 'Bocadillo de Jamón', cantidad: 2 },
+      { nombre: 'Agua con gas', cantidad: 1 },
+    ],
+    total: 14.80
+  },
+  {
+    id: 3,
+    mesa: 1,
+    cliente: 'Marcos',
+    telefono: '655 111 222',
+    horaRecogida: '12:55',
+    hora: new Date(Date.now() - 22 * 60000).toISOString(),
+    estado: 'listo',
+    items: [
+      { nombre: 'Tostada con Tomate', cantidad: 3 },
+      { nombre: 'Zumo de Naranja', cantidad: 2 },
+    ],
+    total: 9.10
+  }
+];
+
+DEMO_ORDERS.forEach(addOrder);
+doneCount = orders.filter(o => o.estado === 'listo').length;
+renderAll();
+
+// ═══════════════════════════════════════════════
+//  LÓGICA DE ÓRDENES
+// ═══════════════════════════════════════════════
+function addOrder(order) {
+  const existing = orders.findIndex(o => o.id === order.id);
+  if (existing >= 0) orders[existing] = order;
+  else orders.unshift(order);
+  renderAll();
+}
+
+function markDone(id) {
+  const o = orders.find(o => o.id === id);
+  if (!o) return;
+  o.estado = 'listo';
+  doneCount++;
+  // TODO: llamar al backend → PATCH /api/pedidos/:id/estado { estado: 'listo' }
+  renderAll();
+}
+
+function markPending(id) {
+  const o = orders.find(o => o.id === id);
+  if (!o) return;
+  o.estado = 'pendiente';
+  doneCount = Math.max(0, doneCount - 1);
+  // TODO: llamar al backend → PATCH /api/pedidos/:id/estado { estado: 'pendiente' }
+  renderAll();
+}
+
+function setFilter(f, btn) {
+  filter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════
+function renderAll() {
+  const pending = orders.filter(o => o.estado === 'pendiente');
+  const done    = orders.filter(o => o.estado === 'listo');
+
+  document.getElementById('count-pending').textContent = pending.length;
+  document.getElementById('count-done').textContent    = doneCount;
+
+  let visible;
+  if (filter === 'pending') visible = pending;
+  else if (filter === 'done') visible = done;
+  else visible = orders;
+
+  const grid  = document.getElementById('orders-grid');
+  const empty = document.getElementById('empty');
+
+  if (visible.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'flex';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = visible.map(renderCard).join('');
+
+  // start elapsed timers
+  visible.forEach(o => startElapsed(o));
+}
+
+function renderCard(o) {
+  const isDone    = o.estado === 'listo';
+  const orderTime = new Date(o.hora);
+  const timeStr   = orderTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const elapsedId = `elapsed-${o.id}`;
+
+  const itemsHTML = o.items.map(i => `
+    <div class="item-row">
+      <div class="item-qty">${i.cantidad}</div>
+      <div>
+        <div class="item-name">${i.nombre}</div>
+        ${i.notas ? `<div class="item-notes">📝 ${i.notas}</div>` : ''}
+      </div>
+    </div>`).join('');
+
+  const actionBtn = isDone
+    ? `<button class="btn-undo" onclick="markPending(${o.id})">↩ Deshacer</button>`
+    : `<button class="btn-ready" onclick="markDone(${o.id})">✓ Listo</button>`;
+
+  return `
+  <div class="order-card ${isDone ? 'done' : ''}" id="card-${o.id}">
+    <div class="card-header">
+      <div class="card-left">
+        <div class="order-num">#${o.id}</div>
+        <span class="customer-name">${o.cliente}</span>
+      </div>
+      <div class="card-right">
+        <span class="status-badge ${isDone ? 'status-done' : 'status-pending'}">
+          ${isDone ? '✓ Listo' : '⏳ Pendiente'}
+        </span>
+        <span class="elapsed" id="${elapsedId}">0 min</span>
+      </div>
+    </div>
+    <div class="pickup-row">
+      <span class="icon">🕐</span>
+      Recoger a las <strong>${o.horaRecogida}</strong>
+    </div>
+    <div class="card-items">${itemsHTML}</div>
+    <div class="card-footer">
+      ${actionBtn}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  ELAPSED TIMER
+// ═══════════════════════════════════════════════
+const timers = {};
+
+function startElapsed(o) {
+  const id = `elapsed-${o.id}`;
+  if (timers[id]) return; // ya corriendo
+
+  timers[id] = setInterval(() => {
+    const el = document.getElementById(id);
+    if (!el) { clearInterval(timers[id]); delete timers[id]; return; }
+    const mins = Math.floor((Date.now() - new Date(o.hora)) / 60000);
+    el.textContent = mins < 60 ? `${mins} min` : `${Math.floor(mins/60)}h ${mins%60}m`;
+    el.className = 'elapsed' + (mins >= 20 ? ' alert' : mins >= 10 ? ' warning' : '');
+  }, 15000);
+
+  // run once immediately
+  const el = document.getElementById(id);
+  if (el) {
+    const mins = Math.floor((Date.now() - new Date(o.hora)) / 60000);
+    el.textContent = mins < 60 ? `${mins} min` : `${Math.floor(mins/60)}h ${mins%60}m`;
+    el.className = 'elapsed' + (mins >= 20 ? ' alert' : mins >= 10 ? ' warning' : '');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function showToast(title, body) {
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent  = body;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4500);
+}
+</script>
+</body>
+</html>
