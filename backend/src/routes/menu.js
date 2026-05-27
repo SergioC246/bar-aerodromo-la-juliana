@@ -2,9 +2,20 @@ const express = require('express');
 const router = express.Router();
 const menuController = require('../controllers/menuController');
 
-router.get('/', menuController.getMenuByLanguage);
-router.get('/categorias', menuController.getCategorias);
-router.get('/categorias/:categoriaId', menuController.getProductosPorCategoria);
-router.get('/productos/:id', menuController.getProducto);
+// Menú público
+router.get('/', menuController.getMenuCompleto);
+
+// Menú para admin (incluye no disponibles)
+router.get('/admin', menuController.getMenuAdmin);
+
+// Categorías
+router.post('/categorias', menuController.createCategoria);
+router.put('/categorias/:id', menuController.updateCategoria);
+router.delete('/categorias/:id', menuController.deleteCategoria);
+
+// Productos
+router.post('/productos', menuController.createProducto);
+router.put('/productos/:id', menuController.updateProducto);
+router.delete('/productos/:id', menuController.deleteProducto);
 
 module.exports = router;
