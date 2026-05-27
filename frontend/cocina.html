@@ -184,6 +184,33 @@
 
     .order-time { font-size: 14px; color: var(--muted); }
 
+    .pickup-time {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(212, 168, 83, 0.15);
+      border: 2px solid var(--gold);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 14px;
+    }
+
+    .pickup-time-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .pickup-time-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+    }
+
     .customer-name {
       font-size: 18px;
       font-weight: 700;
@@ -463,6 +490,9 @@
       board.innerHTML = orderList.map(order => {
         const time = formatTime(new Date(order.created_at));
         const num = orderNumberMap[order.id] || '?';
+        const pickupHtml = order.pickup_time
+          ? `<div class="pickup-time"><span class="pickup-time-label">🕐 Recogida</span><span class="pickup-time-value">${order.pickup_time.substring(0,5)}</span></div>`
+          : '';
 
         // Solo renderizar el bloque de items si hay items con nombre
         const itemsFiltered = (order.items || []).filter(item => item.nombre);
@@ -501,6 +531,7 @@
               <div class="order-time">${time}</div>
             </div>
             <div class="customer-name">${order.customer_name}</div>
+            ${pickupHtml}
             ${itemsHtml}
             ${actionsHtml}
           </div>
