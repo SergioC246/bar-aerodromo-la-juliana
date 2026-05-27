@@ -6,25 +6,26 @@ exports.getActiveOrders = async (req, res, next) => {
       SELECT
         p.id,
         p.customer_name,
+        p.phone,
+        p.pickup_time,
         p.status,
         p.created_at,
         json_agg(
           json_build_object(
-            'id', pr.id,
-            'nombre', pr.nombre,
+            'id',       lp.id,
+            'nombre',   lp.notas,
             'cantidad', lp.cantidad,
-            'notas', lp.notas
-          )
-        ) as items
+            'precio',   lp.precio_unitario
+          ) ORDER BY lp.id
+        ) FILTER (WHERE lp.id IS NOT NULL) as items
       FROM pedidos p
       LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
-      LEFT JOIN productos pr ON lp.producto_id = pr.id
       WHERE p.status IN ('pendiente', 'en_cocina')
-      GROUP BY p.id, p.customer_name, p.status, p.created_at
+      GROUP BY p.id
       ORDER BY p.created_at ASC
     `);
 
-    res.json(result.rows);
+    res.json(result.rows.map(row => ({ ...row, items: row.items || [] })));
   } catch (err) {
     next(err);
   }
@@ -36,24 +37,26 @@ exports.getReadyOrders = async (req, res, next) => {
       SELECT
         p.id,
         p.customer_name,
+        p.phone,
+        p.pickup_time,
         p.status,
         p.created_at,
         json_agg(
           json_build_object(
-            'id', pr.id,
-            'nombre', pr.nombre,
-            'cantidad', lp.cantidad
-          )
-        ) as items
+            'id',       lp.id,
+            'nombre',   lp.notas,
+            'cantidad', lp.cantidad,
+            'precio',   lp.precio_unitario
+          ) ORDER BY lp.id
+        ) FILTER (WHERE lp.id IS NOT NULL) as items
       FROM pedidos p
       LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
-      LEFT JOIN productos pr ON lp.producto_id = pr.id
       WHERE p.status = 'listo'
-      GROUP BY p.id, p.customer_name, p.status, p.created_at
+      GROUP BY p.id
       ORDER BY p.created_at DESC
     `);
 
-    res.json(result.rows);
+    res.json(result.rows.map(row => ({ ...row, items: row.items || [] })));
   } catch (err) {
     next(err);
   }
