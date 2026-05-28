@@ -16,7 +16,6 @@
 html{scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-/* ── SPLASH ── */
 #splash{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
 .glow-top{position:absolute;top:-140px;left:50%;transform:translateX(-50%);width:520px;height:320px;background:radial-gradient(ellipse,rgba(212,168,83,0.2) 0%,transparent 70%);pointer-events:none}
 .glow-bot{position:absolute;bottom:0;left:0;right:0;height:180px;background:linear-gradient(0deg,rgba(212,168,83,0.05) 0%,transparent 100%);pointer-events:none}
@@ -41,13 +40,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .cat-tile:hover::after{opacity:1}
 .cat-tile:hover{border-color:rgba(212,168,83,0.32);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.35)}
 .cat-tile:active{transform:scale(0.97)}
-.cat-tile.wide{grid-column:1/-1}
 .ct-ico{font-size:28px;line-height:1}
 .ct-name{font-size:14px;font-weight:600;color:var(--text)}
 .ct-cnt{font-size:11px;color:var(--muted)}
 .ct-arr{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:20px;font-weight:300}
 
-/* ── SECTION VIEW ── */
 #secView{display:none;min-height:100vh}
 .sec-nav{position:sticky;top:0;z-index:100;background:rgba(12,11,9,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .nav-row{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px}
@@ -70,7 +67,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .sec-body{max-width:600px;margin:0 auto;padding:16px}
 .ssub{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:2.5px;color:var(--dim);margin:22px 0 10px;padding-left:10px;border-left:2px solid var(--gold);line-height:1}
 
-/* ── ITEM CARD ── */
 .item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;transition:border-color 0.2s,background 0.15s}
 .item:hover{border-color:var(--border2)}
 .item.on{border-color:rgba(212,168,83,0.4);background:rgba(212,168,83,0.04)}
@@ -92,25 +88,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .xfl{font-size:14px;font-weight:600}.xfs{font-size:12px;color:var(--muted);margin-top:2px}
 .xfp{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:#e06b5a}
 
-/* ── ADD TOAST NOTIFICATION ── */
-#addToast{
-  position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);
-  z-index:500;pointer-events:none;opacity:0;transition:all 0.3s cubic-bezier(0.32,0.72,0,1);
-  white-space:nowrap;
-}
+#addToast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);z-index:500;pointer-events:none;opacity:0;transition:all 0.3s cubic-bezier(0.32,0.72,0,1);white-space:nowrap}
 #addToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast-inner{
-  background:rgba(224,123,48,0.96);
-  border:1px solid rgba(224,123,48,0.6);
-  border-radius:24px;padding:10px 18px;
-  display:flex;align-items:center;gap:8px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.5);
-  backdrop-filter:blur(8px);
-}
+.toast-inner{background:rgba(224,123,48,0.96);border:1px solid rgba(224,123,48,0.6);border-radius:24px;padding:10px 18px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,0.5);backdrop-filter:blur(8px)}
 .toast-ico{font-size:16px}
 .toast-msg{font-size:13px;font-weight:600;color:#fff;letter-spacing:0.1px}
 
-/* ── DRAWER ── */
 .dbg{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:200;display:none;backdrop-filter:blur(8px);align-items:flex-end;justify-content:center}
 .dbg.on{display:flex}
 .drawer{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:92vh;display:flex;flex-direction:column;border:1px solid var(--border2);border-bottom:none;animation:slideUp 0.28s cubic-bezier(0.32,0.72,0,1)}
@@ -128,24 +111,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .crdel{background:none;border:none;color:var(--dim);cursor:pointer;font-size:20px;padding:0 3px;line-height:1;transition:color 0.2s}
 .crdel:hover{color:var(--red)}
 
-/* ── PAY AT COUNTER BANNER ── */
-.counter-banner{
-  background:rgba(224,123,48,0.1);
-  border:1px solid rgba(224,123,48,0.3);
-  border-radius:var(--r);padding:14px 16px;
-  display:flex;align-items:flex-start;gap:12px;
-  margin-bottom:4px;
-}
+.counter-banner{background:rgba(224,123,48,0.1);border:1px solid rgba(224,123,48,0.3);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:4px}
 .cb-ico{font-size:22px;flex-shrink:0;margin-top:1px}
 .cb-title{font-size:13px;font-weight:700;color:#f0a060;margin-bottom:3px}
 .cb-msg{font-size:12px;color:var(--muted);line-height:1.5}
 
-/* ── STRIPE DISABLED BANNER ── */
-.stripe-disabled{
-  background:var(--card);border:1px solid var(--border);border-radius:var(--rs);
-  padding:14px 16px;display:flex;align-items:center;gap:12px;
-  opacity:0.6;cursor:not-allowed;
-}
+.stripe-disabled{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;display:flex;align-items:center;gap:12px;opacity:0.6;cursor:not-allowed}
 .sd-ico{font-size:20px}
 .sd-text{flex:1}
 .sd-title{font-size:13px;font-weight:600;color:var(--muted)}
@@ -170,7 +141,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .obtn:hover:not(:disabled){background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 28px rgba(212,168,83,0.2)}
 .obtn:disabled{background:var(--card2);color:var(--dim);cursor:not-allowed;transform:none;box-shadow:none}
 
-/* ── SUCCESS ── */
 .sbg{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:300;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(10px)}
 .sbg.on{display:flex}
 .sbox{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:40px 28px;text-align:center;max-width:340px;width:100%;animation:popIn 0.38s cubic-bezier(0.175,0.885,0.32,1.275)}
@@ -182,7 +152,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .sbtn{background:var(--gold);color:#0c0b09;border:none;border-radius:var(--rs);padding:13px 30px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.2s}
 .sbtn:hover{background:var(--gold2)}
 
-/* ── QR ── */
 #qrBtn{position:fixed;bottom:20px;right:16px;z-index:50;background:var(--card2);border:1px solid var(--border2);border-radius:50%;width:42px;height:42px;cursor:pointer;font-size:18px;display:none;align-items:center;justify-content:center;color:var(--muted);box-shadow:0 4px 20px rgba(0,0,0,0.5);transition:all 0.2s}
 #qrBtn:hover{background:var(--gold);color:#0c0b09;border-color:var(--gold)}
 .qbg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:250;display:none;align-items:center;justify-content:center;padding:20px}
@@ -199,11 +168,14 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .qprint:hover{background:var(--gold);color:#0c0b09;border-color:var(--gold)}
 .qclose{background:none;border:1px solid var(--border);border-radius:var(--rs);color:var(--muted);padding:11px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;width:100%}
 .qclose:hover{border-color:var(--border2);color:var(--text)}
+
+.loading-splash{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted);font-size:14px}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top:3px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
-<!-- ═══ ADD TOAST ═══ -->
 <div id="addToast">
   <div class="toast-inner">
     <span class="toast-ico">🏧</span>
@@ -211,7 +183,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
-<!-- ═══ SPLASH ═══ -->
 <div id="splash">
   <div class="glow-top"></div>
   <div class="glow-bot"></div>
@@ -225,11 +196,15 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
       <button class="lpill on" id="pillEN" onclick="setLang('en')">🇬🇧 English</button>
       <button class="lpill"    id="pillES" onclick="setLang('es')">🇪🇸 Español</button>
     </div>
-    <div class="cats-grid" id="catsGrid"></div>
+    <div class="cats-grid" id="catsGrid">
+      <div class="loading-splash">
+        <div class="loading-spinner"></div>
+        <span>Cargando carta...</span>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ═══ SECTION VIEW ═══ -->
 <div id="secView">
   <div class="sec-nav">
     <div class="nav-row">
@@ -247,7 +222,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   <div class="sec-body" id="secBody"></div>
 </div>
 
-<!-- ═══ CART DRAWER ═══ -->
 <div class="dbg" id="dbg" onclick="bgClick(event)">
   <div class="drawer">
     <div class="dhandle"></div>
@@ -266,7 +240,6 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
-<!-- ═══ SUCCESS ═══ -->
 <div class="sbg" id="sbg">
   <div class="sbox">
     <span class="sico">✅</span>
@@ -277,10 +250,8 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
-<!-- ═══ QR BUTTON ═══ -->
 <button id="qrBtn" onclick="openQR()">◼</button>
 
-<!-- ═══ QR MODAL ═══ -->
 <div class="qbg" id="qbg" onclick="qrBgClick(event)">
   <div class="qbox">
     <div class="qtitle">QR Code</div>
@@ -295,160 +266,39 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-// ════════════════════════════════════════════════════════════
-// MENU DATA
-// ════════════════════════════════════════════════════════════
-const MENU = {
-  starters:{en:"Starters",es:"Entrantes",emoji:"🥗",
-    items:[
-      {id:"s1",en:"Nuggets & Chips",es:"Nuggets y Patatas",p:5.00,de:"Golden chicken nuggets with fries",ds:"Nuggets de pollo con patatas"},
-      {id:"s2",en:"Nachos",es:"Nachos",p:4.50,de:"Tortilla chips with cheese sauce",ds:"Nachos con salsa de queso"},
-      {id:"s3",en:"Onion Rings",es:"Aros de Cebolla",p:3.00,de:"Crispy golden onion rings",ds:"Aros de cebolla crujientes"},
-      {id:"s4",en:"Panini",es:"Panini",p:3.50,de:"Tomato, onion, pepperoni, bacon & cheese",ds:"Tomate, cebolla, pepperoni, bacon y queso"},
-      {id:"s5",en:"Croquetas",es:"Croquetas",p:3.00,de:"Homemade Spanish croquettes",ds:"Croquetas caseras"},
-      {id:"s6",en:"French Fries",es:"Patatas Fritas",p:3.50,de:"Classic golden fries",ds:"Patatas fritas clásicas"},
-      {id:"s7",en:"Special French Fries",es:"Patatas Especiales",p:4.50,de:"Loaded fries with special toppings",ds:"Patatas con toppings especiales"},
-      {id:"s8",en:"Huevos Rotos",es:"Huevos Rotos",p:4.50,de:"Fried eggs with chips and ham",ds:"Huevos fritos con patatas y jamón"},
-      {id:"s9",en:"Alioli Chips",es:"Patatas Alioli",p:4.00,de:"Fries with homemade alioli",ds:"Patatas con alioli casero"},
-      {id:"s10",en:"Bravas Chips",es:"Patatas Bravas",p:4.00,de:"Fries with spicy brava sauce",ds:"Patatas con salsa brava picante"},
-    ]},
-  breakfast:{en:"Breakfast",es:"Desayunos",emoji:"☀️",
-    subsections:[
-      {en:"Toast (½ / full)",es:"Tostadas (½ / enteras)",items:[
-        {id:"b1",en:"Jam Toast",es:"Tostada con Mermelada",p:1.50,de:"Homemade jam",ds:"Mermelada casera"},
-        {id:"b2",en:"Butter Toast",es:"Tostada con Mantequilla",p:1.50,de:"Fresh butter",ds:"Mantequilla fresca"},
-        {id:"b3",en:"Ham Toast",es:"Tostada con Jamón",p:1.70,de:"Cured ham",ds:"Jamón curado"},
-        {id:"b4",en:"Tomato Toast",es:"Tostada con Tomate",p:1.20,de:"Fresh tomato & olive oil",ds:"Tomate y aceite de oliva"},
-        {id:"b5",en:"Cheese Toast",es:"Tostada con Queso",p:1.50,de:"Melted cheese",ds:"Queso fundido"},
-        {id:"b6",en:"Tuna Toast",es:"Tostada con Atún",p:2.00,de:"Tuna with mayo",ds:"Atún con mayonesa"},
-        {id:"b7",en:"Bacon Toast",es:"Tostada con Bacon",p:1.70,de:"Crispy bacon",ds:"Bacon crujiente"},
-      ]},
-      {en:"Breakfast Plates",es:"Platos de Desayuno",items:[
-        {id:"bp1",en:"Egg, Bacon & Toast",es:"Huevo, Bacon y Tostada",p:5.00,de:"Fried egg, crispy bacon & toast",ds:"Huevo frito, bacon crujiente y tostada"},
-        {id:"bp2",en:"Omelette Ham & Cheese",es:"Tortilla Jamón y Queso",p:5.00,de:"Ham & cheese omelette with toast",ds:"Tortilla de jamón y queso con tostada"},
-        {id:"bp3",en:"Scrambled Egg with Pork Loin",es:"Revuelto con Lomo",p:6.00,de:"Scrambled eggs, onion, tomato & pork loin",ds:"Huevos revueltos con cebolla, tomate y lomo"},
-        {id:"bp4",en:"Wrap with Eggs & Bacon",es:"Wrap de Huevos y Bacon",p:6.00,de:"Flour wrap with eggs and bacon",ds:"Wrap con huevos y bacon"},
-        {id:"bp5",en:"Churros",es:"Churros",p:3.00,de:"Traditional Spanish churros",ds:"Churros tradicionales"},
-      ]},
-    ]},
-  mains:{en:"Mains",es:"Comidas",emoji:"🍔",
-    subsections:[
-      {en:"Burgers & Hot Dogs",es:"Hamburguesas y Hot Dogs",items:[
-        {id:"m1",en:"Cheese Burger",es:"Cheese Burger",p:6.00,de:"Meat, lettuce, tomato, crispy onions & BBQ sauce",ds:"Carne, lechuga, tomate, cebolla crujiente y BBQ"},
-        {id:"m2",en:"Special Burger",es:"Special Burger",p:7.00,de:"Meat, lettuce, tomato, crispy onions, bacon, cheese, egg & BBQ",ds:"Carne, lechuga, tomate, cebolla, bacon, queso, huevo y BBQ"},
-        {id:"m3",en:"Classic Burger",es:"Classic Burger",p:6.00,de:"Meat, onions, cheese, pickle, ketchup & mustard",ds:"Carne, cebolla, queso, pepinillo, ketchup y mostaza"},
-        {id:"m4",en:"Chicken Burger",es:"Chicken Burger",p:6.00,de:"Crispy chicken, cheese, lettuce, tomato & mayo",ds:"Pollo crujiente, queso, lechuga, tomate y mayonesa"},
-        {id:"m5",en:"Bacon Champions Burger",es:"Bacon Champions Burger",p:7.00,de:"Meat, cheese, bacon, mushrooms, mayo & special sauce",ds:"Carne, queso, bacon, champiñones, mayonesa y salsa especial"},
-        {id:"m6",en:"Campometh Burger",es:"Campometh Burger",p:6.00,de:"Meat, lettuce, tomato, onions, white cheese & sauce",ds:"Carne, lechuga, tomate, cebollas, queso blanco y salsa"},
-        {id:"m7",en:"Hot Dog",es:"Hot Dog",p:3.20,de:"Classic hot dog with crispy onions",ds:"Hot dog clásico con cebolla crujiente"},
-        {id:"m8",en:"Hot Dog Classic",es:"Hot Dog Clásico",p:3.20,de:"Classic hot dog with onions & pickle",ds:"Hot dog con cebolla y pepinillo"},
-      ]},
-      {en:"Salads",es:"Ensaladas",items:[
-        {id:"sa1",en:"Mix Salad",es:"Ensalada Mixta",p:5.00,de:"Lettuce, tomato, onion, carrot & beef",ds:"Lechuga, tomate, cebolla, zanahoria y ternera"},
-        {id:"sa2",en:"Chicken Salad",es:"Ensalada de Pollo",p:6.00,de:"Lettuce, tomato, onion, carrot & chicken",ds:"Lechuga, tomate, cebolla, zanahoria y pollo"},
-        {id:"sa3",en:"Tuna Salad",es:"Ensalada de Atún",p:6.00,de:"Lettuce, tomato, onion, carrot & tuna",ds:"Lechuga, tomate, cebolla, zanahoria y atún"},
-        {id:"sa4",en:"Caesar Salad",es:"Ensalada César",p:7.00,de:"Lettuce, bacon, cheese, chicken & caesar sauce",ds:"Lechuga, bacon, queso, pollo y salsa césar"},
-        {id:"sa5",en:"Special Salad",es:"Ensalada Especial",p:7.00,de:"Lettuce, tomato, ham, bacon, cheese, egg & chicken",ds:"Lechuga, tomate, jamón, bacon, queso, huevo y pollo"},
-      ]},
-      {en:"Wraps",es:"Wraps",items:[
-        {id:"w1",en:"Chicken Wrap",es:"Wrap de Pollo",p:5.50,de:"Lettuce, tomato, onion, carrot, chicken & sauce",ds:"Lechuga, tomate, cebolla, zanahoria, pollo y salsa",note:"Grilled chicken +1€ / Plancha +1€"},
-        {id:"w2",en:"Tuna Wrap",es:"Wrap de Atún",p:5.50,de:"Lettuce, tomato, onion, carrot, tuna & sauce",ds:"Lechuga, tomate, cebolla, zanahoria, atún y salsa"},
-        {id:"w3",en:"Special Justin Wrap",es:"Wrap Especial Justin",p:6.00,de:"Pork, lettuce, tomato, onion, green pepper & garlic sauce",ds:"Cerdo, lechuga, tomate, cebolla, pimiento verde y ajo"},
-        {id:"w4",en:"Caesar Wrap",es:"Wrap César",p:5.50,de:"Lettuce, chicken, bacon, cheese & caesar sauce",ds:"Lechuga, pollo, bacon, queso y salsa césar"},
-      ]},
-      {en:"Mix Lunch",es:"Mix del Día",items:[
-        {id:"ml1",en:"Chicken, Egg, Chips & Salad",es:"Pollo, Huevo, Patatas y Ensalada",p:6.50,de:"Served with salad & fries (grilled +1€)",ds:"Con ensalada y patatas (plancha +1€)",note:"Grilled +1€ / Plancha +1€"},
-        {id:"ml2",en:"Pork Loin, Chips & Salad",es:"Lomo, Patatas y Ensalada",p:6.50,de:"Pork loin with salad & fries",ds:"Lomo con ensalada y patatas"},
-        {id:"ml3",en:"Egg, Bacon, Sausage & Chips",es:"Huevo, Bacon, Salchicha y Patatas",p:6.50,de:"Hearty breakfast-style plate",ds:"Plato contundente estilo desayuno"},
-      ]},
-      {en:"Sandwiches",es:"Sándwiches",items:[
-        {id:"sw1",en:"Tuna Sandwich",es:"Sándwich de Atún",p:4.00,de:"Tuna, lettuce, tomato & mayo",ds:"Atún, lechuga, tomate y mayonesa"},
-        {id:"sw2",en:"Bikini",es:"Bikini",p:3.20,de:"Toasted ham & cheese",ds:"Jamón y queso tostado"},
-        {id:"sw3",en:"B.L.T.",es:"B.L.T.",p:3.50,de:"Bacon, lettuce, tomato, mayo & mustard",ds:"Bacon, lechuga, tomate, mayonesa y mostaza"},
-        {id:"sw4",en:"BBQ Sandwich",es:"Sándwich BBQ",p:3.50,de:"Cheese, bacon, onions & BBQ sauce",ds:"Queso, bacon, cebolla y salsa BBQ"},
-        {id:"sw5",en:"Champions Sandwich",es:"Champions Sándwich",p:3.50,de:"Cheese, onions & mushrooms",ds:"Queso, cebollas y champiñones"},
-        {id:"sw6",en:"Vegetables Sandwich",es:"Sándwich Vegetal",p:3.50,de:"Cheese, lettuce, tomato, onion & carrot",ds:"Queso, lechuga, tomate, cebolla y zanahoria"},
-        {id:"sw7",en:"Mix Sandwich",es:"Sándwich Mix",p:4.00,de:"Ham, cheese, egg & tomato",ds:"Jamón, queso, huevo y tomate"},
-        {id:"sw8",en:"Special Sandwich",es:"Sándwich Especial",p:6.00,de:"Chicken, egg, bacon, cheese, lettuce, tomato & sauce",ds:"Pollo, huevo, bacon, queso, lechuga, tomate y salsa"},
-        {id:"sw9",en:"Cheese & Bacon",es:"Queso y Bacon",p:3.50,de:"Melted cheese with crispy bacon",ds:"Queso fundido con bacon crujiente"},
-      ]},
-      {en:"Baguettes",es:"Bocadillos",items:[
-        {id:"bg1",en:"Ham & Cheese",es:"Jamón y Queso",p:5.00,de:"Cured ham with cheese",ds:"Jamón curado con queso"},
-        {id:"bg2",en:"Pork Loin & Cheese",es:"Lomo y Queso",p:5.00,de:"Pork loin with cheese",ds:"Lomo con queso"},
-        {id:"bg3",en:"Breaded Chicken",es:"Pollo Empanado",p:5.00,de:"Breaded chicken (grilled +1€)",ds:"Pollo empanado (plancha +1€)",note:"Grilled +1€ / Plancha +1€"},
-        {id:"bg4",en:"Tuna & Mayonnaise",es:"Atún y Mayonesa",p:5.00,de:"Tuna with homemade mayo",ds:"Atún con mayonesa casera"},
-        {id:"bg5",en:"Omelette Baguette",es:"Bocadillo de Tortilla",p:5.00,de:"Spanish omelette on baguette",ds:"Tortilla española en baguette"},
-        {id:"bg6",en:"Chevere",es:"Chevere",p:6.50,de:"Chicken, bacon, egg, cheese, lettuce, tomato, crispy onions & sauce",ds:"Pollo, bacon, huevo, queso, lechuga, tomate, cebolla crujiente y salsa"},
-        {id:"bg7",en:"Rhett Baguette",es:"Baguette Rhett",p:5.00,de:"Egg, bacon, cheese & tomato",ds:"Huevo, bacon, queso y tomate"},
-      ]},
-    ]},
-  drinks:{en:"Drinks",es:"Bebidas",emoji:"🥤",
-    items:[
-      {id:"d1",en:"Still Water",es:"Agua sin Gas",p:1.20,de:"0.5L bottle",ds:"Botella 0.5L"},
-      {id:"d2",en:"Sparkling Water",es:"Agua con Gas",p:1.50,de:"0.5L bottle",ds:"Botella 0.5L"},
-      {id:"d3",en:"Coca-Cola",es:"Coca-Cola",p:2.20,de:"330ml",ds:"330ml"},
-      {id:"d4",en:"Coca-Cola Zero",es:"Coca-Cola Zero",p:2.20,de:"330ml",ds:"330ml"},
-      {id:"d5",en:"Fanta Orange",es:"Fanta Naranja",p:2.20,de:"330ml",ds:"330ml"},
-      {id:"d6",en:"Fanta Lemon",es:"Fanta Limón",p:2.20,de:"330ml",ds:"330ml"},
-      {id:"d7",en:"Fresh Lemonade",es:"Limonada Natural",p:2.80,de:"Freshly made",ds:"Recién preparada"},
-      {id:"d8",en:"Orange Juice",es:"Zumo de Naranja",p:2.50,de:"Freshly squeezed",ds:"Recién exprimido"},
-      {id:"d9",en:"Coffee",es:"Café",p:1.50,de:"Espresso / Americano",ds:"Espresso / Americano"},
-      {id:"d10",en:"Caffe Latte",es:"Café con Leche",p:1.80,de:"Espresso with steamed milk",ds:"Espresso con leche al vapor"},
-      {id:"d11",en:"Draft Beer (small)",es:"Caña",p:2.00,de:"Fresh draft beer",ds:"Cerveza fresca de grifo"},
-      {id:"d12",en:"Draft Beer (large)",es:"Jarra",p:3.50,de:"500ml draft beer",ds:"Cerveza de grifo 500ml"},
-    ]},
-};
-
-// ════════════════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════════════════
-let lang = 'en', cart = {}, curSec = null;
+let lang = 'en', cart = {}, curCatId = null, MENU = [];
 let toastTimer = null;
 
-// ════════════════════════════════════════════════════════════
-// TRANSLATIONS
-// ════════════════════════════════════════════════════════════
 const T = {
-  en:{
-    items:"items", order:"Order", yourOrder:"Your Order", total:"Total",
-    empty:"Your cart is empty",
-    toastMsg:"Pay at the counter when collecting 🏧",
-    counterTitle:"Payment at the counter",
-    counterMsg:"Your order is prepared and confirmed here. Please go to the counter to pay and collect your food.",
-    stripeTitle:"Card payment", stripeSub:"Coming soon", stripeDisabled:"Online payment not yet available",
-    nameLabel:"👤 Your name", namePh:"Your name (so we can call you)",
-    phoneLabel:"📱 Phone number", phonePh:"Your phone number",
-    nameReq:"Please enter your name", phoneReq:"Please enter a valid phone number",
-    pickup:"🕐 Pickup time (optional)",
-    placeOrder:"Confirm Order →",
-    ok:"Order Confirmed!", thanks:"Your order has been registered.",
-    pickAt:"Pickup time: ",
-    payNote:"Please go to the counter to pay and collect your order.",
-    great:"Perfect, see you at the counter!"
-  },
-  es:{
-    items:"platos", order:"Pedido", yourOrder:"Tu Pedido", total:"Total",
-    empty:"Tu carrito está vacío",
-    toastMsg:"Paga en caja al recoger tu pedido 🏧",
-    counterTitle:"Pago en caja",
-    counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",
-    stripeTitle:"Pago con tarjeta", stripeSub:"Próximamente", stripeDisabled:"Pago online no disponible aún",
-    nameLabel:"👤 Tu nombre", namePh:"Tu nombre (para llamarte)",
-    phoneLabel:"📱 Teléfono", phonePh:"Tu número de teléfono",
-    nameReq:"Por favor escribe tu nombre", phoneReq:"Por favor escribe un teléfono válido",
-    pickup:"🕐 Hora de recogida (opcional)",
-    placeOrder:"Confirmar Pedido →",
-    ok:"¡Pedido Confirmado!", thanks:"Tu pedido ha sido registrado.",
-    pickAt:"Hora de recogida: ",
-    payNote:"Dirígete a la barra para pagar y recoger tu pedido.",
-    great:"¡Perfecto, nos vemos en caja!"
-  }
+  en:{items:"items",order:"Order",yourOrder:"Your Order",total:"Total",empty:"Your cart is empty",toastMsg:"Pay at the counter when collecting 🏧",counterTitle:"Payment at the counter",counterMsg:"Your order is prepared and confirmed here. Please go to the counter to pay and collect your food.",stripeTitle:"Card payment",stripeSub:"Coming soon",stripeDisabled:"Online payment not yet available",nameLabel:"👤 Your name",namePh:"Your name (so we can call you)",phoneLabel:"📱 Phone number",phonePh:"Your phone number",nameReq:"Please enter your name",phoneReq:"Please enter a valid phone number",pickup:"🕐 Pickup time (optional)",placeOrder:"Confirm Order →",ok:"Order Confirmed!",thanks:"Your order has been registered.",pickAt:"Pickup time: ",payNote:"Please go to the counter to pay and collect your order.",great:"Perfect, see you at the counter!"},
+  es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!"}
 };
 const t = k => T[lang][k] || k;
 
-// ════════════════════════════════════════════════════════════
-// TOAST — shown every time + is pressed
-// ════════════════════════════════════════════════════════════
+// ── LOAD MENU FROM API ──
+async function loadMenu() {
+  try {
+    const res = await fetch('/api/carta');
+    MENU = await res.json();
+    renderSplash();
+  } catch (err) {
+    console.error('Error cargando menú:', err);
+    document.getElementById('catsGrid').innerHTML = '<div style="color:#c94a3a;font-size:13px">Error cargando la carta. Recarga la página.</div>';
+  }
+}
+
+function getCatName(cat) {
+  return lang === 'en' ? (cat.nombre_en || cat.nombre) : cat.nombre;
+}
+
+function getProductName(p) {
+  return lang === 'en' ? (p.nombre_en || p.nombre) : p.nombre;
+}
+
+function getProductDesc(p) {
+  return lang === 'en' ? (p.descripcion || '') : (p.descripcion_es || p.descripcion || '');
+}
+
 function showToast() {
   const el = document.getElementById('addToast');
   document.getElementById('toastMsg').textContent = t('toastMsg');
@@ -457,9 +307,6 @@ function showToast() {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// ════════════════════════════════════════════════════════════
-// LANGUAGE
-// ════════════════════════════════════════════════════════════
 function setLang(l) {
   lang = l;
   ['EN','ES'].forEach(x => {
@@ -468,64 +315,80 @@ function setLang(l) {
     document.getElementById('sp'+x)?.classList.toggle('on', on);
   });
   renderSplash();
-  if (curSec) renderSec(curSec);
+  if (curCatId !== null) renderSec(curCatId);
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
 }
 
-// ════════════════════════════════════════════════════════════
-// SPLASH
-// ════════════════════════════════════════════════════════════
 function renderSplash() {
-  const keys = ['breakfast','starters','mains','drinks'];
-  document.getElementById('catsGrid').innerHTML = keys.map((k) => {
-    const d = MENU[k];
-    const cnt = d.items ? d.items.length : d.subsections.reduce((a,s)=>a+s.items.length,0);
-    return `<div class="cat-tile" onclick="openSec('${k}')">
-      <div class="ct-ico">${d.emoji}</div>
-      <div class="ct-name">${d[lang]}</div>
+  if (!MENU.length) return;
+  document.getElementById('catsGrid').innerHTML = MENU.map(cat => {
+    const cnt = cat.productos ? cat.productos.length : 0;
+    return `<div class="cat-tile" onclick="openSec(${cat.id})">
+      <div class="ct-ico">${cat.emoji || '🍽️'}</div>
+      <div class="ct-name">${getCatName(cat)}</div>
       <div class="ct-cnt">${cnt} ${t('items')}</div>
       <span class="ct-arr">›</span>
     </div>`;
   }).join('');
 }
 
-// ════════════════════════════════════════════════════════════
-// SECTION VIEW
-// ════════════════════════════════════════════════════════════
-function openSec(key) {
-  curSec = key;
+function openSec(catId) {
+  curCatId = catId;
   document.getElementById('splash').style.display = 'none';
   document.getElementById('secView').style.display = 'block';
   document.getElementById('qrBtn').style.display = 'flex';
-  renderSec(key);
+  renderSec(catId);
   window.scrollTo(0,0);
 }
+
 function goHome() {
   document.getElementById('secView').style.display = 'none';
   document.getElementById('splash').style.display = 'flex';
   document.getElementById('qrBtn').style.display = 'none';
-  curSec = null;
+  curCatId = null;
 }
-function renderSec(key) {
-  const d = MENU[key];
-  document.getElementById('secTitle').textContent = d.emoji + ' ' + d[lang];
+
+function renderSec(catId) {
+  const cat = MENU.find(c => c.id === catId);
+  if (!cat) return;
+  document.getElementById('secTitle').textContent = (cat.emoji || '') + ' ' + getCatName(cat);
   document.getElementById('cartLbl').textContent = t('order');
-  document.getElementById('tabsRow').innerHTML = Object.keys(MENU).map(k =>
-    `<button class="stab${k===key?' on':''}" onclick="openSec('${k}')">${MENU[k][lang]}</button>`
+  document.getElementById('tabsRow').innerHTML = MENU.map(c =>
+    `<button class="stab${c.id===catId?' on':''}" onclick="openSec(${c.id})">${getCatName(c)}</button>`
   ).join('');
+
   const body = document.getElementById('secBody');
   body.innerHTML = '';
-  if (d.items) {
-    if (key === 'starters') body.appendChild(mkXF());
-    d.items.forEach(item => body.appendChild(mkItem(item)));
-  } else if (d.subsections) {
-    d.subsections.forEach(sub => {
-      const st = document.createElement('div');
-      st.className = 'ssub'; st.textContent = sub[lang];
-      body.appendChild(st);
-      sub.items.forEach(item => body.appendChild(mkItem(item)));
+
+  const productos = cat.productos || [];
+
+  // Agrupar por subsección
+  const subs = {};
+  productos.forEach(p => {
+    const key = p.subseccion || '__none__';
+    if (!subs[key]) subs[key] = { nombre: p.subseccion, nombre_en: p.subseccion_en, items: [] };
+    subs[key].items.push(p);
+  });
+
+  const subKeys = Object.keys(subs);
+
+  if (subKeys.length === 1 && subKeys[0] === '__none__') {
+    // Sin subsecciones — añadir extra fries si es entrantes
+    if (cat.nombre === 'Entrantes' || cat.nombre_en === 'Starters') body.appendChild(mkXF());
+    productos.forEach(p => body.appendChild(mkItem(p)));
+  } else {
+    subKeys.forEach(key => {
+      const sub = subs[key];
+      if (key !== '__none__') {
+        const st = document.createElement('div');
+        st.className = 'ssub';
+        st.textContent = lang === 'en' ? (sub.nombre_en || sub.nombre) : sub.nombre;
+        body.appendChild(st);
+      }
+      sub.items.forEach(p => body.appendChild(mkItem(p)));
     });
-    if (key === 'mains') {
+    // Extra fries al final de Comidas
+    if (cat.nombre === 'Comidas' || cat.nombre_en === 'Mains') {
       const st = document.createElement('div');
       st.className = 'ssub'; st.textContent = 'Extras';
       body.appendChild(st);
@@ -535,23 +398,25 @@ function renderSec(key) {
   refreshBadge();
 }
 
-function mkItem(item) {
-  const qty = cart[item.id]?.qty || 0;
-  const desc = lang==='en' ? item.de : item.ds;
+function mkItem(p) {
+  const id = 'p' + p.id;
+  const qty = cart[id]?.qty || 0;
+  const name = getProductName(p);
+  const desc = getProductDesc(p);
   const d = document.createElement('div');
-  d.className = 'item' + (qty>0?' on':'');
-  d.id = 'item-' + item.id;
+  d.className = 'item' + (qty > 0 ? ' on' : '');
+  d.id = 'item-' + id;
   d.innerHTML = `
     <div class="ii">
-      <div class="iname">${item[lang]}</div>
+      <div class="iname">${name}</div>
       <div class="idesc">${desc}</div>
-      ${item.note ? `<div class="inote">ℹ️ ${item.note}</div>` : ''}
+      ${p.notas ? `<div class="inote">ℹ️ ${p.notas}</div>` : ''}
     </div>
     <div class="ir">
-      <div class="iprice">${item.p.toFixed(2)}€</div>
+      <div class="iprice">${parseFloat(p.precio).toFixed(2)}€</div>
       <div class="qrow">
-        ${qty>0 ? `<button class="qb" onclick="adj('${item.id}','${esc(item[lang])}',${item.p},-1)">−</button><span class="qn">${qty}</span>` : ''}
-        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${item.id}','${esc(item[lang])}',${item.p},1)">+</button>
+        ${qty > 0 ? `<button class="qb" onclick="adj('${id}','${esc(name)}',${p.precio},-1)">−</button><span class="qn">${qty}</span>` : ''}
+        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${id}','${esc(name)}',${p.precio},1)">+</button>
       </div>
     </div>`;
   return d;
@@ -580,9 +445,6 @@ function mkXF() {
 
 function esc(s) { return s.replace(/'/g,"\\'"); }
 
-// ════════════════════════════════════════════════════════════
-// CART
-// ════════════════════════════════════════════════════════════
 function adjAndToast(id, name, price, delta) {
   adj(id, name, price, delta);
   if (delta > 0) showToast();
@@ -593,7 +455,7 @@ function adj(id, name, price, delta) {
   cart[id].name = name; cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
   refreshBadge();
-  if (curSec) renderSec(curSec);
+  if (curCatId !== null) renderSec(curCatId);
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
 }
 
@@ -607,9 +469,6 @@ function openCart() { buildDrawer(); document.getElementById('dbg').classList.ad
 function closeCart() { document.getElementById('dbg').classList.remove('on'); document.body.style.overflow=''; }
 function bgClick(e) { if (e.target===document.getElementById('dbg')) closeCart(); }
 
-// ════════════════════════════════════════════════════════════
-// BUILD DRAWER
-// ════════════════════════════════════════════════════════════
 function buildDrawer() {
   const items = Object.entries(cart);
   const body  = document.getElementById('drawerBody');
@@ -622,14 +481,12 @@ function buildDrawer() {
   }
 
   let total = 0, html = '';
-
-  // Cart rows
   items.forEach(([id,item]) => {
     const sub = item.price * item.qty; total += sub;
     html += `<div class="crow">
       <div class="crn">
         <div class="crname">${item.name}</div>
-        <div class="crqty">×${item.qty} · ${item.price.toFixed(2)}€</div>
+        <div class="crqty">×${item.qty} · ${parseFloat(item.price).toFixed(2)}€</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="crprice">${sub.toFixed(2)}€</div>
@@ -638,48 +495,11 @@ function buildDrawer() {
     </div>`;
   });
 
-  // Pay-at-counter banner
-  html += `<div class="form-block">
-    <div class="counter-banner">
-      <span class="cb-ico">🏧</span>
-      <div>
-        <div class="cb-title">${t('counterTitle')}</div>
-        <div class="cb-msg">${t('counterMsg')}</div>
-      </div>
-    </div>
-  </div>`;
-
-  // Stripe disabled notice
-  html += `<div class="form-block">
-    <div class="stripe-disabled">
-      <span class="sd-ico">💳</span>
-      <div class="sd-text">
-        <div class="sd-title">${t('stripeTitle')}</div>
-        <div class="sd-sub">${t('stripeDisabled')}</div>
-      </div>
-      <span class="sd-badge">${t('stripeSub')}</span>
-    </div>
-  </div>`;
-
-  // Name field
-  html += `<div class="form-block">
-    <label class="flabel">${t('nameLabel')}</label>
-    <input class="finput" id="custName" type="text" placeholder="${t('namePh')}" autocomplete="given-name" maxlength="40">
-    <div class="req-err" id="nameErr">${t('nameReq')}</div>
-  </div>`;
-
-  // Phone field
-  html += `<div class="form-block">
-    <label class="flabel">${t('phoneLabel')}</label>
-    <input class="finput" id="custPhone" type="tel" placeholder="${t('phonePh')}" autocomplete="tel" maxlength="20" inputmode="numeric">
-    <div class="req-err" id="phoneErr">${t('phoneReq')}</div>
-  </div>`;
-
-  // Pickup time
-  html += `<div class="form-block" style="margin-bottom:8px">
-    <label class="flabel">${t('pickup')}</label>
-    <input type="time" class="tinput" id="pTime" min="07:00" max="23:00">
-  </div>`;
+  html += `<div class="form-block"><div class="counter-banner"><span class="cb-ico">🏧</span><div><div class="cb-title">${t('counterTitle')}</div><div class="cb-msg">${t('counterMsg')}</div></div></div></div>`;
+  html += `<div class="form-block"><div class="stripe-disabled"><span class="sd-ico">💳</span><div class="sd-text"><div class="sd-title">${t('stripeTitle')}</div><div class="sd-sub">${t('stripeDisabled')}</div></div><span class="sd-badge">${t('stripeSub')}</span></div></div>`;
+  html += `<div class="form-block"><label class="flabel">${t('nameLabel')}</label><input class="finput" id="custName" type="text" placeholder="${t('namePh')}" autocomplete="given-name" maxlength="40"><div class="req-err" id="nameErr">${t('nameReq')}</div></div>`;
+  html += `<div class="form-block"><label class="flabel">${t('phoneLabel')}</label><input class="finput" id="custPhone" type="tel" placeholder="${t('phonePh')}" autocomplete="tel" maxlength="20" inputmode="numeric"><div class="req-err" id="phoneErr">${t('phoneReq')}</div></div>`;
+  html += `<div class="form-block" style="margin-bottom:8px"><label class="flabel">${t('pickup')}</label><input type="time" class="tinput" id="pTime" min="07:00" max="23:00"></div>`;
 
   body.innerHTML = html;
   ft.style.display = 'block';
@@ -692,76 +512,37 @@ function buildDrawer() {
 function delItem(id) {
   delete cart[id];
   refreshBadge();
-  if (curSec) renderSec(curSec);
+  if (curCatId !== null) renderSec(curCatId);
   buildDrawer();
 }
 
-// ════════════════════════════════════════════════════════════
-// PLACE ORDER
-// ════════════════════════════════════════════════════════════
 function placeOrder() {
   const nameInput  = document.getElementById('custName');
   const phoneInput = document.getElementById('custPhone');
   const nameErr    = document.getElementById('nameErr');
   const phoneErr   = document.getElementById('phoneErr');
-
   const name  = nameInput?.value.trim() || '';
   const phone = phoneInput?.value.trim() || '';
-
   let valid = true;
 
-  if (!name) {
-    if (nameErr) nameErr.style.display = 'block';
-    if (nameInput) nameInput.focus();
-    valid = false;
-  } else {
-    if (nameErr) nameErr.style.display = 'none';
-  }
-
-  if (!phone || phone.replace(/\D/g,'').length < 6) {
-    if (phoneErr) phoneErr.style.display = 'block';
-    if (valid && phoneInput) phoneInput.focus();
-    valid = false;
-  } else {
-    if (phoneErr) phoneErr.style.display = 'none';
-  }
-
+  if (!name) { if (nameErr) nameErr.style.display='block'; if (nameInput) nameInput.focus(); valid=false; }
+  else { if (nameErr) nameErr.style.display='none'; }
+  if (!phone || phone.replace(/\D/g,'').length < 6) { if (phoneErr) phoneErr.style.display='block'; if (valid && phoneInput) phoneInput.focus(); valid=false; }
+  else { if (phoneErr) phoneErr.style.display='none'; }
   if (!valid) return;
 
   const pickup = document.getElementById('pTime')?.value || '';
-
-  const items = Object.values(cart).map(function(item) {
-    return { nombre: item.name, cantidad: item.qty, precio: item.price };
-  });
-
-  const payload = {
-    customerName: name,
-    phone: phone,
-    pickupTime: pickup || null,
-    items: items
-  };
+  const items = Object.values(cart).map(item => ({ nombre: item.name, cantidad: item.qty, precio: item.price }));
+  const payload = { customerName: name, phone, pickupTime: pickup || null, items };
 
   const btn = document.getElementById('orderBtn');
   btn.disabled = true;
   btn.textContent = lang === 'es' ? 'Enviando...' : 'Sending...';
 
-  fetch('/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(function(res) {
-    if (!res.ok) throw new Error('Error');
-    return res.json();
-  })
-  .then(function() {
-    showSuccess(name, phone, pickup);
-  })
-  .catch(function() {
-    btn.disabled = false;
-    btn.textContent = t('placeOrder');
-    alert(lang === 'es' ? 'Error al enviar el pedido. Inténtalo de nuevo.' : 'Error sending order. Please try again.');
-  });
+  fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(res => { if (!res.ok) throw new Error('Error'); return res.json(); })
+    .then(() => showSuccess(name, phone, pickup))
+    .catch(() => { btn.disabled=false; btn.textContent=t('placeOrder'); alert(lang==='es'?'Error al enviar el pedido. Inténtalo de nuevo.':'Error sending order. Please try again.'); });
 }
 
 function showSuccess(name, phone, pickup) {
@@ -776,13 +557,10 @@ function showSuccess(name, phone, pickup) {
   document.getElementById('sbg').classList.add('on');
   cart = {};
   refreshBadge();
-  if (curSec) renderSec(curSec);
+  if (curCatId !== null) renderSec(curCatId);
 }
 function closeSuccess() { document.getElementById('sbg').classList.remove('on'); }
 
-// ════════════════════════════════════════════════════════════
-// QR
-// ════════════════════════════════════════════════════════════
 function openQR() {
   const card = document.getElementById('qCardSingle');
   if (!card.hasChildNodes()) {
@@ -801,30 +579,11 @@ function qrBgClick(e) { if (e.target===document.getElementById('qbg')) closeQR()
 function printQR() {
   const base = window.location.origin + window.location.pathname;
   const w = window.open('','_blank');
-  w.document.write('<html><head>'
-    + '<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}'
-    + '.card{border:2px solid #e5e0d8;border-radius:16px;padding:32px;text-align:center;max-width:300px}'
-    + 'h1{font-size:22px;color:#c9a84c;margin-bottom:2px}h2{font-size:16px;color:#c9a84c;font-style:italic;margin-bottom:20px}'
-    + '#qrc{display:flex;justify-content:center;margin-bottom:12px}'
-    + 'p{font-size:13px;color:#666;margin-bottom:4px}.url{font-size:9px;color:#bbb;margin-top:8px;word-break:break-all}'
-    + '@media print{@page{size:A5;margin:10mm}}</style>'
-    + '<sc'+'ript src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><'+'/sc'+'ript>'
-    + '</head><body><div class="card">'
-    + '<h1>Bar Aer\u00f3dromo</h1><h2>La Juliana</h2>'
-    + '<div id="qrc"></div>'
-    + '<p>\uD83D\uDCF1 Escanea para ver la carta y pedir</p>'
-    + '<p>\uD83D\uDCF1 Scan to browse the menu & order</p>'
-    + '<div class="url">'+base+'</div>'
-    + '</div>'
-    + '<sc'+'ript>new QRCode(document.getElementById("qrc"),{text:"'+base+'",width:200,height:200,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.H});setTimeout(()=>window.print(),900);<'+'/sc'+'ript>'
-    + '</body></html>');
+  w.document.write('<html><head><style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}.card{border:2px solid #e5e0d8;border-radius:16px;padding:32px;text-align:center;max-width:300px}h1{font-size:22px;color:#c9a84c;margin-bottom:2px}h2{font-size:16px;color:#c9a84c;font-style:italic;margin-bottom:20px}#qrc{display:flex;justify-content:center;margin-bottom:12px}p{font-size:13px;color:#666;margin-bottom:4px}.url{font-size:9px;color:#bbb;margin-top:8px;word-break:break-all}@media print{@page{size:A5;margin:10mm}}</style><sc'+'ript src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><'+'/sc'+'ript></head><body><div class="card"><h1>Bar Aer\u00f3dromo</h1><h2>La Juliana</h2><div id="qrc"></div><p>\uD83D\uDCF1 Escanea para ver la carta y pedir</p><p>\uD83D\uDCF1 Scan to browse the menu & order</p><div class="url">'+base+'</div></div><sc'+'ript>new QRCode(document.getElementById("qrc"),{text:"'+base+'",width:200,height:200,colorDark:"#000",colorLight:"#fff",correctLevel:QRCode.CorrectLevel.H});setTimeout(()=>window.print(),900);<'+'/sc'+'ript></body></html>');
   w.document.close();
 }
 
-// ════════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', renderSplash);
+document.addEventListener('DOMContentLoaded', loadMenu);
 </script>
 </body>
 </html>
