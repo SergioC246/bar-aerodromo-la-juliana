@@ -6,7 +6,9 @@ require('dotenv').config();
 const orderRoutes = require('./routes/orders');
 const menuRoutes = require('./routes/menu');
 const kitchenRoutes = require('./routes/kitchen');
+const authRoutes = require('./routes/auth');
 const errorHandler = require('./middleware/errorHandler');
+const authMiddleware = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -16,9 +18,14 @@ app.use(cors({
   credentials: true
 }));
 
+// Rutas públicas
 app.use('/api/orders', orderRoutes);
 app.use('/api/carta', menuRoutes);
 app.use('/api/cocina', kitchenRoutes);
+app.use('/api/auth', authRoutes);
+
+// Rutas protegidas de admin (modificar menú)
+app.use('/api/admin/carta', authMiddleware, menuRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
@@ -33,4 +40,3 @@ app.get('*', (req, res) => {
 app.use(errorHandler);
 
 module.exports = app;
-
