@@ -24,8 +24,8 @@ exports.createOrder = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const { status } = req.query;
-    const orders = await Order.getAll(status);
+    const { status, date } = req.query;
+    const orders = await Order.getAll(status, date);
     res.json(orders);
   } catch (err) {
     next(err);

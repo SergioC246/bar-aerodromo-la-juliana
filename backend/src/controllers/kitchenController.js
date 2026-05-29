@@ -21,10 +21,10 @@ exports.getActiveOrders = async (req, res, next) => {
       FROM pedidos p
       LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
       WHERE p.status IN ('pendiente', 'en_cocina')
+        AND DATE(p.created_at) = CURRENT_DATE
       GROUP BY p.id
       ORDER BY p.created_at ASC
     `);
-
     res.json(result.rows.map(row => ({ ...row, items: row.items || [] })));
   } catch (err) {
     next(err);
@@ -52,10 +52,10 @@ exports.getReadyOrders = async (req, res, next) => {
       FROM pedidos p
       LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
       WHERE p.status = 'listo'
+        AND DATE(p.created_at) = CURRENT_DATE
       GROUP BY p.id
       ORDER BY p.created_at DESC
     `);
-
     res.json(result.rows.map(row => ({ ...row, items: row.items || [] })));
   } catch (err) {
     next(err);

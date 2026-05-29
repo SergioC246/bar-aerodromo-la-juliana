@@ -24,7 +24,6 @@ class Order {
           INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad, precio_unitario, notas)
           VALUES ($1, NULL, $2, $3, $4);
         `;
-        // Guardamos el nombre del producto en la columna notas
         await client.query(lineaQuery, [id, item.cantidad, item.precio, item.nombre]);
       }
 
@@ -38,7 +37,7 @@ class Order {
     }
   }
 
-  static async getAll(status = null) {
+  static async getAll(status = null, date = null) {
     let query = `
       SELECT
         p.id,
@@ -59,17 +58,26 @@ class Order {
       LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
     `;
     const values = [];
+    const conditions = [];
 
     if (status) {
-      query += ' WHERE p.status = $1';
       values.push(status);
+      conditions.push(`p.status = $${values.length}`);
+    }
+
+    if (date) {
+      values.push(date);
+      conditions.push(`DATE(p.created_at) = $${values.length}`);
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
     }
 
     query += ' GROUP BY p.id ORDER BY p.created_at DESC';
 
     try {
       const result = await pool.query(query, values);
-      // Garantizar que items nunca sea null
       return result.rows.map(row => ({
         ...row,
         items: row.items || []
@@ -137,6 +145,6 @@ class Order {
       throw new Error(`Database error: ${err.message}`);
     }
   }
-};
+}
 
 module.exports = Order;

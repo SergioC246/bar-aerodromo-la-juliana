@@ -185,9 +185,10 @@ tr:hover td{background:rgba(255,255,255,0.02)}
     <div id="tabPedidos" style="display:none">
       <div class="sec-header">
         <div class="sec-title">Pedidos</div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="date" id="filterDate" onchange="loadPedidos()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px">
           <select id="filterStatus" onchange="loadPedidos()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px">
-            <option value="">Todos</option>
+            <option value="">Todos los estados</option>
             <option value="pendiente">Pendientes</option>
             <option value="en_cocina">En cocina</option>
             <option value="listo">Listos</option>
@@ -357,7 +358,11 @@ function showTab(tab) {
   event.target.classList.add('on');
   document.getElementById('tabMenu').style.display = tab === 'menu' ? 'block' : 'none';
   document.getElementById('tabPedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
-  if (tab === 'pedidos') loadPedidos();
+  if (tab === 'pedidos') {
+    const dateInput = document.getElementById('filterDate');
+    if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+    loadPedidos();
+  }
 }
 
 // ── MENÚ ──
@@ -558,7 +563,12 @@ async function deleteProducto(id) {
 // ── PEDIDOS ──
 async function loadPedidos() {
   const status = document.getElementById('filterStatus').value;
-  const url = status ? `/api/orders?status=${status}` : '/api/orders';
+  const date = document.getElementById('filterDate').value;
+  let url = '/api/orders?';
+  if (status) url += `status=${status}&`;
+  if (date) url += `date=${date}&`;
+  url = url.endsWith('?') || url.endsWith('&') ? url.slice(0, -1) : url;
+  if (url === '/api/orders') url = '/api/orders';
   document.getElementById('pedidosList').innerHTML = '<div class="loading"><div class="spinner"></div> Cargando...</div>';
 
   try {
