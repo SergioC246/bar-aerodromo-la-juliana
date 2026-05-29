@@ -2,7 +2,15 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'bar-juliana-secret-2026';
+if (!process.env.JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required');
+}
+if (!process.env.ADMIN_SECRET) {
+  throw new Error('ADMIN_SECRET environment variable is required');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
 exports.login = async (req, res, next) => {
   try {
@@ -32,7 +40,7 @@ exports.login = async (req, res, next) => {
 exports.createAdmin = async (req, res, next) => {
   try {
     const { username, password, secretKey } = req.body;
-    if (secretKey !== (process.env.ADMIN_SECRET || 'juliana-admin-2026')) {
+    if (secretKey !== ADMIN_SECRET) {
       return res.status(403).json({ error: 'Clave secreta incorrecta' });
     }
     const hash = await bcrypt.hash(password, 10);

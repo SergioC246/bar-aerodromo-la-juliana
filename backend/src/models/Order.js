@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const pool = require('../config/database');
+const { getOrdersByStatus, getOrderById: queryGetOrderById } = require('./orderQueries');
 
 class Order {
   static async create(orderData) {
@@ -38,88 +39,11 @@ class Order {
   }
 
   static async getAll(status = null, date = null) {
-    let query = `
-      SELECT
-        p.id,
-        p.customer_name,
-        p.phone,
-        p.pickup_time,
-        p.status,
-        p.created_at,
-        json_agg(
-          json_build_object(
-            'id',       lp.id,
-            'nombre',   lp.notas,
-            'cantidad', lp.cantidad,
-            'precio',   lp.precio_unitario
-          ) ORDER BY lp.id
-        ) FILTER (WHERE lp.id IS NOT NULL) as items
-      FROM pedidos p
-      LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
-    `;
-    const values = [];
-    const conditions = [];
-
-    if (status) {
-      values.push(status);
-      conditions.push(`p.status = $${values.length}`);
-    }
-
-    if (date) {
-      values.push(date);
-      conditions.push(`DATE(p.created_at) = $${values.length}`);
-    }
-
-    if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
-    }
-
-    query += ' GROUP BY p.id ORDER BY p.created_at DESC';
-
-    try {
-      const result = await pool.query(query, values);
-      return result.rows.map(row => ({
-        ...row,
-        items: row.items || []
-      }));
-    } catch (err) {
-      throw new Error(`Database error: ${err.message}`);
-    }
+    return getOrdersByStatus(status, date);
   }
 
   static async getById(id) {
-    const query = `
-      SELECT
-        p.id,
-        p.customer_name,
-        p.phone,
-        p.pickup_time,
-        p.status,
-        p.created_at,
-        json_agg(
-          json_build_object(
-            'id',       lp.id,
-            'nombre',   lp.notas,
-            'cantidad', lp.cantidad,
-            'precio',   lp.precio_unitario
-          ) ORDER BY lp.id
-        ) FILTER (WHERE lp.id IS NOT NULL) as items
-      FROM pedidos p
-      LEFT JOIN lineas_pedido lp ON p.id = lp.pedido_id
-      WHERE p.id = $1
-      GROUP BY p.id
-    `;
-
-    try {
-      const result = await pool.query(query, [id]);
-      if (!result.rows[0]) return null;
-      return {
-        ...result.rows[0],
-        items: result.rows[0].items || []
-      };
-    } catch (err) {
-      throw new Error(`Database error: ${err.message}`);
-    }
+    return queryGetOrderById(id);
   }
 
   static async updateStatus(id, status) {

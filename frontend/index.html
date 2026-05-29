@@ -275,6 +275,12 @@ const T = {
 };
 const t = k => T[lang][k] || k;
 
+// Security: Sanitize HTML to prevent XSS
+function escapeHtml(text) {
+  const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
 // ── LOAD MENU FROM API ──
 async function loadMenu() {
   try {
@@ -483,9 +489,10 @@ function buildDrawer() {
   let total = 0, html = '';
   items.forEach(([id,item]) => {
     const sub = item.price * item.qty; total += sub;
+    const safeName = escapeHtml(item.name);
     html += `<div class="crow">
       <div class="crn">
-        <div class="crname">${item.name}</div>
+        <div class="crname">${safeName}</div>
         <div class="crqty">×${item.qty} · ${parseFloat(item.price).toFixed(2)}€</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
