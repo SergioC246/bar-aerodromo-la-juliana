@@ -8,12 +8,10 @@ exports.createOrder = async (req, res, next) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Crear el pedido
     await Order.create({ customerName, phone, items, pickupTime });
 
-    // Buscar el pedido completo con sus items para emitirlo a cocina
     const orders = await Order.getAll('pendiente');
-    const order = orders[0]; // El más reciente es el primero
+    const order = orders[0];
 
     const emitir = req.app.get('emitNuevoPedido');
     if (emitir) emitir(order);
@@ -38,11 +36,7 @@ exports.getOrder = async (req, res, next) => {
   try {
     const { id } = req.params;
     const order = await Order.getById(id);
-
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
+    if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(order);
   } catch (err) {
     next(err);
@@ -53,20 +47,23 @@ exports.updateOrderStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-
-    if (!status) {
-      return res.status(400).json({ error: 'Status is required' });
-    }
+    if (!status) return res.status(400).json({ error: 'Status is required' });
 
     const updated = await Order.updateStatus(id, status);
+    if (!updated) return res.status(404).json({ error: 'Order not found' });
 
-    if (!updated) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    // Devolver el pedido completo con sus items
     const order = await Order.getById(id);
     res.json(order);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await Order.delete(id);
+    res.json({ ok: true });
   } catch (err) {
     next(err);
   }

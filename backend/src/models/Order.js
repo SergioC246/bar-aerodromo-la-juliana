@@ -129,6 +129,14 @@ class Order {
       throw new Error(`Database error: ${err.message}`);
     }
   }
-}
+
+  static async delete(id) {
+    try {
+      await pool.query('DELETE FROM pedidos WHERE id = $1', [id]);
+    } catch (err) {
+      throw new Error(`Database error: ${err.message}`);
+    }
+  }
+};
 
 module.exports = Order;
