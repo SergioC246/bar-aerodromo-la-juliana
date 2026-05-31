@@ -11,112 +11,169 @@
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
   --gold:#d4a853;--gold2:#e8c87a;--red:#c94a3a;--green:#4caf50;
   --text:#f2ede6;--muted:#9a9080;--dim:#5a5248;
+  --sidebar-w: 240px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* LOGIN */
-#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.login-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:48px 40px;width:100%;max-width:400px;text-align:center}
-.login-logo{font-size:48px;margin-bottom:16px}
-.login-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--gold);margin-bottom:4px}
-.login-sub{font-size:13px;color:var(--muted);margin-bottom:32px}
-.field{text-align:left;margin-bottom:16px}
+/* ── LOGIN ── */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,rgba(212,168,83,0.12) 0%,transparent 60%)}
+.login-box{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:56px 48px;width:100%;max-width:420px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.5)}
+.login-logo{font-size:52px;margin-bottom:16px}
+.login-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:36px}
+.field{text-align:left;margin-bottom:18px}
 .field label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);display:block;margin-bottom:8px}
-.field input{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:12px 14px;font-size:15px;font-family:'Inter',sans-serif;transition:border-color 0.2s}
+.field input{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:10px;color:var(--text);padding:13px 16px;font-size:15px;font-family:'Inter',sans-serif;transition:border-color 0.2s}
 .field input:focus{outline:none;border-color:var(--gold)}
-.login-btn{width:100%;background:var(--gold);color:#0c0b09;border:none;border-radius:10px;padding:14px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:all 0.2s}
-.login-btn:hover{background:var(--gold2)}
+.login-btn{width:100%;background:var(--gold);color:#0c0b09;border:none;border-radius:12px;padding:15px;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:all 0.2s;letter-spacing:0.3px}
+.login-btn:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(212,168,83,0.25)}
 .login-err{color:var(--red);font-size:13px;margin-top:12px;display:none}
 
-/* ADMIN LAYOUT */
+/* ── ADMIN LAYOUT ── */
 #adminScreen{display:none;min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.topbar-left{display:flex;align-items:center;gap:16px}
-.topbar-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold)}
-.topbar-user{font-size:13px;color:var(--muted)}
-.logout-btn{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--muted);padding:6px 14px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s}
+
+/* Sidebar */
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform 0.3s}
+.sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid var(--border)}
+.sidebar-logo-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);line-height:1.1}
+.sidebar-logo-sub{font-size:11px;color:var(--dim);margin-top:2px;letter-spacing:0.5px}
+.sidebar-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);transition:all 0.2s;border:none;background:none;width:100%;text-align:left;font-family:'Inter',sans-serif}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.on{background:rgba(212,168,83,0.12);color:var(--gold)}
+.nav-item-ico{font-size:18px;width:24px;text-align:center}
+.sidebar-footer{padding:16px 12px;border-top:1px solid var(--border)}
+.sidebar-user{font-size:12px;color:var(--muted);padding:8px 14px;margin-bottom:8px}
+.logout-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);transition:all 0.2s;border:1px solid var(--border2);background:none;width:100%;font-family:'Inter',sans-serif}
 .logout-btn:hover{border-color:var(--red);color:var(--red)}
 
-.nav-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);padding:0 24px}
-.nav-tab{padding:14px 20px;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:3px solid transparent;transition:all 0.2s;font-family:'Inter',sans-serif}
-.nav-tab:hover{color:var(--text)}
-.nav-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+/* Main content */
+.main-content{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-badge{font-size:12px;color:var(--muted);background:var(--card2);padding:4px 12px;border-radius:20px;border:1px solid var(--border)}
 
-.admin-body{max-width:1200px;margin:0 auto;padding:32px 24px}
+.page-body{padding:32px;flex:1}
 
-/* SECTION HEADERS */
-.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.sec-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--text)}
-.btn-primary{background:var(--gold);color:#0c0b09;border:none;border-radius:10px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s}
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:var(--gold)}
+.stat-sub{font-size:12px;color:var(--dim);margin-top:4px}
+
+/* ── SECTION HEADERS ── */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--text)}
+
+/* ── BUTTONS ── */
+.btn-primary{background:var(--gold);color:#0c0b09;border:none;border-radius:10px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
 .btn-primary:hover{background:var(--gold2);transform:translateY(-1px)}
 .btn-danger{background:var(--red);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
 .btn-danger:hover{background:#b83f33}
-.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
 .btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
 
-/* TABLES */
+/* ── CATEGORY CARDS ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:36px}
+.cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color 0.2s}
+.cat-card:hover{border-color:var(--border2)}
+.cat-card-left{display:flex;align-items:center;gap:14px}
+.cat-emoji{font-size:30px}
+.cat-name{font-size:16px;font-weight:700;color:var(--text)}
+.cat-name-en{font-size:12px;color:var(--muted);margin-top:2px}
+.cat-actions{display:flex;gap:8px;flex-shrink:0}
+
+/* ── TABLE ── */
 .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-th{background:var(--card2);padding:12px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border)}
-td{padding:12px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th{background:var(--card2);padding:12px 16px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:13px 16px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,0.02)}
+tr:hover td{background:rgba(255,255,255,0.015)}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .badge-green{background:rgba(76,175,80,0.15);color:var(--green)}
 .badge-red{background:rgba(201,74,58,0.15);color:var(--red)}
 .badge-gold{background:rgba(212,168,83,0.15);color:var(--gold)}
 .badge-muted{background:rgba(154,144,128,0.15);color:var(--muted)}
 
-/* CATEGORY CARDS */
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px}
-.cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.cat-card-left{display:flex;align-items:center;gap:12px}
-.cat-emoji{font-size:28px}
-.cat-name{font-size:16px;font-weight:700;color:var(--text)}
-.cat-name-en{font-size:12px;color:var(--muted)}
-.cat-actions{display:flex;gap:8px}
+/* ── TOGGLE ── */
+.toggle{position:relative;width:44px;height:24px;cursor:pointer;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--card2);border-radius:12px;transition:0.3s;border:1px solid var(--border2)}
+.toggle input:checked + .toggle-slider{background:var(--green);border-color:var(--green)}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:0.3s}
+.toggle input:checked + .toggle-slider::before{transform:translateX(20px)}
 
-/* MODAL */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px)}
+/* ── PEDIDOS ── */
+.pedidos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px}
+.pedido-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;transition:border-color 0.2s}
+.pedido-card:hover{border-color:var(--border2)}
+.pedido-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px}
+.pedido-num{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold)}
+.pedido-info{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+.pedido-items{background:var(--card2);border-radius:8px;padding:12px;margin-bottom:14px}
+.pedido-item-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;gap:8px}
+.pedido-actions{display:flex;gap:8px;flex-wrap:wrap}
+.status-select{background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:7px 10px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer;flex:1;min-width:120px}
+.status-select:focus{outline:none;border-color:var(--gold)}
+
+/* ── FILTERS ── */
+.filters-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+.filter-input{background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 14px;font-family:'Inter',sans-serif;font-size:13px;transition:border-color 0.2s}
+.filter-input:focus{outline:none;border-color:var(--gold)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px)}
 .modal-bg.on{display:flex}
-.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
-.modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold);margin-bottom:24px}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--gold);margin-bottom:24px}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .form-group{margin-bottom:16px}
 .form-group label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);display:block;margin-bottom:8px}
 .form-group input,.form-group select,.form-group textarea{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif;transition:border-color 0.2s}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--gold)}
 .form-group select option{background:var(--card2)}
-.form-group textarea{resize:vertical;min-height:80px}
+.form-group textarea{resize:vertical;min-height:72px}
 .modal-footer{display:flex;gap:12px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
 
-/* TOGGLE */
-.toggle{position:relative;width:44px;height:24px;cursor:pointer}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:var(--card2);border-radius:12px;transition:0.3s;border:1px solid var(--border2)}
-.toggle input:checked + .toggle-slider{background:var(--green)}
-.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:#fff;border-radius:50%;transition:0.3s}
-.toggle input:checked + .toggle-slider::before{transform:translateX(20px)}
-
-/* PEDIDOS */
-.pedido-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:12px}
-.pedido-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.pedido-num{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold)}
-.pedido-info{font-size:13px;color:var(--muted)}
-.pedido-items{background:var(--card2);border-radius:8px;padding:12px;margin-bottom:12px}
-.pedido-item-row{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
-.pedido-actions{display:flex;gap:8px;flex-wrap:wrap}
-.status-select{background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:6px 10px;font-size:13px;font-family:'Inter',sans-serif;cursor:pointer}
-.status-select:focus{outline:none;border-color:var(--gold)}
-
-.loading{display:flex;align-items:center;justify-content:center;padding:48px;color:var(--muted)}
-.spinner{width:24px;height:24px;border:3px solid var(--border);border-top:3px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-right:10px}
+/* ── MISC ── */
+.loading{display:flex;align-items:center;justify-content:center;padding:48px;color:var(--muted);font-size:14px}
+.spinner{width:22px;height:22px;border:3px solid var(--border);border-top:3px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-right:10px;flex-shrink:0}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
-.toast-admin{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none}
+.empty-state{text-align:center;padding:60px 24px;color:var(--muted)}
+.empty-ico{font-size:48px;margin-bottom:12px;opacity:0.4}
+
+.toast-admin{position:fixed;bottom:28px;right:28px;background:var(--green);color:#fff;padding:13px 22px;border-radius:12px;font-size:14px;font-weight:600;z-index:999;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.3)}
 .toast-admin.show{opacity:1;transform:translateY(0)}
 .toast-admin.error{background:var(--red)}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-content{margin-left:0}
+  .topbar{padding:0 16px}
+  .page-body{padding:20px 16px}
+  .mobile-menu-btn{display:flex!important}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .pedidos-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+}
+
+@media (max-width: 500px) {
+  .stats-row{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr}
+  .sec-header{flex-direction:column;align-items:flex-start}
+}
+
+.mobile-menu-btn{display:none;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);width:36px;height:36px;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99}
+.sidebar-overlay.on{display:block}
 </style>
 </head>
 <body>
@@ -142,61 +199,100 @@ tr:hover td{background:rgba(255,255,255,0.02)}
 
 <!-- ADMIN -->
 <div id="adminScreen">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-title">✈️ Admin Panel</div>
-      <div class="topbar-user" id="topbarUser"></div>
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-title">✈️ Admin Panel</div>
+      <div class="sidebar-logo-sub">Bar Aeródromo La Juliana</div>
     </div>
-    <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+    <nav class="sidebar-nav">
+      <button class="nav-item on" id="navMenu" onclick="showTab('menu')">
+        <span class="nav-item-ico">🍽️</span> Menú
+      </button>
+      <button class="nav-item" id="navPedidos" onclick="showTab('pedidos')">
+        <span class="nav-item-ico">📋</span> Pedidos
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user" id="sidebarUser"></div>
+      <button class="logout-btn" onclick="doLogout()">
+        <span>🚪</span> Cerrar sesión
+      </button>
+    </div>
   </div>
 
-  <div class="nav-tabs">
-    <button class="nav-tab on" onclick="showTab('menu')">🍽️ Menú</button>
-    <button class="nav-tab" onclick="showTab('pedidos')">📋 Pedidos</button>
-  </div>
-
-  <div class="admin-body">
-    <!-- TAB MENÚ -->
-    <div id="tabMenu">
-      <div class="sec-header">
-        <div class="sec-title">Categorías</div>
-        <button class="btn-primary" onclick="openCatModal()">+ Nueva Categoría</button>
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
+        <div class="topbar-title" id="topbarTitle">Menú</div>
       </div>
-      <div class="cat-grid" id="catGrid"></div>
-
-      <div class="sec-header">
-        <div class="sec-title">Productos</div>
-        <button class="btn-primary" onclick="openProductModal()">+ Nuevo Producto</button>
-      </div>
-      <div id="productosFilter" style="margin-bottom:16px;display:flex;gap:12px;align-items:center">
-        <select id="filterCat" onchange="renderProductos()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px">
-          <option value="">Todas las categorías</option>
-        </select>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nombre ES</th><th>Nombre EN</th><th>Categoría</th><th>Subsección</th><th>Precio</th><th>Disponible</th><th>Acciones</th></tr></thead>
-          <tbody id="productosTable"></tbody>
-        </table>
+      <div class="topbar-right">
+        <div class="topbar-badge" id="topbarUser"></div>
       </div>
     </div>
 
-    <!-- TAB PEDIDOS -->
-    <div id="tabPedidos" style="display:none">
-      <div class="sec-header">
-        <div class="sec-title">Pedidos</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="date" id="filterDate" onchange="loadPedidos()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px">
-          <select id="filterStatus" onchange="loadPedidos()" style="background:var(--card);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:8px 12px;font-family:'Inter',sans-serif;font-size:13px">
+    <div class="page-body">
+
+      <!-- TAB MENÚ -->
+      <div id="tabMenu">
+        <div class="sec-header">
+          <div class="sec-title">Categorías</div>
+          <button class="btn-primary" onclick="openCatModal()">+ Nueva Categoría</button>
+        </div>
+        <div class="cat-grid" id="catGrid"></div>
+
+        <div class="sec-header">
+          <div class="sec-title">Productos</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <select class="filter-input" id="filterCat" onchange="renderProductos()">
+              <option value="">Todas las categorías</option>
+            </select>
+            <button class="btn-primary" onclick="openProductModal()">+ Nuevo Producto</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre ES</th>
+                  <th>Nombre EN</th>
+                  <th>Categoría</th>
+                  <th>Subsección</th>
+                  <th>Precio</th>
+                  <th>Disponible</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="productosTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB PEDIDOS -->
+      <div id="tabPedidos" style="display:none">
+        <div class="sec-header">
+          <div class="sec-title">Pedidos</div>
+          <button class="btn-secondary" onclick="loadPedidos()">↻ Actualizar</button>
+        </div>
+        <div class="filters-row">
+          <input type="date" id="filterDate" class="filter-input" onchange="loadPedidos()">
+          <select id="filterStatus" class="filter-input" onchange="loadPedidos()">
             <option value="">Todos los estados</option>
             <option value="pendiente">Pendientes</option>
             <option value="en_cocina">En cocina</option>
             <option value="listo">Listos</option>
           </select>
-          <button class="btn-secondary" onclick="loadPedidos()">↻ Actualizar</button>
         </div>
+        <div id="pedidosList"></div>
       </div>
-      <div id="pedidosList"></div>
+
     </div>
   </div>
 </div>
@@ -312,19 +408,12 @@ let pedidoNumbers = {};
 async function doLogin() {
   const username = document.getElementById('loginUser').value.trim();
   const password = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginErr');
   if (!username || !password) { showLoginErr('Completa todos los campos'); return; }
-
   try {
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
+    const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password}) });
     const data = await res.json();
     if (!res.ok) { showLoginErr(data.error || 'Error al iniciar sesión'); return; }
-    token = data.token;
-    adminUser = data.username;
+    token = data.token; adminUser = data.username;
     localStorage.setItem('adminToken', token);
     localStorage.setItem('adminUser', adminUser);
     showAdmin();
@@ -333,14 +422,12 @@ async function doLogin() {
 
 function showLoginErr(msg) {
   const err = document.getElementById('loginErr');
-  err.textContent = msg;
-  err.style.display = 'block';
+  err.textContent = msg; err.style.display = 'block';
 }
 
 function doLogout() {
   token = ''; adminUser = '';
-  localStorage.removeItem('adminToken');
-  localStorage.removeItem('adminUser');
+  localStorage.removeItem('adminToken'); localStorage.removeItem('adminUser');
   document.getElementById('adminScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
 }
@@ -349,15 +436,28 @@ function showAdmin() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminScreen').style.display = 'block';
   document.getElementById('topbarUser').textContent = '👤 ' + adminUser;
+  document.getElementById('sidebarUser').textContent = '👤 ' + adminUser;
   loadMenu();
+}
+
+// ── SIDEBAR MOBILE ──
+function openSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('on');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('on');
 }
 
 // ── TABS ──
 function showTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('on'));
-  event.target.classList.add('on');
+  closeSidebar();
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('on'));
+  document.getElementById('nav' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('on');
   document.getElementById('tabMenu').style.display = tab === 'menu' ? 'block' : 'none';
   document.getElementById('tabPedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
+  document.getElementById('topbarTitle').textContent = tab === 'menu' ? 'Menú' : 'Pedidos';
   if (tab === 'pedidos') {
     const dateInput = document.getElementById('filterDate');
     if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
@@ -368,11 +468,9 @@ function showTab(tab) {
 // ── MENÚ ──
 async function loadMenu() {
   try {
-    const res = await fetch('/api/carta/admin', { headers: { Authorization: 'Bearer ' + token } });
+    const res = await fetch('/api/carta/admin', { headers:{Authorization:'Bearer '+token} });
     categorias = await res.json();
-    renderCategorias();
-    renderProductos();
-    populateCatSelects();
+    renderCategorias(); renderProductos(); populateCatSelects();
   } catch { showToast('Error cargando menú', true); }
 }
 
@@ -380,14 +478,14 @@ function renderCategorias() {
   document.getElementById('catGrid').innerHTML = categorias.map(cat => `
     <div class="cat-card">
       <div class="cat-card-left">
-        <div class="cat-emoji">${cat.emoji || '🍽️'}</div>
+        <div class="cat-emoji">${cat.emoji||'🍽️'}</div>
         <div>
           <div class="cat-name">${cat.nombre}</div>
           <div class="cat-name-en">${cat.nombre_en}</div>
         </div>
       </div>
       <div class="cat-actions">
-        <button class="btn-secondary" onclick="editCategoria(${cat.id})">✏️</button>
+        <button class="btn-secondary" onclick="editCategoria(${cat.id})">✏️ Editar</button>
         <button class="btn-danger" onclick="deleteCategoria(${cat.id})">🗑</button>
       </div>
     </div>
@@ -398,23 +496,20 @@ function renderProductos() {
   const filterCatId = document.getElementById('filterCat')?.value;
   let prods = [];
   categorias.forEach(cat => {
-    (cat.productos || []).forEach(p => {
-      if (!filterCatId || cat.id == filterCatId) {
-        prods.push({ ...p, catNombre: cat.nombre });
-      }
+    (cat.productos||[]).forEach(p => {
+      if (!filterCatId || cat.id == filterCatId) prods.push({...p, catNombre:cat.nombre});
     });
   });
-
   document.getElementById('productosTable').innerHTML = prods.map(p => `
     <tr>
       <td><strong>${p.nombre}</strong></td>
-      <td>${p.nombre_en || ''}</td>
-      <td>${p.catNombre}</td>
-      <td><span style="color:var(--muted);font-size:12px">${p.subseccion || '—'}</span></td>
+      <td style="color:var(--muted)">${p.nombre_en||''}</td>
+      <td><span class="badge badge-muted">${p.catNombre}</span></td>
+      <td style="color:var(--dim);font-size:12px">${p.subseccion||'—'}</td>
       <td><strong style="color:var(--gold)">${parseFloat(p.precio).toFixed(2)}€</strong></td>
       <td>
         <label class="toggle">
-          <input type="checkbox" ${p.disponible ? 'checked' : ''} onchange="toggleDisponible(${p.id}, this.checked)">
+          <input type="checkbox" ${p.disponible?'checked':''} onchange="toggleDisponible(${p.id},this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </td>
@@ -429,135 +524,105 @@ function renderProductos() {
 }
 
 function populateCatSelects() {
-  const filterCat = document.getElementById('filterCat');
-  const prodCat = document.getElementById('prodCategoria');
-  const opts = categorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-  filterCat.innerHTML = '<option value="">Todas las categorías</option>' + opts;
-  prodCat.innerHTML = opts;
+  const opts = categorias.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  document.getElementById('filterCat').innerHTML = '<option value="">Todas las categorías</option>'+opts;
+  document.getElementById('prodCategoria').innerHTML = opts;
 }
 
 // ── CATEGORÍAS CRUD ──
-function openCatModal(cat = null) {
+function openCatModal(cat=null) {
   editingCatId = cat ? cat.id : null;
   document.getElementById('catModalTitle').textContent = cat ? 'Editar Categoría' : 'Nueva Categoría';
-  document.getElementById('catNombre').value = cat?.nombre || '';
-  document.getElementById('catNombreEn').value = cat?.nombre_en || '';
-  document.getElementById('catEmoji').value = cat?.emoji || '';
-  document.getElementById('catOrden').value = cat?.orden || '';
+  document.getElementById('catNombre').value = cat?.nombre||'';
+  document.getElementById('catNombreEn').value = cat?.nombre_en||'';
+  document.getElementById('catEmoji').value = cat?.emoji||'';
+  document.getElementById('catOrden').value = cat?.orden||'';
   document.getElementById('catModal').classList.add('on');
 }
-
 function closeCatModal() { document.getElementById('catModal').classList.remove('on'); }
-
-function editCategoria(id) {
-  const cat = categorias.find(c => c.id === id);
-  if (cat) openCatModal(cat);
-}
+function editCategoria(id) { const cat=categorias.find(c=>c.id===id); if(cat) openCatModal(cat); }
 
 async function saveCategoria() {
-  const body = {
-    nombre: document.getElementById('catNombre').value.trim(),
-    nombre_en: document.getElementById('catNombreEn').value.trim(),
-    emoji: document.getElementById('catEmoji').value.trim(),
-    orden: parseInt(document.getElementById('catOrden').value) || 0
-  };
-  if (!body.nombre) { showToast('El nombre es obligatorio', true); return; }
-
+  const body = { nombre:document.getElementById('catNombre').value.trim(), nombre_en:document.getElementById('catNombreEn').value.trim(), emoji:document.getElementById('catEmoji').value.trim(), orden:parseInt(document.getElementById('catOrden').value)||0 };
+  if(!body.nombre){showToast('El nombre es obligatorio',true);return;}
   const url = editingCatId ? `/api/carta/categorias/${editingCatId}` : '/api/carta/categorias';
   const method = editingCatId ? 'PUT' : 'POST';
-
   try {
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error();
-    closeCatModal();
-    await loadMenu();
-    showToast(editingCatId ? 'Categoría actualizada' : 'Categoría creada');
-  } catch { showToast('Error guardando categoría', true); }
+    const res = await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body)});
+    if(!res.ok) throw new Error();
+    closeCatModal(); await loadMenu();
+    showToast(editingCatId?'Categoría actualizada':'Categoría creada');
+  } catch { showToast('Error guardando categoría',true); }
 }
 
 async function deleteCategoria(id) {
-  if (!confirm('¿Eliminar esta categoría y todos sus productos?')) return;
-  try {
-    await fetch(`/api/carta/categorias/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
-    await loadMenu();
-    showToast('Categoría eliminada');
-  } catch { showToast('Error eliminando categoría', true); }
+  if(!confirm('¿Eliminar esta categoría y todos sus productos?')) return;
+  try { await fetch(`/api/carta/categorias/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadMenu(); showToast('Categoría eliminada'); }
+  catch { showToast('Error eliminando categoría',true); }
 }
 
 // ── PRODUCTOS CRUD ──
-function openProductModal(prod = null) {
+function openProductModal(prod=null) {
   editingProductId = prod ? prod.id : null;
   document.getElementById('productModalTitle').textContent = prod ? 'Editar Producto' : 'Nuevo Producto';
-  document.getElementById('prodNombre').value = prod?.nombre || '';
-  document.getElementById('prodNombreEn').value = prod?.nombre_en || '';
-  document.getElementById('prodDesc').value = prod?.descripcion || '';
-  document.getElementById('prodDescEs').value = prod?.descripcion_es || '';
-  document.getElementById('prodSub').value = prod?.subseccion || '';
-  document.getElementById('prodSubEn').value = prod?.subseccion_en || '';
-  document.getElementById('prodPrecio').value = prod?.precio || '';
-  document.getElementById('prodOrden').value = prod?.orden || '';
-  document.getElementById('prodNotas').value = prod?.notas || '';
+  document.getElementById('prodNombre').value = prod?.nombre||'';
+  document.getElementById('prodNombreEn').value = prod?.nombre_en||'';
+  document.getElementById('prodDesc').value = prod?.descripcion||'';
+  document.getElementById('prodDescEs').value = prod?.descripcion_es||'';
+  document.getElementById('prodSub').value = prod?.subseccion||'';
+  document.getElementById('prodSubEn').value = prod?.subseccion_en||'';
+  document.getElementById('prodPrecio').value = prod?.precio||'';
+  document.getElementById('prodOrden').value = prod?.orden||'';
+  document.getElementById('prodNotas').value = prod?.notas||'';
   document.getElementById('prodDisponible').checked = prod ? prod.disponible : true;
-  if (prod) document.getElementById('prodCategoria').value = prod.categoria_id;
+  if(prod) document.getElementById('prodCategoria').value = prod.categoria_id;
   document.getElementById('productModal').classList.add('on');
 }
-
 function closeProductModal() { document.getElementById('productModal').classList.remove('on'); }
-
 function editProducto(id) {
-  let found = null;
-  categorias.forEach(cat => { const p = (cat.productos || []).find(p => p.id === id); if (p) found = { ...p, categoria_id: cat.id }; });
-  if (found) openProductModal(found);
+  let found=null;
+  categorias.forEach(cat=>{const p=(cat.productos||[]).find(p=>p.id===id);if(p) found={...p,categoria_id:cat.id};});
+  if(found) openProductModal(found);
 }
 
 async function toggleDisponible(id, disponible) {
-  let prod = null, catId = null;
-  categorias.forEach(cat => { const p = (cat.productos || []).find(p => p.id === id); if (p) { prod = p; catId = cat.id; } });
-  if (!prod) return;
-  await fetch(`/api/carta/productos/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-    body: JSON.stringify({ ...prod, categoria_id: catId, disponible })
-  });
+  let prod=null,catId=null;
+  categorias.forEach(cat=>{const p=(cat.productos||[]).find(p=>p.id===id);if(p){prod=p;catId=cat.id;}});
+  if(!prod) return;
+  await fetch(`/api/carta/productos/${id}`,{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({...prod,categoria_id:catId,disponible})});
   await loadMenu();
-  showToast(disponible ? 'Producto activado' : 'Producto desactivado');
+  showToast(disponible?'Producto activado':'Producto desactivado');
 }
 
 async function saveProducto() {
   const body = {
-    categoria_id: parseInt(document.getElementById('prodCategoria').value),
-    nombre: document.getElementById('prodNombre').value.trim(),
-    nombre_en: document.getElementById('prodNombreEn').value.trim(),
-    descripcion: document.getElementById('prodDesc').value.trim(),
-    descripcion_es: document.getElementById('prodDescEs').value.trim(),
-    subseccion: document.getElementById('prodSub').value.trim() || null,
-    subseccion_en: document.getElementById('prodSubEn').value.trim() || null,
-    precio: parseFloat(document.getElementById('prodPrecio').value),
-    orden: parseInt(document.getElementById('prodOrden').value) || 0,
-    notas: document.getElementById('prodNotas').value.trim() || null,
-    disponible: document.getElementById('prodDisponible').checked
+    categoria_id:parseInt(document.getElementById('prodCategoria').value),
+    nombre:document.getElementById('prodNombre').value.trim(),
+    nombre_en:document.getElementById('prodNombreEn').value.trim(),
+    descripcion:document.getElementById('prodDesc').value.trim(),
+    descripcion_es:document.getElementById('prodDescEs').value.trim(),
+    subseccion:document.getElementById('prodSub').value.trim()||null,
+    subseccion_en:document.getElementById('prodSubEn').value.trim()||null,
+    precio:parseFloat(document.getElementById('prodPrecio').value),
+    orden:parseInt(document.getElementById('prodOrden').value)||0,
+    notas:document.getElementById('prodNotas').value.trim()||null,
+    disponible:document.getElementById('prodDisponible').checked
   };
-  if (!body.nombre || !body.precio) { showToast('Nombre y precio son obligatorios', true); return; }
-
+  if(!body.nombre||!body.precio){showToast('Nombre y precio son obligatorios',true);return;}
   const url = editingProductId ? `/api/carta/productos/${editingProductId}` : '/api/carta/productos';
   const method = editingProductId ? 'PUT' : 'POST';
-
   try {
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
-    if (!res.ok) throw new Error();
-    closeProductModal();
-    await loadMenu();
-    showToast(editingProductId ? 'Producto actualizado' : 'Producto creado');
-  } catch { showToast('Error guardando producto', true); }
+    const res = await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body)});
+    if(!res.ok) throw new Error();
+    closeProductModal(); await loadMenu();
+    showToast(editingProductId?'Producto actualizado':'Producto creado');
+  } catch { showToast('Error guardando producto',true); }
 }
 
 async function deleteProducto(id) {
-  if (!confirm('¿Eliminar este producto?')) return;
-  try {
-    await fetch(`/api/carta/productos/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
-    await loadMenu();
-    showToast('Producto eliminado');
-  } catch { showToast('Error eliminando producto', true); }
+  if(!confirm('¿Eliminar este producto?')) return;
+  try { await fetch(`/api/carta/productos/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadMenu(); showToast('Producto eliminado'); }
+  catch { showToast('Error eliminando producto',true); }
 }
 
 // ── PEDIDOS ──
@@ -565,98 +630,72 @@ async function loadPedidos() {
   const status = document.getElementById('filterStatus').value;
   const date = document.getElementById('filterDate').value;
   let url = '/api/orders?';
-  if (status) url += `status=${status}&`;
-  if (date) url += `date=${date}&`;
-  url = url.endsWith('?') || url.endsWith('&') ? url.slice(0, -1) : url;
-  if (url === '/api/orders') url = '/api/orders';
-  document.getElementById('pedidosList').innerHTML = '<div class="loading"><div class="spinner"></div> Cargando...</div>';
-
+  if(status) url += `status=${status}&`;
+  if(date) url += `date=${date}&`;
+  url = url.replace(/[?&]$/,'');
+  document.getElementById('pedidosList').innerHTML = '<div class="loading"><div class="spinner"></div> Cargando pedidos...</div>';
   try {
-    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    const res = await fetch(url,{headers:{Authorization:'Bearer '+token}});
     const pedidos = await res.json();
-
-    // Asignar números
-    const sorted = [...pedidos].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    sorted.forEach((p, i) => { if (!pedidoNumbers[p.id]) pedidoNumbers[p.id] = i + 1; });
-
-    if (!pedidos.length) {
-      document.getElementById('pedidosList').innerHTML = '<div style="text-align:center;padding:48px;color:var(--muted)">No hay pedidos</div>';
+    const sorted = [...pedidos].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    sorted.forEach((p,i)=>{if(!pedidoNumbers[p.id]) pedidoNumbers[p.id]=i+1;});
+    if(!pedidos.length){
+      document.getElementById('pedidosList').innerHTML = '<div class="empty-state"><div class="empty-ico">📭</div>No hay pedidos para este filtro</div>';
       return;
     }
-
-    document.getElementById('pedidosList').innerHTML = pedidos.map(p => {
-      const num = pedidoNumbers[p.id] || '?';
-      const time = new Date(p.created_at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-      const date = new Date(p.created_at).toLocaleDateString('es-ES');
-      const items = (p.items || []).filter(i => i.nombre);
-      const statusBadge = {
-        pendiente: '<span class="badge badge-gold">Pendiente</span>',
-        en_cocina: '<span class="badge badge-muted">En cocina</span>',
-        listo: '<span class="badge badge-green">Listo</span>',
-      }[p.status] || '<span class="badge badge-muted">' + p.status + '</span>';
-
-      return `
-        <div class="pedido-card">
-          <div class="pedido-header">
-            <div>
-              <div class="pedido-num">Comanda #${num}</div>
-              <div class="pedido-info">${p.customer_name} · 📱 ${p.phone} · ${date} ${time}${p.pickup_time ? ' · 🕐 ' + p.pickup_time.substring(0,5) : ''}</div>
-            </div>
-            ${statusBadge}
+    document.getElementById('pedidosList').innerHTML = '<div class="pedidos-grid">'+pedidos.map(p=>{
+      const num=pedidoNumbers[p.id]||'?';
+      const time=new Date(p.created_at).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+      const date=new Date(p.created_at).toLocaleDateString('es-ES');
+      const items=(p.items||[]).filter(i=>i.nombre);
+      const statusBadge={pendiente:'<span class="badge badge-gold">Pendiente</span>',en_cocina:'<span class="badge badge-muted">En cocina</span>',listo:'<span class="badge badge-green">Listo</span>'}[p.status]||'<span class="badge badge-muted">'+p.status+'</span>';
+      return `<div class="pedido-card">
+        <div class="pedido-header">
+          <div>
+            <div class="pedido-num">Comanda #${num}</div>
+            <div class="pedido-info">${p.customer_name} · 📱 ${p.phone}<br>${date} ${time}${p.pickup_time?' · 🕐 '+p.pickup_time.substring(0,5):''}</div>
           </div>
-          <div class="pedido-items">
-            ${items.length ? items.map(i => `<div class="pedido-item-row"><span>${i.nombre}</span><span style="color:var(--gold)">×${i.cantidad}</span></div>`).join('') : '<div style="color:var(--muted);font-size:13px">Sin items registrados</div>'}
-          </div>
-          <div class="pedido-actions">
-            <select class="status-select" onchange="updatePedidoStatus('${p.id}', this.value)">
-              <option value="pendiente" ${p.status==='pendiente'?'selected':''}>Pendiente</option>
-              <option value="en_cocina" ${p.status==='en_cocina'?'selected':''}>En cocina</option>
-              <option value="listo" ${p.status==='listo'?'selected':''}>Listo</option>
-            </select>
-            <button class="btn-danger" onclick="deletePedido('${p.id}')">🗑 Eliminar</button>
-          </div>
+          ${statusBadge}
         </div>
-      `;
-    }).join('');
-  } catch { showToast('Error cargando pedidos', true); }
+        <div class="pedido-items">
+          ${items.length?items.map(i=>`<div class="pedido-item-row"><span>${i.nombre}</span><span style="color:var(--gold);font-weight:600">×${i.cantidad}</span></div>`).join(''):'<div style="color:var(--muted);font-size:12px">Sin items registrados</div>'}
+        </div>
+        <div class="pedido-actions">
+          <select class="status-select" onchange="updatePedidoStatus('${p.id}',this.value)">
+            <option value="pendiente" ${p.status==='pendiente'?'selected':''}>Pendiente</option>
+            <option value="en_cocina" ${p.status==='en_cocina'?'selected':''}>En cocina</option>
+            <option value="listo" ${p.status==='listo'?'selected':''}>Listo</option>
+          </select>
+          <button class="btn-danger" onclick="deletePedido('${p.id}')">🗑 Eliminar</button>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
+  } catch { showToast('Error cargando pedidos',true); }
 }
 
 async function updatePedidoStatus(id, status) {
   try {
-    await fetch(`/api/orders/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({ status })
-    });
+    await fetch(`/api/orders/${id}/status`,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({status})});
     showToast('Estado actualizado');
-  } catch { showToast('Error actualizando estado', true); }
+  } catch { showToast('Error actualizando estado',true); }
 }
 
 async function deletePedido(id) {
-  if (!confirm('¿Eliminar este pedido?')) return;
-  try {
-    await fetch(`/api/orders/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
-    await loadPedidos();
-    showToast('Pedido eliminado');
-  } catch { showToast('Error eliminando pedido', true); }
+  if(!confirm('¿Eliminar este pedido?')) return;
+  try { await fetch(`/api/orders/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadPedidos(); showToast('Pedido eliminado'); }
+  catch { showToast('Error eliminando pedido',true); }
 }
 
 // ── TOAST ──
 let toastTimer;
-function showToast(msg, error = false) {
-  const el = document.getElementById('toastAdmin');
-  el.textContent = msg;
-  el.className = 'toast-admin show' + (error ? ' error' : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+function showToast(msg,error=false) {
+  const el=document.getElementById('toastAdmin');
+  el.textContent=msg; el.className='toast-admin show'+(error?' error':'');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),3000);
 }
 
 // ── INIT ──
-document.addEventListener('DOMContentLoaded', () => {
-  if (token) {
-    showAdmin();
-  }
-});
+document.addEventListener('DOMContentLoaded',()=>{ if(token) showAdmin(); });
 </script>
 </body>
 </html>
