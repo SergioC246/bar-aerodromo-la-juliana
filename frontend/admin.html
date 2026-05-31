@@ -215,6 +215,9 @@ tr:hover td{background:rgba(255,255,255,0.015)}
       <button class="nav-item" id="navPedidos" onclick="showTab('pedidos')">
         <span class="nav-item-ico">📋</span> Pedidos
       </button>
+      <button class="nav-item" id="navInformes" onclick="showTab('informes')">
+        <span class="nav-item-ico">📊</span> Informes
+      </button>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user" id="sidebarUser"></div>
@@ -279,7 +282,10 @@ tr:hover td{background:rgba(255,255,255,0.015)}
       <div id="tabPedidos" style="display:none">
         <div class="sec-header">
           <div class="sec-title">Pedidos</div>
-          <button class="btn-secondary" onclick="loadPedidos()">↻ Actualizar</button>
+          <div style="display:flex;gap:10px">
+            <button class="btn-primary" onclick="openInformeDia()">📊 Informe del día</button>
+            <button class="btn-secondary" onclick="loadPedidos()">↻ Actualizar</button>
+          </div>
         </div>
         <div class="filters-row">
           <input type="date" id="filterDate" class="filter-input" onchange="loadPedidos()">
@@ -293,6 +299,45 @@ tr:hover td{background:rgba(255,255,255,0.015)}
         <div id="pedidosList"></div>
       </div>
 
+      <!-- TAB INFORMES -->
+      <div id="tabInformes" style="display:none">
+        <div class="sec-header">
+          <div class="sec-title">Ranking Histórico</div>
+          <button class="btn-secondary" onclick="loadHistorico()">↻ Actualizar</button>
+        </div>
+        <div id="historicoResumen" style="margin-bottom:24px"></div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Plato</th>
+                  <th>Unidades vendidas</th>
+                  <th>Veces pedido</th>
+                  <th>Total facturado</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INFORME DEL DÍA -->
+<div class="modal-bg" id="informeModal">
+  <div class="modal" style="max-width:680px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div class="modal-title" style="margin-bottom:0" id="informeModalTitle">Informe del día</div>
+      <button onclick="printInforme()" class="btn-secondary">🖨️ Imprimir</button>
+    </div>
+    <div id="informeContent"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="document.getElementById('informeModal').classList.remove('on')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -457,12 +502,15 @@ function showTab(tab) {
   document.getElementById('nav' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('on');
   document.getElementById('tabMenu').style.display = tab === 'menu' ? 'block' : 'none';
   document.getElementById('tabPedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
-  document.getElementById('topbarTitle').textContent = tab === 'menu' ? 'Menú' : 'Pedidos';
+  document.getElementById('tabInformes').style.display = tab === 'informes' ? 'block' : 'none';
+  const titles = { menu: 'Menú', pedidos: 'Pedidos', informes: 'Informes' };
+  document.getElementById('topbarTitle').textContent = titles[tab] || tab;
   if (tab === 'pedidos') {
     const dateInput = document.getElementById('filterDate');
     if (!dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
     loadPedidos();
   }
+  if (tab === 'informes') loadHistorico();
 }
 
 // ── MENÚ ──
@@ -684,6 +732,111 @@ async function deletePedido(id) {
   if(!confirm('¿Eliminar este pedido?')) return;
   try { await fetch(`/api/orders/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadPedidos(); showToast('Pedido eliminado'); }
   catch { showToast('Error eliminando pedido',true); }
+}
+
+// ── ESTADÍSTICAS ──
+async function openInformeDia() {
+  const date = document.getElementById('filterDate').value || new Date().toISOString().split('T')[0];
+  document.getElementById('informeModalTitle').textContent = 'Informe del día — ' + date.split('-').reverse().join('/');
+  document.getElementById('informeContent').innerHTML = '<div class="loading"><div class="spinner"></div> Cargando...</div>';
+  document.getElementById('informeModal').classList.add('on');
+
+  try {
+    const res = await fetch(`/api/stats/dia?date=${date}`, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+
+    const platosHtml = data.platos.length
+      ? data.platos.map((p, i) => `
+          <tr>
+            <td style="color:var(--muted)">${i + 1}</td>
+            <td><strong>${p.nombre}</strong></td>
+            <td style="color:var(--gold);font-weight:700">${p.total_cantidad}</td>
+            <td style="color:var(--text)">${parseFloat(p.total_importe).toFixed(2)}€</td>
+          </tr>`).join('')
+      : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Sin ventas este día</td></tr>';
+
+    document.getElementById('informeContent').innerHTML = `
+      <div class="stats-row" style="margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-label">Total Facturado</div>
+          <div class="stat-value">${data.total_facturado}€</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Comandas</div>
+          <div class="stat-value">${data.total_comandas}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ticket Medio</div>
+          <div class="stat-value">${data.total_comandas > 0 ? (data.total_facturado / data.total_comandas).toFixed(2) : '0.00'}€</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Plato</th><th>Unidades</th><th>Importe</th></tr></thead>
+            <tbody>${platosHtml}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  } catch { showToast('Error cargando informe', true); }
+}
+
+async function loadHistorico() {
+  document.getElementById('rankingTable').innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>';
+  try {
+    const res = await fetch('/api/stats/historico', { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+
+    const desde = data.desde ? new Date(data.desde).toLocaleDateString('es-ES') : '—';
+    document.getElementById('historicoResumen').innerHTML = `
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Facturado Histórico</div>
+          <div class="stat-value">${data.total_facturado}€</div>
+          <div class="stat-sub">Desde ${desde}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Comandas</div>
+          <div class="stat-value">${data.total_comandas}</div>
+          <div class="stat-sub">Desde ${desde}</div>
+        </div>
+      </div>`;
+
+    document.getElementById('rankingTable').innerHTML = data.ranking.length
+      ? data.ranking.map((p, i) => `
+          <tr>
+            <td><strong style="color:var(--gold)">${i + 1}</strong></td>
+            <td><strong>${p.nombre}</strong></td>
+            <td><span style="color:var(--gold);font-weight:700;font-size:18px">${p.total_cantidad}</span></td>
+            <td style="color:var(--muted)">${p.veces_pedido} comandas</td>
+            <td><strong style="color:var(--green)">${parseFloat(p.total_importe).toFixed(2)}€</strong></td>
+          </tr>`).join('')
+      : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Sin datos históricos</td></tr>';
+  } catch { showToast('Error cargando ranking', true); }
+}
+
+function printInforme() {
+  const content = document.getElementById('informeContent').innerHTML;
+  const title = document.getElementById('informeModalTitle').textContent;
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>${title}</title>
+    <style>body{font-family:sans-serif;padding:24px;color:#111}
+    h1{font-size:22px;margin-bottom:16px}
+    .stats{display:flex;gap:16px;margin-bottom:24px}
+    .stat{border:1px solid #ddd;border-radius:8px;padding:16px;flex:1;text-align:center}
+    .stat-l{font-size:11px;text-transform:uppercase;color:#999;margin-bottom:4px}
+    .stat-v{font-size:28px;font-weight:700;color:#c9a84c}
+    table{width:100%;border-collapse:collapse}
+    th{background:#f5f5f5;padding:10px;text-align:left;font-size:12px;text-transform:uppercase}
+    td{padding:10px;border-bottom:1px solid #eee}
+    @media print{@page{size:A4;margin:15mm}}</style>
+    </head><body>
+    <h1>${title}</h1>
+    ${content.replace(/style="[^"]*color:var[^"]*"/g, '').replace(/class="[^"]*"/g, '')}
+    <script>window.print()<\/script>
+    </body></html>`);
+  w.document.close();
 }
 
 // ── TOAST ──
