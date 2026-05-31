@@ -77,14 +77,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
 
 /* ── CATEGORY CARDS ── */
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:36px}
-.cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color 0.2s}
-.cat-card:hover{border-color:var(--border2)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:36px}
+.cat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px;transition:border-color 0.2s}
+.cat-card:hover{border-color:var(--gold)}
 .cat-card-left{display:flex;align-items:center;gap:14px}
-.cat-emoji{font-size:30px}
-.cat-name{font-size:16px;font-weight:700;color:var(--text)}
+.cat-emoji{font-size:34px}
+.cat-name{font-size:17px;font-weight:700;color:var(--text)}
 .cat-name-en{font-size:12px;color:var(--muted);margin-top:2px}
-.cat-actions{display:flex;gap:8px;flex-shrink:0}
+.cat-actions{display:flex;gap:8px}
 
 /* ── TABLE ── */
 .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
@@ -485,7 +485,7 @@ function renderCategorias() {
         </div>
       </div>
       <div class="cat-actions">
-        <button class="btn-secondary" onclick="editCategoria(${cat.id})">✏️ Editar</button>
+        <button class="btn-secondary" onclick="editCategoria(${cat.id})" style="flex:1">✏️ Editar</button>
         <button class="btn-danger" onclick="deleteCategoria(${cat.id})">🗑</button>
       </div>
     </div>
