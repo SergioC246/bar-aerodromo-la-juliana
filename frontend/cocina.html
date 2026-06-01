@@ -322,6 +322,24 @@
       margin-right: 12px;
     }
 
+    .clock {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .clock-date {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      text-transform: capitalize;
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -331,6 +349,10 @@
 <body>
   <div class="header">
     <h1>🍳 Cocina</h1>
+    <div style="text-align:center">
+      <div class="clock" id="clock">00:00:00</div>
+      <div class="clock-date" id="clockDate"></div>
+    </div>
     <div class="header-right">
       <div class="counter-box">
         <div class="counter-label">Comandas Hoy</div>
@@ -377,6 +399,19 @@
       }
       return orderNumberMap[id];
     }
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock').textContent = h + ':' + m + ':' + s;
+      document.getElementById('clockDate').textContent = now.toLocaleDateString('es-ES', {
+        weekday: 'long', day: 'numeric', month: 'long'
+      });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
 
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
