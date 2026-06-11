@@ -7,346 +7,117 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0c0b09;
-      --surface: #161410;
-      --card: #1e1c18;
-      --card2: #252320;
-      --border: rgba(255,255,255,0.07);
-      --gold: #d4a853;
-      --red: #c94a3a;
-      --green: #4caf50;
-      --text: #f2ede6;
-      --muted: #9a9080;
-      --dim: #5a5248;
+      --bg: #0c0b09; --surface: #161410; --card: #1e1c18; --card2: #252320;
+      --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+      --gold: #d4a853; --red: #c94a3a; --green: #4caf50;
+      --text: #f2ede6; --muted: #9a9080; --dim: #5a5248;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; padding: 30px; }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-      padding: 30px;
-    }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 3px solid var(--border); }
+    .header h1 { font-family: 'Cormorant Garamond', serif; font-size: 48px; color: var(--gold); margin: 0; }
+    .header-right { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
 
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 40px;
-      padding-bottom: 30px;
-      border-bottom: 3px solid var(--border);
-    }
+    .counter-box { background: rgba(212,168,83,0.1); border: 2px solid var(--gold); border-radius: 12px; padding: 16px 24px; text-align: center; }
+    .counter-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .counter-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 700; color: var(--gold); }
 
-    .header h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 48px;
-      color: var(--gold);
-      margin: 0;
-    }
+    .status-badge { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 20px; background: rgba(76,175,80,0.1); border: 2px solid rgba(76,175,80,0.3); font-size: 14px; font-weight: 600; color: var(--green); }
+    .status-badge.off { background: rgba(201,74,58,0.1); border-color: rgba(201,74,58,0.3); color: var(--red); }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; }
+    .status-badge.off .status-dot { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    .header-right {
-      display: flex;
-      gap: 30px;
-      align-items: center;
-    }
+    .clock { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 700; color: var(--gold); letter-spacing: 2px; line-height: 1; }
+    .clock-date { font-size: 13px; color: var(--muted); text-align: center; letter-spacing: 1px; margin-top: 4px; text-transform: capitalize; }
 
-    .counter-box {
-      background: rgba(212, 168, 83, 0.1);
-      border: 2px solid var(--gold);
-      border-radius: 12px;
-      padding: 16px 24px;
-      text-align: center;
-    }
-
-    .counter-label {
-      font-size: 12px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .counter-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--gold);
-    }
-
-    .tabs-container {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 32px;
-      padding-bottom: 20px;
-      border-bottom: 3px solid var(--border);
-    }
-
-    .tab-btn {
-      padding: 16px 28px;
-      border: none;
-      border-bottom: 4px solid transparent;
-      background: none;
-      color: var(--muted);
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 0.5px;
-    }
-
+    /* TABS + TOOLBAR */
+    .tabs-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 3px solid var(--border); flex-wrap: wrap; gap: 12px; }
+    .tabs-left { display: flex; gap: 12px; }
+    .tab-btn { padding: 14px 24px; border: none; border-bottom: 4px solid transparent; background: none; color: var(--muted); font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Inter', sans-serif; }
     .tab-btn:hover { color: var(--text); }
     .tab-btn.on { color: var(--gold); border-bottom-color: var(--gold); }
 
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 20px;
-      border-radius: 20px;
-      background: rgba(76, 175, 80, 0.1);
-      border: 2px solid rgba(76, 175, 80, 0.3);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--green);
-    }
+    /* SEARCH + ACTIONS BAR */
+    .actions-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 24px; }
+    .search-box { flex: 1; min-width: 200px; background: var(--card); border: 1px solid var(--border2); border-radius: 10px; color: var(--text); padding: 11px 16px; font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.2s; }
+    .search-box::placeholder { color: var(--dim); }
+    .search-box:focus { outline: none; border-color: var(--gold); }
+    .btn-action { padding: 11px 18px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+    .btn-clear-all { background: rgba(201,74,58,0.15); color: var(--red); border: 1px solid rgba(201,74,58,0.3); }
+    .btn-clear-all:hover { background: var(--red); color: white; }
 
-    .status-badge.off {
-      background: rgba(201, 74, 58, 0.1);
-      border-color: rgba(201, 74, 58, 0.3);
-      color: var(--red);
-    }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    .status-badge.off .status-dot { background: var(--red); }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
+    /* BOARD */
     .container { max-width: 1600px; margin: 0 auto; }
+    .board { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 24px; }
 
-    .board {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-      gap: 24px;
-    }
+    /* CARDS */
+    .order-card { background: var(--card); border: 3px solid var(--border); border-radius: 16px; padding: 24px; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .order-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--gold); }
+    .order-card:hover { border-color: var(--gold); box-shadow: 0 12px 48px rgba(212,168,83,0.25); }
+    .order-card.selected { border-color: var(--red); box-shadow: 0 0 0 2px var(--red); }
+    .order-card.selected::before { background: var(--red); }
 
-    .order-card {
-      background: var(--card);
-      border: 3px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .order-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 6px;
-      background: var(--gold);
-    }
-
-    .order-card:hover {
-      border-color: var(--gold);
-      box-shadow: 0 12px 48px rgba(212, 168, 83, 0.25);
-    }
-
-    .order-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-    }
-
-    .table-number {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--gold);
-    }
-
+    .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; }
+    .table-number { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 700; color: var(--gold); }
     .order-time { font-size: 14px; color: var(--muted); }
+    .customer-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
 
-    .pickup-time {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(212, 168, 83, 0.15);
-      border: 2px solid var(--gold);
-      border-radius: 10px;
-      padding: 10px 16px;
-      margin-bottom: 14px;
-    }
+    .pickup-time { display: flex; align-items: center; gap: 10px; background: rgba(212,168,83,0.15); border: 2px solid var(--gold); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; }
+    .pickup-time-label { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .pickup-time-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 700; color: var(--gold); line-height: 1; }
 
-    .pickup-time-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .pickup-time-value {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--gold);
-      line-height: 1;
-    }
-
-    .customer-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 12px;
-    }
-
-    .items-list {
-      margin: 16px 0;
-      padding: 16px;
-      background: rgba(212, 168, 83, 0.08);
-      border-radius: 10px;
-    }
-
-    .item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 0;
-      font-size: 26px;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .items-list { margin: 16px 0; padding: 16px; background: rgba(212,168,83,0.08); border-radius: 10px; }
+    .item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; font-size: 26px; border-bottom: 1px solid var(--border); }
     .item:last-child { border-bottom: none; }
-
     .item-name { flex: 1; font-weight: 700; }
-
-    .item-qty {
-      background: var(--gold);
-      padding: 6px 18px;
-      border-radius: 8px;
-      margin: 0 0 0 16px;
-      font-weight: 900;
-      color: #0c0b09;
-      font-size: 28px;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 14px 16px;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .btn-ready { background: var(--green); color: white; }
-    .btn-ready:hover {
-      background: #45a049;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
-    }
-
-    .btn-remove { background: var(--red); color: white; }
-    .btn-remove:hover {
-      background: #b83f33;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(201, 74, 58, 0.3);
-    }
-
-    .btn-toggle { background: var(--card2); color: var(--gold); border: 2px solid var(--gold); }
-    .btn-toggle:hover {
-      background: rgba(212, 168, 83, 0.15);
-      transform: translateY(-2px);
-    }
+    .item-qty { background: var(--gold); padding: 6px 18px; border-radius: 8px; margin: 0 0 0 16px; font-weight: 900; color: #0c0b09; font-size: 28px; }
 
     .items-collapsed { display: none; }
     .items-collapsed.open { display: block; }
 
-    .empty-state {
-      grid-column: 1 / -1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 40px;
-      color: var(--muted);
-      text-align: center;
-    }
+    .actions { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+    .btn { flex: 1; padding: 14px 16px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-ready { background: var(--green); color: white; }
+    .btn-ready:hover { background: #45a049; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(76,175,80,0.3); }
+    .btn-remove { background: var(--red); color: white; }
+    .btn-remove:hover { background: #b83f33; transform: translateY(-2px); }
+    .btn-toggle { background: var(--card2); color: var(--gold); border: 2px solid var(--gold); }
+    .btn-toggle:hover { background: rgba(212,168,83,0.15); transform: translateY(-2px); }
+    .btn-select { background: var(--card2); color: var(--muted); border: 1px solid var(--border2); flex: 0 0 auto; padding: 14px 14px; }
+    .btn-select.active { background: rgba(201,74,58,0.15); color: var(--red); border-color: var(--red); }
 
+    /* EMPTY STATE */
+    .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 40px; color: var(--muted); text-align: center; }
     .empty-state-icon { font-size: 80px; margin-bottom: 24px; opacity: 0.5; }
     .empty-state-text { font-size: 24px; }
 
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 60px;
-      color: var(--muted);
-      font-size: 16px;
-    }
+    /* LOADING */
+    .loading { display: flex; align-items: center; justify-content: center; padding: 60px; color: var(--muted); font-size: 16px; }
+    .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--border); border-top: 3px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 12px; }
+    @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
 
-    .spinner {
-      display: inline-block;
-      width: 28px; height: 28px;
-      border: 3px solid var(--border);
-      border-top: 3px solid var(--gold);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 12px;
-    }
+    /* SCROLL BUTTONS */
+    .scroll-btns { position: fixed; bottom: 28px; right: 28px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
+    .scroll-btn { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--card); border: 2px solid var(--border2); color: var(--muted); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+    .scroll-btn:hover { background: var(--gold); color: #0c0b09; border-color: var(--gold); }
 
-    .clock {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 52px;
-      font-weight: 700;
-      color: var(--gold);
-      letter-spacing: 2px;
-      line-height: 1;
-    }
+    /* NOTIFICATION TOAST */
+    .notif-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 999; background: var(--green); color: white; padding: 16px 28px; border-radius: 14px; font-size: 16px; font-weight: 700; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1); display: flex; align-items: center; gap: 12px; pointer-events: none; }
+    .notif-toast.show { transform: translateX(-50%) translateY(0); }
 
-    .clock-date {
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
-      letter-spacing: 1px;
-      margin-top: 4px;
-      text-transform: capitalize;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    /* SOUND TOGGLE */
+    .sound-btn { background: var(--card2); border: 1px solid var(--border2); border-radius: 10px; color: var(--muted); padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+    .sound-btn.on { border-color: var(--green); color: var(--green); background: rgba(76,175,80,0.1); }
   </style>
 </head>
 <body>
+
+  <!-- NOTIFICATION TOAST -->
+  <div class="notif-toast" id="notifToast">🔔 ¡Nuevo pedido!</div>
+
   <div class="header">
     <h1>🍳 Cocina</h1>
     <div style="text-align:center">
@@ -362,6 +133,7 @@
         <div class="counter-label">Recibidas</div>
         <div class="counter-value" id="receivedCommands">0</div>
       </div>
+      <button class="sound-btn on" id="soundBtn" onclick="toggleSound()">🔔 Sonido ON</button>
       <div class="status-badge" id="statusBadge">
         <div class="status-dot"></div>
         <span id="statusText">Conectado</span>
@@ -369,9 +141,17 @@
     </div>
   </div>
 
-  <div class="tabs-container">
-    <button class="tab-btn on" onclick="switchTab('en_proceso', event)">📋 En Proceso</button>
-    <button class="tab-btn" onclick="switchTab('hechos', event)">✅ Hechos</button>
+  <div class="tabs-bar">
+    <div class="tabs-left">
+      <button class="tab-btn on" onclick="switchTab('en_proceso', event)">📋 En Proceso</button>
+      <button class="tab-btn" onclick="switchTab('hechos', event)">✅ Hechos</button>
+    </div>
+  </div>
+
+  <!-- ACTIONS BAR (solo visible en hechos) -->
+  <div class="actions-bar" id="actionsBar" style="display:none">
+    <input class="search-box" id="searchBox" type="text" placeholder="🔍 Buscar por nombre de cliente..." oninput="renderBoard()">
+    <button class="btn-action btn-clear-all" onclick="clearAllHechos()">🗑 Limpiar todo el día</button>
   </div>
 
   <div class="container">
@@ -383,47 +163,81 @@
     </div>
   </div>
 
+  <!-- SCROLL BUTTONS -->
+  <div class="scroll-btns" id="scrollBtns" style="display:none">
+    <button class="scroll-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Ir arriba">↑</button>
+    <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Ir abajo">↓</button>
+  </div>
+
   <script>
     let ws = null;
     let ordersEnProceso = {};
     let ordersHechas = {};
     let currentTab = 'en_proceso';
     let totalCommandsToday = 0;
-
     let orderNumberMap = {};
     let nextOrderNumber = 1;
+    let soundEnabled = true;
+    let notifTimer = null;
 
-    function assignNumber(id) {
-      if (!orderNumberMap[id]) {
-        orderNumberMap[id] = nextOrderNumber++;
-      }
-      return orderNumberMap[id];
+    // ── SONIDO ──
+    function playNotif() {
+      if (!soundEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.15, 0.3].forEach((delay, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.frequency.value = i === 0 ? 880 : i === 1 ? 1100 : 1320;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.4, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.3);
+        });
+      } catch(e) {}
     }
 
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundBtn');
+      btn.textContent = soundEnabled ? '🔔 Sonido ON' : '🔕 Sonido OFF';
+      btn.classList.toggle('on', soundEnabled);
+    }
+
+    // ── NOTIFICACIÓN VISUAL ──
+    function showNotif(name) {
+      const el = document.getElementById('notifToast');
+      el.textContent = `🔔 Nuevo pedido — ${name}`;
+      el.classList.add('show');
+      clearTimeout(notifTimer);
+      notifTimer = setTimeout(() => el.classList.remove('show'), 4000);
+    }
+
+    // ── RELOJ ──
     function updateClock() {
       const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      document.getElementById('clock').textContent = h + ':' + m + ':' + s;
-      document.getElementById('clockDate').textContent = now.toLocaleDateString('es-ES', {
-        weekday: 'long', day: 'numeric', month: 'long'
-      });
+      const h = String(now.getHours()).padStart(2,'0');
+      const m = String(now.getMinutes()).padStart(2,'0');
+      const s = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('clock').textContent = h+':'+m+':'+s;
+      document.getElementById('clockDate').textContent = now.toLocaleDateString('es-ES', { weekday:'long', day:'numeric', month:'long' });
     }
     updateClock();
     setInterval(updateClock, 1000);
 
+    // ── NÚMERO ──
+    function assignNumber(id) {
+      if (!orderNumberMap[id]) orderNumberMap[id] = nextOrderNumber++;
+      return orderNumberMap[id];
+    }
+
+    // ── WEBSOCKET ──
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}`;
-      ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        console.log('✓ Conectado a cocina');
-        updateStatusBadge(true);
-        loadOrders();
-      };
-
+      ws = new WebSocket(`${protocol}//${window.location.host}`);
+      ws.onopen = () => { updateStatusBadge(true); loadOrders(); };
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
@@ -433,92 +247,70 @@
             totalCommandsToday++;
             updateCounters();
             renderBoard();
+            playNotif();
+            showNotif(msg.pedido.customer_name || 'cliente');
           }
-        } catch (err) {
-          console.error('Error procesando mensaje:', err);
-        }
+        } catch(err) {}
       };
-
-      ws.onerror = (err) => {
-        console.error('Error WebSocket:', err);
-        updateStatusBadge(false);
-      };
-
-      ws.onclose = () => {
-        console.log('✗ Desconectado de cocina');
-        updateStatusBadge(false);
-        setTimeout(connect, 3000);
-      };
+      ws.onerror = () => updateStatusBadge(false);
+      ws.onclose = () => { updateStatusBadge(false); setTimeout(connect, 3000); };
     }
 
     function updateStatusBadge(connected) {
       const badge = document.getElementById('statusBadge');
-      const text = document.getElementById('statusText');
-      if (connected) {
-        badge.classList.remove('off');
-        text.textContent = 'Conectado';
-      } else {
-        badge.classList.add('off');
-        text.textContent = 'Desconectado';
-      }
+      document.getElementById('statusText').textContent = connected ? 'Conectado' : 'Desconectado';
+      badge.classList.toggle('off', !connected);
     }
 
     function updateCounters() {
-      const received = Object.keys(ordersEnProceso).length + Object.keys(ordersHechas).length;
       document.getElementById('totalCommands').textContent = totalCommandsToday;
-      document.getElementById('receivedCommands').textContent = received;
+      document.getElementById('receivedCommands').textContent = Object.keys(ordersEnProceso).length + Object.keys(ordersHechas).length;
     }
 
     async function loadOrders() {
       try {
-        const resEnProceso = await fetch('/api/cocina/comandas');
-        const dataEnProceso = await resEnProceso.json();
+        const [resEP, resH] = await Promise.all([fetch('/api/cocina/comandas'), fetch('/api/cocina/listas')]);
+        const dataEP = await resEP.json();
+        const dataH = await resH.json();
         ordersEnProceso = {};
-        dataEnProceso.forEach(order => {
-          ordersEnProceso[order.id] = order;
-        });
-
-        const resHechas = await fetch('/api/cocina/listas');
-        const dataHechas = await resHechas.json();
         ordersHechas = {};
-        dataHechas.forEach(order => {
-          ordersHechas[order.id] = order;
-        });
-
-        // Asignar números en orden cronológico a todas las órdenes del día
-        const todasOrdenadas = [...dataEnProceso, ...dataHechas]
-          .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        todasOrdenadas.forEach(order => assignNumber(order.id));
-
-        totalCommandsToday = Object.keys(ordersEnProceso).length + Object.keys(ordersHechas).length;
+        dataEP.forEach(o => { ordersEnProceso[o.id] = o; });
+        dataH.forEach(o => { ordersHechas[o.id] = o; });
+        [...dataEP, ...dataH].sort((a,b) => new Date(a.created_at)-new Date(b.created_at)).forEach(o => assignNumber(o.id));
+        totalCommandsToday = dataEP.length + dataH.length;
         updateCounters();
         renderBoard();
-      } catch (err) {
-        console.error('Error cargando órdenes:', err);
-      }
+      } catch(err) { console.error(err); }
     }
 
     function switchTab(tab, event) {
       currentTab = tab;
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('on'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
       event.target.classList.add('on');
+      document.getElementById('actionsBar').style.display = tab === 'hechos' ? 'flex' : 'none';
+      document.getElementById('scrollBtns').style.display = tab === 'hechos' ? 'flex' : 'none';
+      if (tab === 'en_proceso') document.getElementById('searchBox').value = '';
       renderBoard();
     }
 
     function renderBoard() {
       const board = document.getElementById('board');
       const orders = currentTab === 'en_proceso' ? ordersEnProceso : ordersHechas;
-      const orderList = Object.values(orders).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      let orderList = Object.values(orders).sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
+
+      // Filtro búsqueda
+      if (currentTab === 'hechos') {
+        const q = (document.getElementById('searchBox')?.value || '').toLowerCase().trim();
+        if (q) orderList = orderList.filter(o => o.customer_name.toLowerCase().includes(q));
+      }
 
       if (orderList.length === 0) {
-        const emptyMsg = currentTab === 'en_proceso' ? 'Sin comandas en cocina' : 'Sin comandas completadas';
-        const emptyIcon = currentTab === 'en_proceso' ? '✨' : '📭';
+        const q = document.getElementById('searchBox')?.value;
         board.innerHTML = `
           <div class="empty-state">
-            <div class="empty-state-icon">${emptyIcon}</div>
-            <div class="empty-state-text">${emptyMsg}</div>
-          </div>
-        `;
+            <div class="empty-state-icon">${currentTab === 'en_proceso' ? '✨' : '📭'}</div>
+            <div class="empty-state-text">${q ? `Sin resultados para "${q}"` : currentTab === 'en_proceso' ? 'Sin comandas en cocina' : 'Sin comandas completadas'}</div>
+          </div>`;
         return;
       }
 
@@ -529,22 +321,16 @@
           ? `<div class="pickup-time"><span class="pickup-time-label">🕐 Recogida</span><span class="pickup-time-value">${order.pickup_time.substring(0,5)}</span></div>`
           : '';
 
-        // Solo renderizar el bloque de items si hay items con nombre
-        const itemsFiltered = (order.items || []).filter(item => item.nombre);
-        const itemsInner = itemsFiltered.map(item => `
-          <div class="item">
-            <div class="item-name">${item.nombre}</div>
-            <div class="item-qty">×${item.cantidad}</div>
-          </div>
+        const itemsFiltered = (order.items||[]).filter(i => i.nombre);
+        const itemsInner = itemsFiltered.map(i => `
+          <div class="item"><div class="item-name">${i.nombre}</div><div class="item-qty">×${i.cantidad}</div></div>
         `).join('');
 
         let itemsHtml = '';
         if (itemsFiltered.length > 0) {
-          if (currentTab === 'en_proceso') {
-            itemsHtml = `<div class="items-list">${itemsInner}</div>`;
-          } else {
-            itemsHtml = `<div class="items-list items-collapsed" id="items-${order.id}">${itemsInner}</div>`;
-          }
+          itemsHtml = currentTab === 'en_proceso'
+            ? `<div class="items-list">${itemsInner}</div>`
+            : `<div class="items-list items-collapsed" id="items-${order.id}">${itemsInner}</div>`;
         }
 
         const actionsHtml = currentTab === 'en_proceso' ? `
@@ -560,66 +346,56 @@
         `;
 
         return `
-          <div class="order-card">
+          <div class="order-card" id="card-${order.id}">
             <div class="order-header">
               <div class="table-number">Comanda #${num}</div>
               <div class="order-time">${time}</div>
             </div>
             <div class="customer-name">${order.customer_name}</div>
-            ${pickupHtml}
-            ${itemsHtml}
-            ${actionsHtml}
-          </div>
-        `;
+            ${pickupHtml}${itemsHtml}${actionsHtml}
+          </div>`;
       }).join('');
     }
 
     async function markReady(orderId) {
       try {
         const res = await fetch(`/api/orders/${orderId}/status`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'listo' })
+          method: 'PATCH', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({status:'listo'})
         });
         if (res.ok) {
           delete ordersEnProceso[orderId];
-          const order = await res.json();
-          ordersHechas[orderId] = order;
-          updateCounters();
-          renderBoard();
+          ordersHechas[orderId] = await res.json();
+          updateCounters(); renderBoard();
         }
-      } catch (err) {
-        console.error('Error:', err);
-        alert('Error al actualizar pedido');
-      }
+      } catch(err) { alert('Error al actualizar pedido'); }
     }
 
     function toggleItems(orderId) {
-      const el = document.getElementById('items-' + orderId);
-      const btn = document.getElementById('toggle-' + orderId);
+      const el = document.getElementById('items-'+orderId);
+      const btn = document.getElementById('toggle-'+orderId);
       if (!el) return;
       const open = el.classList.toggle('open');
       btn.textContent = open ? '🙈 Ocultar platos' : '👁 Ver platos';
     }
 
     async function removeOrder(orderId, isFromEnProceso) {
-      if (confirm('¿Eliminar esta comanda?')) {
-        try {
-          if (isFromEnProceso) {
-            delete ordersEnProceso[orderId];
-          } else {
-            delete ordersHechas[orderId];
-          }
-          updateCounters();
-          renderBoard();
-        } catch (err) {
-          console.error('Error:', err);
-        }
-      }
+      if (!confirm('¿Eliminar esta comanda?')) return;
+      if (isFromEnProceso) delete ordersEnProceso[orderId];
+      else delete ordersHechas[orderId];
+      updateCounters(); renderBoard();
+    }
+
+    function clearAllHechos() {
+      const count = Object.keys(ordersHechas).length;
+      if (count === 0) { alert('No hay comandas en el historial'); return; }
+      if (!confirm(`¿Limpiar todas las ${count} comandas del historial de hoy?`)) return;
+      ordersHechas = {};
+      updateCounters(); renderBoard();
     }
 
     function formatTime(date) {
-      return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
     }
 
     document.addEventListener('DOMContentLoaded', connect);
