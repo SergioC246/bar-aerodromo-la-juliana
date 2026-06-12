@@ -386,12 +386,17 @@
       updateCounters(); renderBoard();
     }
 
-    function clearAllHechos() {
+    async function clearAllHechos() {
       const count = Object.keys(ordersHechas).length;
-      if (count === 0) { alert('No hay comandas en el historial'); return; }
-      if (!confirm(`¿Limpiar todas las ${count} comandas del historial de hoy?`)) return;
-      ordersHechas = {};
-      updateCounters(); renderBoard();
+      if (count === 0) { alert('No hay comandas en el historial de hoy'); return; }
+      if (!confirm(`¿Eliminar las ${count} comandas completadas de hoy? Esta acción no se puede deshacer.`)) return;
+      try {
+        const ids = Object.keys(ordersHechas);
+        await Promise.all(ids.map(id => fetch(`/api/orders/${id}`, { method: 'DELETE' })));
+        ordersHechas = {};
+        totalCommandsToday = Object.keys(ordersEnProceso).length;
+        updateCounters(); renderBoard();
+      } catch(err) { alert('Error al eliminar las comandas'); }
     }
 
     function formatTime(date) {
