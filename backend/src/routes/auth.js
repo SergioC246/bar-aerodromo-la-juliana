@@ -4,6 +4,6 @@ const authController = require('../controllers/authController');
 const { loginLimiter } = require('../middleware/rateLimiter');
 
 router.post('/login', loginLimiter, authController.login);
-router.post('/create', authController.createAdmin);
+// router.post('/create', authController.createAdmin);
 
 module.exports = router;
