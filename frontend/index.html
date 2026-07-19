@@ -45,6 +45,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ct-cnt{font-size:11px;color:var(--muted)}
 .ct-arr{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:20px;font-weight:300}
 
+.sub-grid{max-width:none;width:100%}
+.sub-tile.special{border-color:rgba(212,168,83,0.55);background:linear-gradient(135deg,rgba(212,168,83,0.16) 0%,var(--card) 60%)}
+.sub-tile.special .ct-name{color:var(--gold)}
+
 #secView{display:none;min-height:100vh}
 .sec-nav{position:sticky;top:0;z-index:100;background:rgba(12,11,9,0.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
 .nav-row{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:10px 14px}
@@ -266,7 +270,7 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-let lang = 'en', cart = {}, curCatId = null, MENU = [];
+let lang = 'en', cart = {}, curCatId = null, curSubKey = null, curScreen = 'items', MENU = [];
 let toastTimer = null;
 
 const T = {
@@ -321,7 +325,10 @@ function setLang(l) {
     document.getElementById('sp'+x)?.classList.toggle('on', on);
   });
   renderSplash();
-  if (curCatId !== null) renderSec(curCatId);
+  if (curCatId !== null) {
+    if (curScreen === 'subcats') renderSubcats(curCatId);
+    else renderItems(curCatId, curSubKey);
+  }
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
 }
 
@@ -338,13 +345,45 @@ function renderSplash() {
   }).join('');
 }
 
+function catHasSubs(cat) {
+  return !!(cat && (cat.productos || []).some(p => p.subseccion));
+}
+
 function openSec(catId) {
   curCatId = catId;
+  curSubKey = null;
   document.getElementById('splash').style.display = 'none';
   document.getElementById('secView').style.display = 'block';
   document.getElementById('qrBtn').style.display = 'flex';
-  renderSec(catId);
+
+  const cat = MENU.find(c => c.id === catId);
+  if (catHasSubs(cat)) {
+    curScreen = 'subcats';
+    renderSubcats(catId);
+  } else {
+    curScreen = 'items';
+    renderItems(catId, null);
+  }
   window.scrollTo(0,0);
+}
+
+function openSub(subKey) {
+  curSubKey = subKey;
+  curScreen = 'items';
+  renderItems(curCatId, subKey);
+  window.scrollTo(0,0);
+}
+
+function backFromItems() {
+  const cat = MENU.find(c => c.id === curCatId);
+  if (catHasSubs(cat)) {
+    curSubKey = null;
+    curScreen = 'subcats';
+    renderSubcats(curCatId);
+    window.scrollTo(0,0);
+  } else {
+    goHome();
+  }
 }
 
 function goHome() {
@@ -352,9 +391,12 @@ function goHome() {
   document.getElementById('splash').style.display = 'flex';
   document.getElementById('qrBtn').style.display = 'none';
   curCatId = null;
+  curSubKey = null;
+  curScreen = 'items';
 }
 
-function renderSec(catId) {
+// Pantalla intermedia: tiles de subcategorías + "Todos"
+function renderSubcats(catId) {
   const cat = MENU.find(c => c.id === catId);
   if (!cat) return;
   document.getElementById('secTitle').textContent = (cat.emoji || '') + ' ' + getCatName(cat);
@@ -362,28 +404,73 @@ function renderSec(catId) {
   document.getElementById('tabsRow').innerHTML = MENU.map(c =>
     `<button class="stab${c.id===catId?' on':''}" onclick="openSec(${c.id})">${getCatName(c)}</button>`
   ).join('');
+  document.querySelector('#secView .back').setAttribute('onclick', 'goHome()');
+
+  const productos = cat.productos || [];
+  const subMap = {};
+  productos.forEach(p => {
+    if (!p.subseccion) return;
+    if (!subMap[p.subseccion]) subMap[p.subseccion] = { nombre: p.subseccion, nombre_en: p.subseccion_en || p.subseccion, count: 0 };
+    subMap[p.subseccion].count++;
+  });
+
+  const tiles = Object.keys(subMap).map(key => {
+    const s = subMap[key];
+    const name = lang === 'en' ? (s.nombre_en || s.nombre) : s.nombre;
+    const special = /d[ií]a|special/i.test(s.nombre) ? ' special' : '';
+    return `<div class="cat-tile sub-tile${special}" onclick="openSub('${esc(key)}')">
+      <div class="ct-name">${escapeHtml(name)}</div>
+      <div class="ct-cnt">${s.count} ${t('items')}</div>
+      <span class="ct-arr">›</span>
+    </div>`;
+  }).join('');
+
+  const allName = lang === 'en' ? 'All' : 'Todos';
+  const allTile = `<div class="cat-tile sub-tile" onclick="openSub(null)">
+      <div class="ct-name">${allName}</div>
+      <div class="ct-cnt">${productos.length} ${t('items')}</div>
+      <span class="ct-arr">›</span>
+    </div>`;
+
+  document.getElementById('secBody').innerHTML = `<div class="cats-grid sub-grid">${tiles}${allTile}</div>`;
+}
+
+function getSubDisplayName(cat, subKey) {
+  if (!subKey) return lang === 'en' ? 'All' : 'Todos';
+  const p = (cat.productos || []).find(x => x.subseccion === subKey);
+  if (!p) return subKey;
+  return lang === 'en' ? (p.subseccion_en || p.subseccion) : p.subseccion;
+}
+
+// Lista de productos, filtrada opcionalmente por subsección ('Todos' = subKey null)
+function renderItems(catId, subKey) {
+  const cat = MENU.find(c => c.id === catId);
+  if (!cat) return;
+  const hasSubs = catHasSubs(cat);
+  const subLabel = hasSubs ? ' · ' + getSubDisplayName(cat, subKey) : '';
+  document.getElementById('secTitle').textContent = (cat.emoji || '') + ' ' + getCatName(cat) + subLabel;
+  document.getElementById('cartLbl').textContent = t('order');
+  document.getElementById('tabsRow').innerHTML = MENU.map(c =>
+    `<button class="stab${c.id===catId?' on':''}" onclick="openSec(${c.id})">${getCatName(c)}</button>`
+  ).join('');
+  document.querySelector('#secView .back').setAttribute('onclick', 'backFromItems()');
 
   const body = document.getElementById('secBody');
   body.innerHTML = '';
 
-  const productos = cat.productos || [];
+  let productos = cat.productos || [];
+  if (subKey) productos = productos.filter(p => p.subseccion === subKey);
 
-  // Agrupar por subsección
-  const subs = {};
-  productos.forEach(p => {
-    const key = p.subseccion || '__none__';
-    if (!subs[key]) subs[key] = { nombre: p.subseccion, nombre_en: p.subseccion_en, items: [] };
-    subs[key].items.push(p);
-  });
-
-  const subKeys = Object.keys(subs);
-
-  if (subKeys.length === 1 && subKeys[0] === '__none__') {
-    // Sin subsecciones — añadir extra fries si es entrantes
+  if (!subKey) {
+    // Vista "Todos": agrupar por subsección con cabeceras, igual que antes
+    const subs = {};
+    productos.forEach(p => {
+      const key = p.subseccion || '__none__';
+      if (!subs[key]) subs[key] = { nombre: p.subseccion, nombre_en: p.subseccion_en, items: [] };
+      subs[key].items.push(p);
+    });
     if (cat.nombre === 'Entrantes' || cat.nombre_en === 'Starters') body.appendChild(mkXF());
-    productos.forEach(p => body.appendChild(mkItem(p)));
-  } else {
-    subKeys.forEach(key => {
+    Object.keys(subs).forEach(key => {
       const sub = subs[key];
       if (key !== '__none__') {
         const st = document.createElement('div');
@@ -393,13 +480,14 @@ function renderSec(catId) {
       }
       sub.items.forEach(p => body.appendChild(mkItem(p)));
     });
-    // Extra fries al final de Comidas
     if (cat.nombre === 'Comidas' || cat.nombre_en === 'Mains') {
       const st = document.createElement('div');
       st.className = 'ssub'; st.textContent = 'Extras';
       body.appendChild(st);
       body.appendChild(mkXF());
     }
+  } else {
+    productos.forEach(p => body.appendChild(mkItem(p)));
   }
   refreshBadge();
 }
@@ -461,7 +549,7 @@ function adj(id, name, price, delta) {
   cart[id].name = name; cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
   refreshBadge();
-  if (curCatId !== null) renderSec(curCatId);
+  if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
 }
 
@@ -519,7 +607,7 @@ function buildDrawer() {
 function delItem(id) {
   delete cart[id];
   refreshBadge();
-  if (curCatId !== null) renderSec(curCatId);
+  if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
   buildDrawer();
 }
 
@@ -564,7 +652,7 @@ function showSuccess(name, phone, pickup) {
   document.getElementById('sbg').classList.add('on');
   cart = {};
   refreshBadge();
-  if (curCatId !== null) renderSec(curCatId);
+  if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
 }
 function closeSuccess() { document.getElementById('sbg').classList.remove('on'); }
 
