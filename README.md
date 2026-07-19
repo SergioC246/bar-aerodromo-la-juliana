@@ -199,18 +199,6 @@ El panel de cocina muestra en tiempo real los pedidos con estado `en_cocina`, co
 
 ---
 
-## 📌 Estado del proyecto
-
-- [x] Frontend — Carta digital con QR
-- [ ] Backend — Servidor Node.js + Express
-- [ ] Base de datos — Schema PostgreSQL
-- [ ] API REST — Carta y pedidos
-- [ ] Panel de cocina — Comandas en tiempo real
-- [ ] Panel de caja — Gestión de cobros
-- [ ] Generación y gestión de QRs por mesa
-
----
-
 ## 👤 Autor
 
 Proyecto desarrollado por **Sergio Córdoba** para el Bar Aeródromo La Juliana.
