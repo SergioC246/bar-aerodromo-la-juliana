@@ -416,9 +416,8 @@ function renderSubcats(catId) {
 
   const tiles = Object.keys(subMap).map(key => {
     const s = subMap[key];
-    const name = lang === 'en' ? (s.nombre_en || s.nombre) : s.nombre;
-    const special = /d[ií]a|special/i.test(s.nombre) ? ' special' : '';
-    return `<div class="cat-tile sub-tile${special}" onclick="openSub('${esc(key)}')">
+    const name = relabelSub(lang === 'en' ? (s.nombre_en || s.nombre) : s.nombre);
+    return `<div class="cat-tile sub-tile" onclick="openSub('${esc(key)}')">
       <div class="ct-name">${escapeHtml(name)}</div>
       <div class="ct-cnt">${s.count} ${t('items')}</div>
       <span class="ct-arr">›</span>
@@ -435,11 +434,19 @@ function renderSubcats(catId) {
   document.getElementById('secBody').innerHTML = `<div class="cats-grid sub-grid">${tiles}${allTile}</div>`;
 }
 
+// Reetiqueta nombres de subsección solo para mostrar (sin tocar la BD)
+function relabelSub(name) {
+  if (!name) return name;
+  if (/mix\s*del\s*d[ií]a/i.test(name)) return lang === 'en' ? 'Combo Plates' : 'Platos Combinados';
+  if (/mix\s*lunch/i.test(name)) return lang === 'en' ? 'Combo Plates' : 'Platos Combinados';
+  return name;
+}
+
 function getSubDisplayName(cat, subKey) {
   if (!subKey) return lang === 'en' ? 'All' : 'Todos';
   const p = (cat.productos || []).find(x => x.subseccion === subKey);
   if (!p) return subKey;
-  return lang === 'en' ? (p.subseccion_en || p.subseccion) : p.subseccion;
+  return relabelSub(lang === 'en' ? (p.subseccion_en || p.subseccion) : p.subseccion);
 }
 
 // Lista de productos, filtrada opcionalmente por subsección ('Todos' = subKey null)
@@ -475,7 +482,7 @@ function renderItems(catId, subKey) {
       if (key !== '__none__') {
         const st = document.createElement('div');
         st.className = 'ssub';
-        st.textContent = lang === 'en' ? (sub.nombre_en || sub.nombre) : sub.nombre;
+        st.textContent = relabelSub(lang === 'en' ? (sub.nombre_en || sub.nombre) : sub.nombre);
         body.appendChild(st);
       }
       sub.items.forEach(p => body.appendChild(mkItem(p)));
