@@ -2,10 +2,11 @@ require('dotenv').config();
 const pool = require('./src/config/database');
 
 const categorias = [
-  { nombre: 'Desayunos', nombre_en: 'Breakfast', emoji: '☀️', orden: 1 },
-  { nombre: 'Entrantes', nombre_en: 'Starters', emoji: '🥗', orden: 2 },
-  { nombre: 'Comidas',   nombre_en: 'Mains',     emoji: '🍔', orden: 3 },
-  { nombre: 'Bebidas',   nombre_en: 'Drinks',    emoji: '🥤', orden: 4 },
+  { nombre: 'Plato del Día', nombre_en: 'Dish of the Day', emoji: '⭐', orden: 1 },
+  { nombre: 'Desayunos', nombre_en: 'Breakfast', emoji: '☀️', orden: 2 },
+  { nombre: 'Entrantes', nombre_en: 'Starters', emoji: '🥗', orden: 3 },
+  { nombre: 'Comidas',   nombre_en: 'Mains',     emoji: '🍔', orden: 4 },
+  { nombre: 'Bebidas',   nombre_en: 'Drinks',    emoji: '🥤', orden: 5 },
 ];
 
 const productos = [
@@ -58,21 +59,21 @@ const productos = [
   { categoria: 'Comidas', subseccion: 'Wraps', subseccion_en: 'Wraps', nombre: 'Wrap Especial Justin', nombre_en: 'Special Justin Wrap', descripcion: 'Pork, lettuce, tomato, onion, green pepper & garlic sauce', descripcion_es: 'Cerdo, lechuga, tomate, cebolla, pimiento verde y ajo', precio: 6.00, orden: 16 },
   { categoria: 'Comidas', subseccion: 'Wraps', subseccion_en: 'Wraps', nombre: 'Wrap César', nombre_en: 'Caesar Wrap', descripcion: 'Lettuce, chicken, bacon, cheese & caesar sauce', descripcion_es: 'Lechuga, pollo, bacon, queso y salsa césar', precio: 5.50, orden: 17 },
 
-  // ── COMIDAS - Platos Combinados ──
+  // ── COMIDAS - Mix del Día ──
   { categoria: 'Comidas', subseccion: 'Platos Combinados', subseccion_en: 'Combo Plates', nombre: 'Pollo, Huevo, Patatas y Ensalada', nombre_en: 'Chicken, Egg, Chips & Salad', descripcion: 'Served with salad & fries (grilled +1€)', descripcion_es: 'Con ensalada y patatas (plancha +1€)', precio: 6.50, notas: 'Grilled +1€ / Plancha +1€', orden: 18 },
   { categoria: 'Comidas', subseccion: 'Platos Combinados', subseccion_en: 'Combo Plates', nombre: 'Lomo, Patatas y Ensalada', nombre_en: 'Pork Loin, Chips & Salad', descripcion: 'Pork loin with salad & fries', descripcion_es: 'Lomo con ensalada y patatas', precio: 6.50, orden: 19 },
   { categoria: 'Comidas', subseccion: 'Platos Combinados', subseccion_en: 'Combo Plates', nombre: 'Huevo, Bacon, Salchicha y Patatas', nombre_en: 'Egg, Bacon, Sausage & Chips', descripcion: 'Hearty breakfast-style plate', descripcion_es: 'Plato contundente estilo desayuno', precio: 6.50, orden: 20 },
 
   // ── COMIDAS - Sándwiches ──
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Sándwich de Atún', nombre_en: 'Tuna Sandwich', descripcion: 'Tuna, lettuce, tomato & mayo', descripcion_es: 'Atún, lechuga, tomate y mayonesa', precio: 4.00, orden: 21 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Bikini', nombre_en: 'Bikini', descripcion: 'Toasted ham & cheese', descripcion_es: 'Jamón y queso tostado', precio: 3.20, orden: 22 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'B.L.T.', nombre_en: 'B.L.T.', descripcion: 'Bacon, lettuce, tomato, mayo & mustard', descripcion_es: 'Bacon, lechuga, tomate, mayonesa y mostaza', precio: 3.50, orden: 23 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Sándwich BBQ', nombre_en: 'BBQ Sandwich', descripcion: 'Cheese, bacon, onions & BBQ sauce', descripcion_es: 'Queso, bacon, cebolla y salsa BBQ', precio: 3.50, orden: 24 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Champions Sándwich', nombre_en: 'Champions Sandwich', descripcion: 'Cheese, onions & mushrooms', descripcion_es: 'Queso, cebollas y champiñones', precio: 3.50, orden: 25 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Sándwich Vegetal', nombre_en: 'Vegetables Sandwich', descripcion: 'Cheese, lettuce, tomato, onion & carrot', descripcion_es: 'Queso, lechuga, tomate, cebolla y zanahoria', precio: 3.50, orden: 26 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Sándwich Mix', nombre_en: 'Mix Sandwich', descripcion: 'Ham, cheese, egg & tomato', descripcion_es: 'Jamón, queso, huevo y tomate', precio: 4.00, orden: 27 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Sándwich Especial', nombre_en: 'Special Sandwich', descripcion: 'Chicken, egg, bacon, cheese, lettuce, tomato & sauce', descripcion_es: 'Pollo, huevo, bacon, queso, lechuga, tomate y salsa', precio: 6.00, orden: 28 },
-  { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Queso y Bacon', nombre_en: 'Cheese & Bacon', descripcion: 'Melted cheese with crispy bacon', descripcion_es: 'Queso fundido con bacon crujiente', precio: 3.50, orden: 29 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Sándwich de Atún', nombre_en: 'Tuna Sandwich', descripcion: 'Tuna, lettuce, tomato & mayo', descripcion_es: 'Atún, lechuga, tomate y mayonesa', precio: 4.00, orden: 21 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Bikini', nombre_en: 'Bikini', descripcion: 'Toasted ham & cheese', descripcion_es: 'Jamón y queso tostado', precio: 3.20, orden: 22 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'B.L.T.', nombre_en: 'B.L.T.', descripcion: 'Bacon, lettuce, tomato, mayo & mustard', descripcion_es: 'Bacon, lechuga, tomate, mayonesa y mostaza', precio: 3.50, orden: 23 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Sándwich BBQ', nombre_en: 'BBQ Sandwich', descripcion: 'Cheese, bacon, onions & BBQ sauce', descripcion_es: 'Queso, bacon, cebolla y salsa BBQ', precio: 3.50, orden: 24 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Champions Sándwich', nombre_en: 'Champions Sandwich', descripcion: 'Cheese, onions & mushrooms', descripcion_es: 'Queso, cebollas y champiñones', precio: 3.50, orden: 25 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Sándwich Vegetal', nombre_en: 'Vegetables Sandwich', descripcion: 'Cheese, lettuce, tomato, onion & carrot', descripcion_es: 'Queso, lechuga, tomate, cebolla y zanahoria', precio: 3.50, orden: 26 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Sándwich Mix', nombre_en: 'Mix Sandwich', descripcion: 'Ham, cheese, egg & tomato', descripcion_es: 'Jamón, queso, huevo y tomate', precio: 4.00, orden: 27 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Sándwich Especial', nombre_en: 'Special Sandwich', descripcion: 'Chicken, egg, bacon, cheese, lettuce, tomato & sauce', descripcion_es: 'Pollo, huevo, bacon, queso, lechuga, tomate y salsa', precio: 6.00, orden: 28 },
+  { categoria: 'Comidas', subseccion: 'Sandwich', subseccion_en: 'Sandwich', nombre: 'Queso y Bacon', nombre_en: 'Cheese & Bacon', descripcion: 'Melted cheese with crispy bacon', descripcion_es: 'Queso fundido con bacon crujiente', precio: 3.50, orden: 29 },
 
   // ── COMIDAS - Bocadillos ──
   { categoria: 'Comidas', subseccion: 'Bocadillos', subseccion_en: 'Baguettes', nombre: 'Jamón y Queso', nombre_en: 'Ham & Cheese', descripcion: 'Cured ham with cheese', descripcion_es: 'Jamón curado con queso', precio: 5.00, orden: 30 },

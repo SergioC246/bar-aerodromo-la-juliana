@@ -44,6 +44,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .ct-name{font-size:14px;font-weight:600;color:var(--text)}
 .ct-cnt{font-size:11px;color:var(--muted)}
 .ct-arr{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:20px;font-weight:300}
+/* ── Categoría destacada: Plato del Día ── */
+.cat-tile.featured{
+  grid-column:1 / -1;
+  background:linear-gradient(135deg,rgba(232,200,122,0.22) 0%,rgba(212,168,83,0.10) 45%,var(--card) 100%);
+  border:1px solid rgba(232,200,122,0.55);
+  box-shadow:0 0 0 1px rgba(212,168,83,0.15),0 8px 30px rgba(212,168,83,0.12);
+  animation:featPulse 2.6s ease-in-out infinite;
+}
+.cat-tile.featured::after{background:linear-gradient(135deg,rgba(232,200,122,0.18) 0%,transparent 60%);opacity:1}
+.cat-tile.featured .ct-name{color:var(--gold2);font-size:15px}
+.cat-tile.featured .ct-ico{font-size:32px}
+.cat-tile.featured .ct-arr{color:var(--gold)}
+.feat-badge{position:absolute;top:12px;right:14px;background:var(--amber);color:#1a1408;font-size:9px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px;box-shadow:0 2px 8px rgba(224,123,48,0.4)}
+@keyframes featPulse{0%,100%{box-shadow:0 0 0 1px rgba(212,168,83,0.15),0 8px 30px rgba(212,168,83,0.12)}50%{box-shadow:0 0 0 1px rgba(232,200,122,0.4),0 8px 38px rgba(212,168,83,0.28)}}
+@media(prefers-reduced-motion:reduce){.cat-tile.featured{animation:none}}
 
 .sub-grid{max-width:none;width:100%}
 .sub-tile.special{border-color:rgba(212,168,83,0.55);background:linear-gradient(135deg,rgba(212,168,83,0.16) 0%,var(--card) 60%)}
@@ -332,11 +347,21 @@ function setLang(l) {
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
 }
 
+function isDishOfDay(cat) {
+  const n = (cat.nombre || '') + ' ' + (cat.nombre_en || '');
+  return /plato del d[ií]a|dish of the day/i.test(n);
+}
+
 function renderSplash() {
   if (!MENU.length) return;
-  document.getElementById('catsGrid').innerHTML = MENU.map(cat => {
+  document.getElementById('catsGrid').innerHTML = MENU
+    .filter(cat => (cat.productos || []).length > 0)
+    .map(cat => {
     const cnt = cat.productos ? cat.productos.length : 0;
-    return `<div class="cat-tile" onclick="openSec(${cat.id})">
+    const feat = isDishOfDay(cat);
+    const badge = feat ? `<span class="feat-badge">${lang === 'en' ? 'Today' : 'Hoy'}</span>` : '';
+    return `<div class="cat-tile${feat ? ' featured' : ''}" onclick="openSec(${cat.id})">
+      ${badge}
       <div class="ct-ico">${cat.emoji || '🍽️'}</div>
       <div class="ct-name">${getCatName(cat)}</div>
       <div class="ct-cnt">${cnt} ${t('items')}</div>
@@ -401,7 +426,7 @@ function renderSubcats(catId) {
   if (!cat) return;
   document.getElementById('secTitle').textContent = (cat.emoji || '') + ' ' + getCatName(cat);
   document.getElementById('cartLbl').textContent = t('order');
-  document.getElementById('tabsRow').innerHTML = MENU.map(c =>
+  document.getElementById('tabsRow').innerHTML = MENU.filter(c => (c.productos || []).length > 0).map(c =>
     `<button class="stab${c.id===catId?' on':''}" onclick="openSec(${c.id})">${getCatName(c)}</button>`
   ).join('');
   document.querySelector('#secView .back').setAttribute('onclick', 'goHome()');
@@ -457,7 +482,7 @@ function renderItems(catId, subKey) {
   const subLabel = hasSubs ? ' · ' + getSubDisplayName(cat, subKey) : '';
   document.getElementById('secTitle').textContent = (cat.emoji || '') + ' ' + getCatName(cat) + subLabel;
   document.getElementById('cartLbl').textContent = t('order');
-  document.getElementById('tabsRow').innerHTML = MENU.map(c =>
+  document.getElementById('tabsRow').innerHTML = MENU.filter(c => (c.productos || []).length > 0).map(c =>
     `<button class="stab${c.id===catId?' on':''}" onclick="openSec(${c.id})">${getCatName(c)}</button>`
   ).join('');
   document.querySelector('#secView .back').setAttribute('onclick', 'backFromItems()');
