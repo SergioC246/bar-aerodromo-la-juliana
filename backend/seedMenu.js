@@ -58,10 +58,10 @@ const productos = [
   { categoria: 'Comidas', subseccion: 'Wraps', subseccion_en: 'Wraps', nombre: 'Wrap Especial Justin', nombre_en: 'Special Justin Wrap', descripcion: 'Pork, lettuce, tomato, onion, green pepper & garlic sauce', descripcion_es: 'Cerdo, lechuga, tomate, cebolla, pimiento verde y ajo', precio: 6.00, orden: 16 },
   { categoria: 'Comidas', subseccion: 'Wraps', subseccion_en: 'Wraps', nombre: 'Wrap César', nombre_en: 'Caesar Wrap', descripcion: 'Lettuce, chicken, bacon, cheese & caesar sauce', descripcion_es: 'Lechuga, pollo, bacon, queso y salsa césar', precio: 5.50, orden: 17 },
 
-  // ── COMIDAS - Mix del Día ──
-  { categoria: 'Comidas', subseccion: 'Mix del Día', subseccion_en: 'Mix Lunch', nombre: 'Pollo, Huevo, Patatas y Ensalada', nombre_en: 'Chicken, Egg, Chips & Salad', descripcion: 'Served with salad & fries (grilled +1€)', descripcion_es: 'Con ensalada y patatas (plancha +1€)', precio: 6.50, notas: 'Grilled +1€ / Plancha +1€', orden: 18 },
-  { categoria: 'Comidas', subseccion: 'Mix del Día', subseccion_en: 'Mix Lunch', nombre: 'Lomo, Patatas y Ensalada', nombre_en: 'Pork Loin, Chips & Salad', descripcion: 'Pork loin with salad & fries', descripcion_es: 'Lomo con ensalada y patatas', precio: 6.50, orden: 19 },
-  { categoria: 'Comidas', subseccion: 'Mix del Día', subseccion_en: 'Mix Lunch', nombre: 'Huevo, Bacon, Salchicha y Patatas', nombre_en: 'Egg, Bacon, Sausage & Chips', descripcion: 'Hearty breakfast-style plate', descripcion_es: 'Plato contundente estilo desayuno', precio: 6.50, orden: 20 },
+  // ── COMIDAS - Platos Combinados ──
+  { categoria: 'Comidas', subseccion: 'Platos Combinados', subseccion_en: 'Combo Plates', nombre: 'Pollo, Huevo, Patatas y Ensalada', nombre_en: 'Chicken, Egg, Chips & Salad', descripcion: 'Served with salad & fries (grilled +1€)', descripcion_es: 'Con ensalada y patatas (plancha +1€)', precio: 6.50, notas: 'Grilled +1€ / Plancha +1€', orden: 18 },
+  { categoria: 'Comidas', subseccion: 'Platos Combinados', subseccion_en: 'Combo Plates', nombre: 'Lomo, Patatas y Ensalada', nombre_en: 'Pork Loin, Chips & Salad', descripcion: 'Pork loin with salad & fries', descripcion_es: 'Lomo con ensalada y patatas', precio: 6.50, orden: 19 },
+  { categoria: 'Comidas', subseccion: 'Platos Combinados', subseccion_en: 'Combo Plates', nombre: 'Huevo, Bacon, Salchicha y Patatas', nombre_en: 'Egg, Bacon, Sausage & Chips', descripcion: 'Hearty breakfast-style plate', descripcion_es: 'Plato contundente estilo desayuno', precio: 6.50, orden: 20 },
 
   // ── COMIDAS - Sándwiches ──
   { categoria: 'Comidas', subseccion: 'Sándwiches', subseccion_en: 'Sandwiches', nombre: 'Sándwich de Atún', nombre_en: 'Tuna Sandwich', descripcion: 'Tuna, lettuce, tomato & mayo', descripcion_es: 'Atún, lechuga, tomate y mayonesa', precio: 4.00, orden: 21 },
