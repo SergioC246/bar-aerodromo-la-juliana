@@ -10,10 +10,11 @@ const ORDER_SELECT_QUERY = `
     p.created_at,
     json_agg(
       json_build_object(
-        'id',       lp.id,
-        'nombre',   lp.notas,
-        'cantidad', lp.cantidad,
-        'precio',   lp.precio_unitario
+        'id',         lp.id,
+        'nombre',     lp.notas,
+        'cantidad',   lp.cantidad,
+        'precio',     lp.precio_unitario,
+        'comentario', lp.comentario_cliente
       ) ORDER BY lp.id
     ) FILTER (WHERE lp.id IS NOT NULL) as items
   FROM pedidos p

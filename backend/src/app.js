@@ -8,6 +8,7 @@ const menuRoutes = require('./routes/menu');
 const kitchenRoutes = require('./routes/kitchen');
 const authRoutes = require('./routes/auth');
 const statsRoutes = require('./routes/stats');
+const horarioRoutes = require('./routes/horario');
 const errorHandler = require('./middleware/errorHandler');
 const authMiddleware = require('./middleware/authMiddleware');
 
@@ -25,6 +26,7 @@ app.use('/api/carta', menuRoutes);
 app.use('/api/cocina', kitchenRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/horario', horarioRoutes);
 
 // Rutas protegidas de admin (modificar menú)
 app.use('/api/admin/carta', authMiddleware, menuRoutes);

@@ -70,10 +70,12 @@
     .pickup-time-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 700; color: var(--gold); line-height: 1; }
 
     .items-list { margin: 16px 0; padding: 16px; background: rgba(212,168,83,0.08); border-radius: 10px; }
-    .item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; font-size: 26px; border-bottom: 1px solid var(--border); }
+    .item { padding: 14px 0; border-bottom: 1px solid var(--border); }
     .item:last-child { border-bottom: none; }
+    .item-main { display: flex; justify-content: space-between; align-items: center; font-size: 26px; }
     .item-name { flex: 1; font-weight: 700; }
     .item-qty { background: var(--gold); padding: 6px 18px; border-radius: 8px; margin: 0 0 0 16px; font-weight: 900; color: #0c0b09; font-size: 28px; }
+    .item-comment { margin-top: 8px; padding: 10px 14px; background: rgba(201,74,58,0.15); border: 2px solid var(--red); border-radius: 8px; font-size: 18px; font-weight: 700; color: #ff8a75; }
 
     .items-collapsed { display: none; }
     .items-collapsed.open { display: block; }
@@ -179,6 +181,12 @@
     let nextOrderNumber = 1;
     let soundEnabled = true;
     let notifTimer = null;
+
+    // Seguridad: el comentario lo escribe el cliente libremente, así que lo escapamos antes de mostrarlo
+    function escapeHtml(text) {
+      const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+      return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
 
     // ── SONIDO ──
     function playNotif() {
@@ -323,7 +331,10 @@
 
         const itemsFiltered = (order.items||[]).filter(i => i.nombre);
         const itemsInner = itemsFiltered.map(i => `
-          <div class="item"><div class="item-name">${i.nombre}</div><div class="item-qty">×${i.cantidad}</div></div>
+          <div class="item">
+            <div class="item-main"><div class="item-name">${i.nombre}</div><div class="item-qty">×${i.cantidad}</div></div>
+            ${i.comentario ? `<div class="item-comment">📝 ${escapeHtml(i.comentario)}</div>` : ''}
+          </div>
         `).join('');
 
         let itemsHtml = '';

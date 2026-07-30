@@ -56,6 +56,15 @@ async function initDb() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS horario_cocina (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        hora_apertura TIME NOT NULL DEFAULT '08:00',
+        hora_cierre TIME NOT NULL DEFAULT '23:00',
+        activo BOOLEAN NOT NULL DEFAULT true,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT horario_cocina_single_row CHECK (id = 1)
+      );
+
       CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos(status);
       CREATE INDEX IF NOT EXISTS idx_pedidos_created_at ON pedidos(created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_lineas_pedido_pedido_id ON lineas_pedido(pedido_id);
@@ -69,6 +78,9 @@ async function initDb() {
       ALTER TABLE productos ADD COLUMN IF NOT EXISTS subseccion_en VARCHAR(100);
       ALTER TABLE productos ADD COLUMN IF NOT EXISTS notas VARCHAR(255);
       ALTER TABLE productos ADD COLUMN IF NOT EXISTS orden INTEGER DEFAULT 0;
+      ALTER TABLE lineas_pedido ADD COLUMN IF NOT EXISTS comentario_cliente VARCHAR(300);
+
+      INSERT INTO horario_cocina (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
     `);
     console.log('✅ Base de datos inicializada correctamente');
   } catch (err) {

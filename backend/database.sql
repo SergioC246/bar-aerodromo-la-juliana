@@ -45,8 +45,20 @@ CREATE TABLE IF NOT EXISTS lineas_pedido (
   cantidad INTEGER NOT NULL,
   precio_unitario DECIMAL(10, 2) NOT NULL,
   notas TEXT,
+  comentario_cliente VARCHAR(300),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Horario de cocina (fila única, id=1)
+CREATE TABLE IF NOT EXISTS horario_cocina (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  hora_apertura TIME NOT NULL DEFAULT '08:00',
+  hora_cierre TIME NOT NULL DEFAULT '23:00',
+  activo BOOLEAN NOT NULL DEFAULT true,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT horario_cocina_single_row CHECK (id = 1)
+);
+INSERT INTO horario_cocina (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 
 -- Admin usuarios
 CREATE TABLE IF NOT EXISTS admins (

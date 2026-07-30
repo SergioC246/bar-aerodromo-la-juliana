@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const { getEstadoCocina } = require('../utils/horario');
 
 const VALID_STATUSES = ['pendiente', 'en_cocina', 'listo', 'entregado'];
 
@@ -16,6 +17,13 @@ exports.createOrder = async (req, res, next) => {
 
     if (!/^[\d\s\-\+\(\)]{7,}$/.test(phone)) {
       return res.status(400).json({ error: 'Invalid phone number' });
+    }
+
+    // Aunque el front-end ya avisa al cliente, comprobamos también aquí
+    // para que no se puedan enviar pedidos saltándose el aviso de cocina cerrada.
+    const horario = await getEstadoCocina();
+    if (!horario.abierta) {
+      return res.status(403).json({ error: 'La cocina está cerrada en este momento', horario });
     }
 
     await Order.create({ customerName, phone, items, pickupTime });

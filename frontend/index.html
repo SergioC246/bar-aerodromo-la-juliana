@@ -124,11 +124,35 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .xbtn:hover{background:var(--red);border-color:var(--red);color:#fff}
 .dbody{overflow-y:auto;flex:1;padding:16px 20px}
 .dempty{text-align:center;padding:48px 0;color:var(--muted);font-size:15px;line-height:2.4}
-.crow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
-.crn{flex:1}.crname{font-size:14px;font-weight:500}.crqty{font-size:12px;color:var(--muted);margin-top:1px}
+.crow{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.crn{flex:1;min-width:0}.crname{font-size:14px;font-weight:500}.crqty{font-size:12px;color:var(--muted);margin-top:1px}
 .crprice{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--gold);white-space:nowrap}
 .crdel{background:none;border:none;color:var(--dim);cursor:pointer;font-size:20px;padding:0 3px;line-height:1;transition:color 0.2s}
 .crdel:hover{color:var(--red)}
+.crcomment{display:flex;align-items:flex-start;gap:5px;font-size:12px;color:var(--gold2);font-style:italic;margin-top:5px;line-height:1.4;word-break:break-word}
+.crcomment-edit{background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;text-decoration:underline;padding:0;flex-shrink:0;font-style:normal}
+.crcomment-edit:hover{color:var(--gold)}
+.craddnote{background:none;border:none;color:var(--dim);cursor:pointer;font-size:11px;padding:0;margin-top:5px;text-decoration:underline;font-family:'Inter',sans-serif}
+.craddnote:hover{color:var(--gold)}
+
+/* ── Modal: comentario del pedido ── */
+.cmtbg{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+.cmtbg.on{display:flex}
+.cmtbox{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:26px 22px;width:100%;max-width:380px;animation:popIn 0.28s cubic-bezier(0.175,0.885,0.32,1.275)}
+.cmt-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.cmt-sub{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5}
+.cmt-textarea{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);padding:12px 14px;font-size:14px;font-family:'Inter',sans-serif;resize:none;min-height:78px;transition:border-color 0.2s}
+.cmt-textarea:focus{outline:none;border-color:var(--gold)}
+.cmt-actions{display:flex;gap:10px;margin-top:16px}
+.cmt-skip{flex:1;background:none;border:1px solid var(--border2);border-radius:var(--rs);color:var(--muted);padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.cmt-skip:hover{border-color:var(--border2);color:var(--text)}
+.cmt-save{flex:1;background:var(--gold);border:none;border-radius:var(--rs);color:#0c0b09;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.cmt-save:hover{background:var(--gold2)}
+
+/* ── Modal: cocina cerrada ── */
+.closedbox .sico{font-size:56px}
+.closed-hours{display:inline-block;margin-top:2px;font-weight:700;color:var(--gold2)}
+.closed-auto{font-size:11px;color:var(--dim);margin-top:14px;letter-spacing:0.3px}
 
 .counter-banner{background:rgba(224,123,48,0.1);border:1px solid rgba(224,123,48,0.3);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;margin-bottom:4px}
 .cb-ico{font-size:22px;flex-shrink:0;margin-top:1px}
@@ -269,6 +293,32 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="cmtbg" id="cmtbg" onclick="cmtBgClick(event)">
+  <div class="cmtbox">
+    <div class="cmt-title" id="cmtTitle">Add a note?</div>
+    <div class="cmt-sub" id="cmtSub">Any extra or something to leave out?</div>
+    <textarea class="cmt-textarea" id="cmtInput" maxlength="200" placeholder="e.g. no onion, extra sauce..."></textarea>
+    <div class="cmt-actions">
+      <button class="cmt-skip" id="cmtSkipBtn" onclick="skipComment()">Skip</button>
+      <button class="cmt-save" id="cmtSaveBtn" onclick="saveComment()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="sbg" id="closedbg">
+  <div class="sbox closedbox">
+    <div class="lang-row" style="max-width:220px;margin:0 auto 18px">
+      <button class="lpill" id="clEN" onclick="setLang('en')">🇬🇧 EN</button>
+      <button class="lpill" id="clES" onclick="setLang('es')">🇪🇸 ES</button>
+    </div>
+    <span class="sico">🔒</span>
+    <div class="stitle" id="closedTitle">Kitchen is closed</div>
+    <div class="smsg" id="closedMsg">The kitchen is closed right now.</div>
+    <button class="sbtn" onclick="retryKitchenCheck()" id="closedBtnClose">Try again</button>
+    <div class="closed-auto" id="closedAutoNote">This screen updates automatically</div>
+  </div>
+</div>
+
 <button id="qrBtn" onclick="openQR()">◼</button>
 
 <div class="qbg" id="qbg" onclick="qrBgClick(event)">
@@ -285,12 +335,21 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-let lang = 'en', cart = {}, curCatId = null, curSubKey = null, curScreen = 'items', MENU = [];
+function detectDefaultLang() {
+  const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  return nav.startsWith('es') ? 'es' : 'en';
+}
+let lang = detectDefaultLang(), cart = {}, curCatId = null, curSubKey = null, curScreen = 'items', MENU = [];
 let toastTimer = null;
+let kitchenStatus = { abierta: true, hora_apertura: '', hora_cierre: '' };
 
 const T = {
-  en:{items:"items",order:"Order",yourOrder:"Your Order",total:"Total",empty:"Your cart is empty",toastMsg:"Pay at the counter when collecting 🏧",counterTitle:"Payment at the counter",counterMsg:"Your order is prepared and confirmed here. Please go to the counter to pay and collect your food.",stripeTitle:"Card payment",stripeSub:"Coming soon",stripeDisabled:"Online payment not yet available",nameLabel:"👤 Your name",namePh:"Your name (so we can call you)",phoneLabel:"📱 Phone number",phonePh:"Your phone number",nameReq:"Please enter your name",phoneReq:"Please enter a valid phone number",pickup:"🕐 Pickup time (optional)",placeOrder:"Confirm Order →",ok:"Order Confirmed!",thanks:"Your order has been registered.",pickAt:"Pickup time: ",payNote:"Please go to the counter to pay and collect your order.",great:"Perfect, see you at the counter!"},
-  es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!"}
+  en:{items:"items",order:"Order",yourOrder:"Your Order",total:"Total",empty:"Your cart is empty",toastMsg:"Pay at the counter when collecting 🏧",counterTitle:"Payment at the counter",counterMsg:"Your order is prepared and confirmed here. Please go to the counter to pay and collect your food.",stripeTitle:"Card payment",stripeSub:"Coming soon",stripeDisabled:"Online payment not yet available",nameLabel:"👤 Your name",namePh:"Your name (so we can call you)",phoneLabel:"📱 Phone number",phonePh:"Your phone number",nameReq:"Please enter your name",phoneReq:"Please enter a valid phone number",pickup:"🕐 Pickup time (optional)",placeOrder:"Confirm Order →",ok:"Order Confirmed!",thanks:"Your order has been registered.",pickAt:"Pickup time: ",payNote:"Please go to the counter to pay and collect your order.",great:"Perfect, see you at the counter!",
+    cmtTitle:"Add a note to {item}?",cmtSub:"Any extra you'd like, or something to leave out?",cmtPh:"e.g. no onion, extra sauce...",cmtSkip:"Skip",cmtSave:"Save note",addNote:"💬 Add a note",editNote:"edit",
+    closedTitle:"Kitchen is closed",closedMsg:"Sorry, the kitchen is closed right now. If you'd like to keep enjoying our products, please head to the bar counter.",closedHoursLbl:"Kitchen hours: ",closedRetry:"Try again",closedAuto:"This screen updates automatically"},
+  es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
+    cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
+    closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente"}
 };
 const t = k => T[lang][k] || k;
 
@@ -332,19 +391,25 @@ function showToast() {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-function setLang(l) {
-  lang = l;
+function syncLangPills() {
   ['EN','ES'].forEach(x => {
-    const on = l === x.toLowerCase();
+    const on = lang === x.toLowerCase();
     document.getElementById('pill'+x)?.classList.toggle('on', on);
     document.getElementById('sp'+x)?.classList.toggle('on', on);
+    document.getElementById('cl'+x)?.classList.toggle('on', on);
   });
+}
+
+function setLang(l) {
+  lang = l;
+  syncLangPills();
   renderSplash();
   if (curCatId !== null) {
     if (curScreen === 'subcats') renderSubcats(curCatId);
     else renderItems(curCatId, curSubKey);
   }
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
+  if (document.getElementById('closedbg').classList.contains('on')) lockKitchenClosed();
 }
 
 function isDishOfDay(cat) {
@@ -572,8 +637,12 @@ function mkXF() {
 function esc(s) { return s.replace(/'/g,"\\'"); }
 
 function adjAndToast(id, name, price, delta) {
+  const wasEmpty = !cart[id] || cart[id].qty === 0;
   adj(id, name, price, delta);
-  if (delta > 0) showToast();
+  if (delta > 0) {
+    showToast();
+    if (wasEmpty) openCommentModal(id);
+  }
 }
 
 function adj(id, name, price, delta) {
@@ -584,6 +653,41 @@ function adj(id, name, price, delta) {
   if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
   if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
 }
+
+// ── COMENTARIO POR ARTÍCULO ──
+let pendingCommentId = null;
+
+function openCommentModal(id) {
+  const item = cart[id];
+  if (!item) return;
+  pendingCommentId = id;
+  document.getElementById('cmtTitle').textContent = t('cmtTitle').replace('{item}', item.name);
+  document.getElementById('cmtSub').textContent = t('cmtSub');
+  document.getElementById('cmtInput').placeholder = t('cmtPh');
+  document.getElementById('cmtInput').value = item.comment || '';
+  document.getElementById('cmtSkipBtn').textContent = t('cmtSkip');
+  document.getElementById('cmtSaveBtn').textContent = t('cmtSave');
+  document.getElementById('cmtbg').classList.add('on');
+  setTimeout(() => document.getElementById('cmtInput').focus(), 150);
+}
+
+function closeCommentModal() {
+  document.getElementById('cmtbg').classList.remove('on');
+  pendingCommentId = null;
+}
+
+function saveComment() {
+  if (pendingCommentId && cart[pendingCommentId]) {
+    const val = document.getElementById('cmtInput').value.trim();
+    cart[pendingCommentId].comment = val || undefined;
+  }
+  closeCommentModal();
+  if (document.getElementById('dbg').classList.contains('on')) buildDrawer();
+}
+
+function skipComment() { closeCommentModal(); }
+
+function cmtBgClick(e) { if (e.target === document.getElementById('cmtbg')) closeCommentModal(); }
 
 function refreshBadge() {
   const n = Object.values(cart).reduce((a,c)=>a+c.qty,0);
@@ -610,10 +714,14 @@ function buildDrawer() {
   items.forEach(([id,item]) => {
     const sub = item.price * item.qty; total += sub;
     const safeName = escapeHtml(item.name);
+    const noteHtml = item.comment
+      ? `<div class="crcomment"><span>💬 ${escapeHtml(item.comment)}</span><button class="crcomment-edit" onclick="openCommentModal('${id}')">${t('editNote')}</button></div>`
+      : `<button class="craddnote" onclick="openCommentModal('${id}')">${t('addNote')}</button>`;
     html += `<div class="crow">
       <div class="crn">
         <div class="crname">${safeName}</div>
         <div class="crqty">×${item.qty} · ${parseFloat(item.price).toFixed(2)}€</div>
+        ${noteHtml}
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <div class="crprice">${sub.toFixed(2)}€</div>
@@ -643,7 +751,11 @@ function delItem(id) {
   buildDrawer();
 }
 
-function placeOrder() {
+async function placeOrder() {
+  // Comprobación fresca por si el horario cambió mientras el cliente decidía
+  const stillOpen = await checkKitchenStatus();
+  if (!stillOpen) { lockKitchenClosed(); return; }
+
   const nameInput  = document.getElementById('custName');
   const phoneInput = document.getElementById('custPhone');
   const nameErr    = document.getElementById('nameErr');
@@ -659,7 +771,7 @@ function placeOrder() {
   if (!valid) return;
 
   const pickup = document.getElementById('pTime')?.value || '';
-  const items = Object.values(cart).map(item => ({ nombre: item.name, cantidad: item.qty, precio: item.price }));
+  const items = Object.values(cart).map(item => ({ nombre: item.name, cantidad: item.qty, precio: item.price, comentario: item.comment || null }));
   const payload = { customerName: name, phone, pickupTime: pickup || null, items };
 
   const btn = document.getElementById('orderBtn');
@@ -667,9 +779,24 @@ function placeOrder() {
   btn.textContent = lang === 'es' ? 'Enviando...' : 'Sending...';
 
   fetch('/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
-    .then(res => { if (!res.ok) throw new Error('Error'); return res.json(); })
+    .then(async res => {
+      if (res.status === 403) {
+        const data = await res.json().catch(() => ({}));
+        throw { closed: true, horario: data.horario };
+      }
+      if (!res.ok) throw new Error('Error');
+      return res.json();
+    })
     .then(() => showSuccess(name, phone, pickup))
-    .catch(() => { btn.disabled=false; btn.textContent=t('placeOrder'); alert(lang==='es'?'Error al enviar el pedido. Inténtalo de nuevo.':'Error sending order. Please try again.'); });
+    .catch(err => {
+      btn.disabled=false; btn.textContent=t('placeOrder');
+      if (err && err.closed) {
+        if (err.horario) kitchenStatus = err.horario;
+        lockKitchenClosed();
+      } else {
+        alert(lang==='es'?'Error al enviar el pedido. Inténtalo de nuevo.':'Error sending order. Please try again.');
+      }
+    });
 }
 
 function showSuccess(name, phone, pickup) {
@@ -687,6 +814,70 @@ function showSuccess(name, phone, pickup) {
   if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
 }
 function closeSuccess() { document.getElementById('sbg').classList.remove('on'); }
+
+// ── HORARIO DE COCINA ──
+let closedPollTimer = null;
+
+// Consulta el estado y devuelve true/false. No decide nada por sí sola.
+async function checkKitchenStatus() {
+  try {
+    const res = await fetch('/api/horario');
+    kitchenStatus = await res.json();
+  } catch (err) {
+    console.error('Error comprobando horario de cocina:', err);
+    // Si falla la consulta, no bloqueamos al cliente por un problema de red puntual
+    return kitchenStatus ? kitchenStatus.abierta : true;
+  }
+  return kitchenStatus.abierta;
+}
+
+// Bloquea toda la app: oculta el menú y muestra una pantalla que no se puede cerrar.
+// Solo se desbloquea reintentando (manual o automáticamente) y comprobando que ya está abierta.
+function lockKitchenClosed() {
+  document.getElementById('splash').style.display = 'none';
+  document.getElementById('secView').style.display = 'none';
+  document.getElementById('qrBtn').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+  syncLangPills();
+
+  document.getElementById('closedTitle').textContent = t('closedTitle');
+  let msg = t('closedMsg');
+  if (kitchenStatus.hora_apertura && kitchenStatus.hora_cierre) {
+    msg += '\n\n' + t('closedHoursLbl') + kitchenStatus.hora_apertura + ' – ' + kitchenStatus.hora_cierre;
+  }
+  document.getElementById('closedMsg').textContent = msg;
+  document.getElementById('closedBtnClose').textContent = t('closedRetry');
+  document.getElementById('closedAutoNote').textContent = t('closedAuto');
+  document.getElementById('closedbg').classList.add('on');
+
+  if (!closedPollTimer) {
+    closedPollTimer = setInterval(async () => {
+      const open = await checkKitchenStatus();
+      if (open) unlockKitchen();
+    }, 60000);
+  }
+}
+
+function unlockKitchen() {
+  clearInterval(closedPollTimer);
+  closedPollTimer = null;
+  document.body.style.overflow = '';
+  document.getElementById('closedbg').classList.remove('on');
+  document.getElementById('qrBtn').style.display = curCatId !== null ? 'flex' : 'none';
+  if (curCatId !== null) {
+    document.getElementById('secView').style.display = 'block';
+    if (curScreen === 'subcats') renderSubcats(curCatId); else renderItems(curCatId, curSubKey);
+  } else {
+    document.getElementById('splash').style.display = 'flex';
+  }
+  if (!MENU.length) loadMenu();
+}
+
+async function retryKitchenCheck() {
+  const open = await checkKitchenStatus();
+  if (open) unlockKitchen();
+  else lockKitchenClosed(); // refresca el mensaje por si cambió el horario mientras tanto
+}
 
 function openQR() {
   const card = document.getElementById('qCardSingle');
@@ -710,7 +901,11 @@ function printQR() {
   w.document.close();
 }
 
-document.addEventListener('DOMContentLoaded', loadMenu);
+document.addEventListener('DOMContentLoaded', async () => {
+  const open = await checkKitchenStatus();
+  if (open) loadMenu();
+  else lockKitchenClosed();
+});
 </script>
 </body>
 </html>

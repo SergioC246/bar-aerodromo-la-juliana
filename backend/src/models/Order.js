@@ -22,10 +22,11 @@ class Order {
 
       for (const item of items) {
         const lineaQuery = `
-          INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad, precio_unitario, notas)
-          VALUES ($1, NULL, $2, $3, $4);
+          INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad, precio_unitario, notas, comentario_cliente)
+          VALUES ($1, NULL, $2, $3, $4, $5);
         `;
-        await client.query(lineaQuery, [id, item.cantidad, item.precio, item.nombre]);
+        const comentario = typeof item.comentario === 'string' ? item.comentario.trim().slice(0, 300) : null;
+        await client.query(lineaQuery, [id, item.cantidad, item.precio, item.nombre, comentario || null]);
       }
 
       await client.query('COMMIT');

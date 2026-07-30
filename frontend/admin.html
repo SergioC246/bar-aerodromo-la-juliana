@@ -218,6 +218,9 @@ tr:hover td{background:rgba(255,255,255,0.015)}
       <button class="nav-item" id="navInformes" onclick="showTab('informes')">
         <span class="nav-item-ico">📊</span> Informes
       </button>
+      <button class="nav-item" id="navHorario" onclick="showTab('horario')">
+        <span class="nav-item-ico">🕐</span> Horario
+      </button>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user" id="sidebarUser"></div>
@@ -321,6 +324,35 @@ tr:hover td{background:rgba(255,255,255,0.015)}
               <tbody id="rankingTable"></tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- TAB HORARIO -->
+      <div id="tabHorario" style="display:none">
+        <div class="sec-header">
+          <div class="sec-title">Horario de Cocina</div>
+        </div>
+        <div class="table-wrap" style="max-width:460px;padding:28px">
+          <div id="horarioEstadoActual" style="margin-bottom:22px"></div>
+          <div class="form-group">
+            <label>Hora de apertura</label>
+            <input type="time" id="horaApertura" class="filter-input" style="width:100%">
+          </div>
+          <div class="form-group">
+            <label>Hora de cierre</label>
+            <input type="time" id="horaCierre" class="filter-input" style="width:100%">
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:12px">
+            <label style="margin-bottom:0">Cocina activa</label>
+            <label class="toggle">
+              <input type="checkbox" id="horarioActivo" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5">
+            Si desactivas "Cocina activa", los clientes verán el aviso de cocina cerrada sin importar la hora (útil para festivos o imprevistos).
+          </div>
+          <button class="btn-primary" onclick="guardarHorario()" style="width:100%;justify-content:center">Guardar Horario</button>
         </div>
       </div>
 
@@ -449,6 +481,12 @@ let editingCatId = null;
 let editingProductId = null;
 let pedidoNumbers = {};
 
+// Seguridad: el nombre del cliente y el comentario los escribe el propio cliente
+function escapeHtml(text) {
+  const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+  return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
 // ── AUTH ──
 async function doLogin() {
   const username = document.getElementById('loginUser').value.trim();
@@ -503,7 +541,8 @@ function showTab(tab) {
   document.getElementById('tabMenu').style.display = tab === 'menu' ? 'block' : 'none';
   document.getElementById('tabPedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
   document.getElementById('tabInformes').style.display = tab === 'informes' ? 'block' : 'none';
-  const titles = { menu: 'Menú', pedidos: 'Pedidos', informes: 'Informes' };
+  document.getElementById('tabHorario').style.display = tab === 'horario' ? 'block' : 'none';
+  const titles = { menu: 'Menú', pedidos: 'Pedidos', informes: 'Informes', horario: 'Horario de Cocina' };
   document.getElementById('topbarTitle').textContent = titles[tab] || tab;
   if (tab === 'pedidos') {
     const dateInput = document.getElementById('filterDate');
@@ -511,6 +550,7 @@ function showTab(tab) {
     loadPedidos();
   }
   if (tab === 'informes') loadHistorico();
+  if (tab === 'horario') loadHorario();
 }
 
 // ── MENÚ ──
@@ -701,12 +741,12 @@ async function loadPedidos() {
         <div class="pedido-header">
           <div>
             <div class="pedido-num">Comanda #${num}</div>
-            <div class="pedido-info">${p.customer_name} · 📱 ${p.phone}<br>${date} ${time}${p.pickup_time?' · 🕐 '+p.pickup_time.substring(0,5):''}</div>
+            <div class="pedido-info">${escapeHtml(p.customer_name)} · 📱 ${escapeHtml(p.phone)}<br>${date} ${time}${p.pickup_time?' · 🕐 '+p.pickup_time.substring(0,5):''}</div>
           </div>
           ${statusBadge}
         </div>
         <div class="pedido-items">
-          ${items.length?items.map(i=>`<div class="pedido-item-row"><span>${i.nombre}</span><span style="color:var(--gold);font-weight:600">×${i.cantidad}</span></div>`).join(''):'<div style="color:var(--muted);font-size:12px">Sin items registrados</div>'}
+          ${items.length?items.map(i=>`<div class="pedido-item-row"><span>${escapeHtml(i.nombre)}${i.comentario?` <span style="color:var(--gold2);font-style:italic">— 💬 ${escapeHtml(i.comentario)}</span>`:''}</span><span style="color:var(--gold);font-weight:600">×${i.cantidad}</span></div>`).join(''):'<div style="color:var(--muted);font-size:12px">Sin items registrados</div>'}
         </div>
         <div class="pedido-actions">
           <select class="status-select" onchange="updatePedidoStatus('${p.id}',this.value)">
@@ -845,6 +885,39 @@ function showToast(msg,error=false) {
   const el=document.getElementById('toastAdmin');
   el.textContent=msg; el.className='toast-admin show'+(error?' error':'');
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── HORARIO DE COCINA ──
+async function loadHorario() {
+  try {
+    const res = await fetch('/api/horario');
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    document.getElementById('horaApertura').value = data.hora_apertura;
+    document.getElementById('horaCierre').value = data.hora_cierre;
+    document.getElementById('horarioActivo').checked = data.activo;
+    const estadoDiv = document.getElementById('horarioEstadoActual');
+    estadoDiv.innerHTML = data.abierta
+      ? '<span class="badge badge-green">🟢 Cocina abierta ahora mismo</span>'
+      : '<span class="badge badge-red">🔴 Cocina cerrada ahora mismo</span>';
+  } catch { showToast('Error cargando el horario', true); }
+}
+
+async function guardarHorario() {
+  const hora_apertura = document.getElementById('horaApertura').value;
+  const hora_cierre = document.getElementById('horaCierre').value;
+  const activo = document.getElementById('horarioActivo').checked;
+  if (!hora_apertura || !hora_cierre) { showToast('Completa ambas horas', true); return; }
+  try {
+    const res = await fetch('/api/horario', {
+      method:'PUT',
+      headers:{'Content-Type':'application/json', Authorization:'Bearer '+token},
+      body:JSON.stringify({ hora_apertura, hora_cierre, activo })
+    });
+    if (!res.ok) throw new Error();
+    showToast('Horario actualizado');
+    loadHorario();
+  } catch { showToast('Error guardando el horario', true); }
 }
 
 // ── INIT ──
