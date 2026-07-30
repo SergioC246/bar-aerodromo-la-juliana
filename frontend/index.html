@@ -149,6 +149,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .cmt-save{flex:1;background:var(--gold);border:none;border-radius:var(--rs);color:#0c0b09;padding:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s}
 .cmt-save:hover{background:var(--gold2)}
 
+/* ── Tostadas: modal media/entera y filas de variantes ── */
+.toast-options{display:flex;flex-direction:column;gap:10px;margin-top:2px}
+.toast-opt-btn{background:var(--card2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);padding:14px 16px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;text-align:left}
+.toast-opt-btn:hover{border-color:var(--gold);background:rgba(212,168,83,0.08)}
+.toast-opt-price{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700}
+.toast-variants{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.toast-variant{display:flex;align-items:center;justify-content:space-between;background:var(--card2);border-radius:8px;padding:6px 10px;gap:8px}
+.toast-variant-lbl{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 /* ── Modal: cocina cerrada ── */
 .closedbox .sico{font-size:56px}
 .closed-hours{display:inline-block;margin-top:2px;font-weight:700;color:var(--gold2)}
@@ -305,6 +314,17 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="cmtbg" id="toastbg" onclick="toastBgClick(event)">
+  <div class="cmtbox">
+    <div class="cmt-title" id="toastModalTitle">Half toast or whole?</div>
+    <div class="cmt-sub" id="toastModalSub">Half = one side of the baguette. Whole = both sides (double portion).</div>
+    <div class="toast-options">
+      <button class="toast-opt-btn" id="toastHalfBtn" onclick="chooseToastVariant('half')"></button>
+      <button class="toast-opt-btn" id="toastFullBtn" onclick="chooseToastVariant('full')"></button>
+    </div>
+  </div>
+</div>
+
 <div class="sbg" id="closedbg">
   <div class="sbox closedbox">
     <div class="lang-row" style="max-width:220px;margin:0 auto 18px">
@@ -346,10 +366,12 @@ let kitchenStatus = { abierta: true, hora_apertura: '', hora_cierre: '' };
 const T = {
   en:{items:"items",order:"Order",yourOrder:"Your Order",total:"Total",empty:"Your cart is empty",toastMsg:"Pay at the counter when collecting 🏧",counterTitle:"Payment at the counter",counterMsg:"Your order is prepared and confirmed here. Please go to the counter to pay and collect your food.",stripeTitle:"Card payment",stripeSub:"Coming soon",stripeDisabled:"Online payment not yet available",nameLabel:"👤 Your name",namePh:"Your name (so we can call you)",phoneLabel:"📱 Phone number",phonePh:"Your phone number",nameReq:"Please enter your name",phoneReq:"Please enter a valid phone number",pickup:"🕐 Pickup time (optional)",placeOrder:"Confirm Order →",ok:"Order Confirmed!",thanks:"Your order has been registered.",pickAt:"Pickup time: ",payNote:"Please go to the counter to pay and collect your order.",great:"Perfect, see you at the counter!",
     cmtTitle:"Add a note to {item}?",cmtSub:"Any extra you'd like, or something to leave out?",cmtPh:"e.g. no onion, extra sauce...",cmtSkip:"Skip",cmtSave:"Save note",addNote:"💬 Add a note",editNote:"edit",
-    closedTitle:"Kitchen is closed",closedMsg:"Sorry, the kitchen is closed right now. If you'd like to keep enjoying our products, please head to the bar counter.",closedHoursLbl:"Kitchen hours: ",closedRetry:"Try again",closedAuto:"This screen updates automatically"},
+    closedTitle:"Kitchen is closed",closedMsg:"Sorry, the kitchen is closed right now. If you'd like to keep enjoying our products, please head to the bar counter.",closedHoursLbl:"Kitchen hours: ",closedRetry:"Try again",closedAuto:"This screen updates automatically",
+    halfToast:"Half toast",fullToast:"Whole toast",fromPrice:"From",toastModalTitle:"Half toast or whole — {item}?",toastModalSub:"🥖 Half toast = one side of the baguette. Whole toast = both sides (double portion)."},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
-    closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente"}
+    closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
+    halfToast:"Media tostada",fullToast:"Tostada entera",fromPrice:"Desde",toastModalTitle:"¿Media tostada o entera — {item}?",toastModalSub:"🥖 Media tostada = una sola cara del pan de baguette. Tostada entera = las dos caras del pan (ración doble)."}
 };
 const t = k => T[lang][k] || k;
 
@@ -575,7 +597,7 @@ function renderItems(catId, subKey) {
         st.textContent = relabelSub(lang === 'en' ? (sub.nombre_en || sub.nombre) : sub.nombre);
         body.appendChild(st);
       }
-      sub.items.forEach(p => body.appendChild(mkItem(p)));
+      sub.items.forEach(p => body.appendChild(mkItem(p, cat)));
     });
     if (cat.nombre === 'Comidas' || cat.nombre_en === 'Mains') {
       const st = document.createElement('div');
@@ -584,12 +606,23 @@ function renderItems(catId, subKey) {
       body.appendChild(mkXF());
     }
   } else {
-    productos.forEach(p => body.appendChild(mkItem(p)));
+    productos.forEach(p => body.appendChild(mkItem(p, cat)));
   }
   refreshBadge();
 }
 
-function mkItem(p) {
+function isToastItem(p, cat) {
+  const catEs = cat?.nombre || '';
+  const catEn = cat?.nombre_en || '';
+  const isBreakfast = /desayuno/i.test(catEs) || /breakfast/i.test(catEn);
+  if (!isBreakfast) return false;
+  const sub = (p.subseccion || '') + ' ' + (p.subseccion_en || '');
+  return /tostad/i.test(sub) || /toast/i.test(sub);
+}
+
+function mkItem(p, cat) {
+  if (isToastItem(p, cat)) return mkToastItem(p);
+
   const id = 'p' + p.id;
   const qty = cart[id]?.qty || 0;
   const name = getProductName(p);
@@ -606,12 +639,106 @@ function mkItem(p) {
     <div class="ir">
       <div class="iprice">${parseFloat(p.precio).toFixed(2)}€</div>
       <div class="qrow">
-        ${qty > 0 ? `<button class="qb" onclick="adj('${id}','${esc(name)}',${p.precio},-1)">−</button><span class="qn">${qty}</span>` : ''}
-        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${id}','${esc(name)}',${p.precio},1)">+</button>
+        ${qty > 0 ? `<button class="qb" onclick="adj('${id}','${esc(name)}',${p.precio},-1,'${esc(p.nombre)}')">−</button><span class="qn">${qty}</span>` : ''}
+        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${id}','${esc(name)}',${p.precio},1,'${esc(p.nombre)}')">+</button>
       </div>
     </div>`;
   return d;
 }
+
+// ── TOSTADAS: media (precio de carta) o entera (doble precio) ──
+function findProducto(id) {
+  for (const cat of MENU) {
+    const p = (cat.productos || []).find(x => x.id === id);
+    if (p) return p;
+  }
+  return null;
+}
+
+function toastVariantId(prodId, variant) { return 'p' + prodId + (variant === 'full' ? 'f' : 'h'); }
+function toastVariantPrice(p, variant) {
+  const half = parseFloat(p.precio);
+  return variant === 'full' ? Math.round(half * 2 * 100) / 100 : half;
+}
+function toastVariantLabel(variant) { return variant === 'full' ? t('fullToast') : t('halfToast'); }
+
+function mkToastItem(p) {
+  const idHalf = toastVariantId(p.id, 'half');
+  const idFull = toastVariantId(p.id, 'full');
+  const qtyHalf = cart[idHalf]?.qty || 0;
+  const qtyFull = cart[idFull]?.qty || 0;
+  const name = getProductName(p);
+  const desc = getProductDesc(p);
+  const priceHalf = toastVariantPrice(p, 'half');
+  const priceFull = toastVariantPrice(p, 'full');
+
+  const variantRow = (variant, qty, price) => qty > 0 ? `
+    <div class="toast-variant">
+      <span class="toast-variant-lbl">🥖 ${toastVariantLabel(variant)} ×${qty}</span>
+      <div class="qrow">
+        <button class="qb" onclick="adjToastVariant(${p.id},'${variant}',-1)">−</button>
+        <span class="qn">${qty}</span>
+        <button class="qb" onclick="adjToastVariant(${p.id},'${variant}',1)">+</button>
+      </div>
+    </div>` : '';
+
+  const d = document.createElement('div');
+  d.className = 'item' + ((qtyHalf > 0 || qtyFull > 0) ? ' on' : '');
+  d.id = 'item-p' + p.id;
+  d.innerHTML = `
+    <div class="ii">
+      <div class="iname">${name}</div>
+      <div class="idesc">${desc}</div>
+      ${p.notas ? `<div class="inote">ℹ️ ${p.notas}</div>` : ''}
+      ${(qtyHalf>0||qtyFull>0) ? `<div class="toast-variants">${variantRow('half',qtyHalf,priceHalf)}${variantRow('full',qtyFull,priceFull)}</div>` : ''}
+    </div>
+    <div class="ir">
+      <div class="iprice">${t('fromPrice')} ${priceHalf.toFixed(2)}€</div>
+      <div class="qrow">
+        <button class="qadd" onclick="openToastModal(${p.id})">+</button>
+      </div>
+    </div>`;
+  return d;
+}
+
+function adjToastVariant(prodId, variant, delta) {
+  const p = findProducto(prodId);
+  if (!p) return;
+  const id = toastVariantId(prodId, variant);
+  const name = getProductName(p) + ' (' + toastVariantLabel(variant) + ')';
+  const nombreEs = p.nombre + ' (' + (variant === 'full' ? 'Tostada entera' : 'Media tostada') + ')';
+  const price = toastVariantPrice(p, variant);
+  if (delta > 0) adjAndToast(id, name, price, delta, nombreEs);
+  else adj(id, name, price, delta, nombreEs);
+}
+
+let pendingToastProdId = null;
+
+function openToastModal(prodId) {
+  const p = findProducto(prodId);
+  if (!p) return;
+  pendingToastProdId = prodId;
+  const name = getProductName(p);
+  const half = toastVariantPrice(p, 'half');
+  const full = toastVariantPrice(p, 'full');
+  document.getElementById('toastModalTitle').textContent = t('toastModalTitle').replace('{item}', name);
+  document.getElementById('toastModalSub').textContent = t('toastModalSub');
+  document.getElementById('toastHalfBtn').innerHTML = `<span>🥖 ${t('halfToast')}</span><span class="toast-opt-price">${half.toFixed(2)}€</span>`;
+  document.getElementById('toastFullBtn').innerHTML = `<span>🥖 ${t('fullToast')}</span><span class="toast-opt-price">${full.toFixed(2)}€</span>`;
+  document.getElementById('toastbg').classList.add('on');
+}
+
+function closeToastModal() {
+  document.getElementById('toastbg').classList.remove('on');
+  pendingToastProdId = null;
+}
+
+function chooseToastVariant(variant) {
+  if (pendingToastProdId != null) adjToastVariant(pendingToastProdId, variant, 1);
+  closeToastModal();
+}
+
+function toastBgClick(e) { if (e.target === document.getElementById('toastbg')) closeToastModal(); }
 
 function mkXF() {
   const qty = cart['xf']?.qty || 0;
@@ -627,8 +754,8 @@ function mkXF() {
     <div style="display:flex;align-items:center;gap:10px">
       <span class="xfp">1.00€</span>
       <div class="qrow">
-        ${qty>0 ? `<button class="qb" onclick="adj('xf','${lbl}',1.00,-1)">−</button><span class="qn">${qty}</span>` : ''}
-        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('xf','${lbl}',1.00,1)">+</button>
+        ${qty>0 ? `<button class="qb" onclick="adj('xf','${lbl}',1.00,-1,'Patatas Extra')">−</button><span class="qn">${qty}</span>` : ''}
+        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('xf','${lbl}',1.00,1,'Patatas Extra')">+</button>
       </div>
     </div>`;
   return d;
@@ -636,18 +763,23 @@ function mkXF() {
 
 function esc(s) { return s.replace(/'/g,"\\'"); }
 
-function adjAndToast(id, name, price, delta) {
+function adjAndToast(id, name, price, delta, nombreEs) {
   const wasEmpty = !cart[id] || cart[id].qty === 0;
-  adj(id, name, price, delta);
+  adj(id, name, price, delta, nombreEs);
   if (delta > 0) {
     showToast();
     if (wasEmpty) openCommentModal(id);
   }
 }
 
-function adj(id, name, price, delta) {
-  if (!cart[id]) cart[id] = {name, price, qty:0};
-  cart[id].name = name; cart[id].qty = Math.max(0, cart[id].qty + delta);
+// nombreEs: nombre del producto SIEMPRE en español, independientemente del idioma
+// que esté viendo el cliente. Es lo que se envía a cocina/admin al confirmar el pedido,
+// para que en cocina siempre se lea en español aunque el cliente haya pedido en inglés.
+function adj(id, name, price, delta, nombreEs) {
+  if (!cart[id]) cart[id] = {name, price, qty:0, nombreEs: nombreEs || name};
+  cart[id].name = name; cart[id].price = price;
+  if (nombreEs) cart[id].nombreEs = nombreEs;
+  cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
   refreshBadge();
   if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
@@ -771,7 +903,7 @@ async function placeOrder() {
   if (!valid) return;
 
   const pickup = document.getElementById('pTime')?.value || '';
-  const items = Object.values(cart).map(item => ({ nombre: item.name, cantidad: item.qty, precio: item.price, comentario: item.comment || null }));
+  const items = Object.values(cart).map(item => ({ nombre: item.nombreEs || item.name, cantidad: item.qty, precio: item.price, comentario: item.comment || null }));
   const payload = { customerName: name, phone, pickupTime: pickup || null, items };
 
   const btn = document.getElementById('orderBtn');
