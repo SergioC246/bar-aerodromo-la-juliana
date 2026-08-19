@@ -22,11 +22,15 @@ class Order {
 
       for (const item of items) {
         const lineaQuery = `
-          INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad, precio_unitario, notas, comentario_cliente)
-          VALUES ($1, NULL, $2, $3, $4, $5);
+          INSERT INTO lineas_pedido (pedido_id, producto_id, cantidad, precio_unitario, notas, comentario_cliente, tipo)
+          VALUES ($1, NULL, $2, $3, $4, $5, $6);
         `;
         const comentario = typeof item.comentario === 'string' ? item.comentario.trim().slice(0, 300) : null;
-        await client.query(lineaQuery, [id, item.cantidad, item.precio, item.nombre, comentario || null]);
+        // El front-end indica si el artículo es comida o bebida (según su categoría en la carta).
+        // Si no llega el dato (pedidos antiguos o clientes desactualizados), se asume 'comida'
+        // para no perder visibilidad de ningún artículo en ninguna de las dos vistas.
+        const tipo = item.tipo === 'bebida' ? 'bebida' : 'comida';
+        await client.query(lineaQuery, [id, item.cantidad, item.precio, item.nombre, comentario || null, tipo]);
       }
 
       await client.query('COMMIT');

@@ -611,6 +611,13 @@ function renderItems(catId, subKey) {
   refreshBadge();
 }
 
+// Determina si una categoría es de bebidas (para separar la vista de Cocina de la de Barra)
+function catEsBebida(cat) {
+  const es = (cat?.nombre || '').toLowerCase();
+  const en = (cat?.nombre_en || '').toLowerCase();
+  return es === 'bebidas' || en === 'drinks';
+}
+
 function isToastItem(p, cat) {
   const catEs = cat?.nombre || '';
   const catEn = cat?.nombre_en || '';
@@ -627,6 +634,7 @@ function mkItem(p, cat) {
   const qty = cart[id]?.qty || 0;
   const name = getProductName(p);
   const desc = getProductDesc(p);
+  const tipo = catEsBebida(cat) ? 'bebida' : 'comida';
   const d = document.createElement('div');
   d.className = 'item' + (qty > 0 ? ' on' : '');
   d.id = 'item-' + id;
@@ -639,8 +647,8 @@ function mkItem(p, cat) {
     <div class="ir">
       <div class="iprice">${parseFloat(p.precio).toFixed(2)}€</div>
       <div class="qrow">
-        ${qty > 0 ? `<button class="qb" onclick="adj('${id}','${esc(name)}',${p.precio},-1,'${esc(p.nombre)}')">−</button><span class="qn">${qty}</span>` : ''}
-        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${id}','${esc(name)}',${p.precio},1,'${esc(p.nombre)}')">+</button>
+        ${qty > 0 ? `<button class="qb" onclick="adj('${id}','${esc(name)}',${p.precio},-1,'${esc(p.nombre)}','${tipo}')">−</button><span class="qn">${qty}</span>` : ''}
+        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${id}','${esc(name)}',${p.precio},1,'${esc(p.nombre)}','${tipo}')">+</button>
       </div>
     </div>`;
   return d;
@@ -708,8 +716,8 @@ function adjToastVariant(prodId, variant, delta) {
   const name = getProductName(p) + ' (' + toastVariantLabel(variant) + ')';
   const nombreEs = p.nombre + ' (' + (variant === 'full' ? 'Tostada entera' : 'Media tostada') + ')';
   const price = toastVariantPrice(p, variant);
-  if (delta > 0) adjAndToast(id, name, price, delta, nombreEs);
-  else adj(id, name, price, delta, nombreEs);
+  if (delta > 0) adjAndToast(id, name, price, delta, nombreEs, 'comida');
+  else adj(id, name, price, delta, nombreEs, 'comida');
 }
 
 let pendingToastProdId = null;
@@ -754,8 +762,8 @@ function mkXF() {
     <div style="display:flex;align-items:center;gap:10px">
       <span class="xfp">1.00€</span>
       <div class="qrow">
-        ${qty>0 ? `<button class="qb" onclick="adj('xf','${lbl}',1.00,-1,'Patatas Extra')">−</button><span class="qn">${qty}</span>` : ''}
-        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('xf','${lbl}',1.00,1,'Patatas Extra')">+</button>
+        ${qty>0 ? `<button class="qb" onclick="adj('xf','${lbl}',1.00,-1,'Patatas Extra','comida')">−</button><span class="qn">${qty}</span>` : ''}
+        <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('xf','${lbl}',1.00,1,'Patatas Extra','comida')">+</button>
       </div>
     </div>`;
   return d;
@@ -763,9 +771,9 @@ function mkXF() {
 
 function esc(s) { return s.replace(/'/g,"\\'"); }
 
-function adjAndToast(id, name, price, delta, nombreEs) {
+function adjAndToast(id, name, price, delta, nombreEs, tipo) {
   const wasEmpty = !cart[id] || cart[id].qty === 0;
-  adj(id, name, price, delta, nombreEs);
+  adj(id, name, price, delta, nombreEs, tipo);
   if (delta > 0) {
     showToast();
     if (wasEmpty) openCommentModal(id);
@@ -775,10 +783,14 @@ function adjAndToast(id, name, price, delta, nombreEs) {
 // nombreEs: nombre del producto SIEMPRE en español, independientemente del idioma
 // que esté viendo el cliente. Es lo que se envía a cocina/admin al confirmar el pedido,
 // para que en cocina siempre se lea en español aunque el cliente haya pedido en inglés.
-function adj(id, name, price, delta, nombreEs) {
-  if (!cart[id]) cart[id] = {name, price, qty:0, nombreEs: nombreEs || name};
+// tipo: 'comida' | 'bebida' — según la categoría del producto en la carta. Se envía al
+// backend para que la vista de Cocina pueda mostrar únicamente los platos y la de Barra
+// siga mostrando el pedido completo.
+function adj(id, name, price, delta, nombreEs, tipo) {
+  if (!cart[id]) cart[id] = {name, price, qty:0, nombreEs: nombreEs || name, tipo: tipo || 'comida'};
   cart[id].name = name; cart[id].price = price;
   if (nombreEs) cart[id].nombreEs = nombreEs;
+  if (tipo) cart[id].tipo = tipo;
   cart[id].qty = Math.max(0, cart[id].qty + delta);
   if (cart[id].qty === 0) delete cart[id];
   refreshBadge();
@@ -903,7 +915,7 @@ async function placeOrder() {
   if (!valid) return;
 
   const pickup = document.getElementById('pTime')?.value || '';
-  const items = Object.values(cart).map(item => ({ nombre: item.nombreEs || item.name, cantidad: item.qty, precio: item.price, comentario: item.comment || null }));
+  const items = Object.values(cart).map(item => ({ nombre: item.nombreEs || item.name, cantidad: item.qty, precio: item.price, comentario: item.comment || null, tipo: item.tipo || 'comida' }));
   const payload = { customerName: name, phone, pickupTime: pickup || null, items };
 
   const btn = document.getElementById('orderBtn');

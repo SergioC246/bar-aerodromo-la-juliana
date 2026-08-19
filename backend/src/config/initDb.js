@@ -79,6 +79,7 @@ async function initDb() {
       ALTER TABLE productos ADD COLUMN IF NOT EXISTS notas VARCHAR(255);
       ALTER TABLE productos ADD COLUMN IF NOT EXISTS orden INTEGER DEFAULT 0;
       ALTER TABLE lineas_pedido ADD COLUMN IF NOT EXISTS comentario_cliente VARCHAR(300);
+      ALTER TABLE lineas_pedido ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) NOT NULL DEFAULT 'comida';
 
       INSERT INTO horario_cocina (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
     `);

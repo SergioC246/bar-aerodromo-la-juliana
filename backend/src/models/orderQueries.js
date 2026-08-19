@@ -14,7 +14,8 @@ const ORDER_SELECT_QUERY = `
         'nombre',     lp.notas,
         'cantidad',   lp.cantidad,
         'precio',     lp.precio_unitario,
-        'comentario', lp.comentario_cliente
+        'comentario', lp.comentario_cliente,
+        'tipo',       lp.tipo
       ) ORDER BY lp.id
     ) FILTER (WHERE lp.id IS NOT NULL) as items
   FROM pedidos p

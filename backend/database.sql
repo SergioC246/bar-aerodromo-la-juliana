@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS lineas_pedido (
   precio_unitario DECIMAL(10, 2) NOT NULL,
   notas TEXT,
   comentario_cliente VARCHAR(300),
+  tipo VARCHAR(20) NOT NULL DEFAULT 'comida', -- 'comida' | 'bebida' (para separar vista de cocina y barra)
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

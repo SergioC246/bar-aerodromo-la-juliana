@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🍳 Cocina - Bar Aeródromo La Juliana</title>
+  <title>🍹 Barra - Bar Aeródromo La Juliana</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -121,7 +121,7 @@
   <div class="notif-toast" id="notifToast">🔔 ¡Nuevo pedido!</div>
 
   <div class="header">
-    <h1>🍳 Cocina</h1>
+    <h1>🍹 Barra</h1>
     <div style="text-align:center">
       <div class="clock" id="clock">00:00:00</div>
       <div class="clock-date" id="clockDate"></div>
@@ -252,14 +252,11 @@
           if (msg.type === 'nuevo_pedido') {
             ordersEnProceso[msg.pedido.id] = msg.pedido;
             assignNumber(msg.pedido.id);
-            // Sólo cuenta/notifica si trae algún plato de comida (si es sólo bebidas, no es cosa de cocina)
-            if (tieneComida(msg.pedido)) {
-              totalCommandsToday++;
-              playNotif();
-              showNotif(msg.pedido.customer_name || 'cliente');
-            }
+            totalCommandsToday++;
             updateCounters();
             renderBoard();
+            playNotif();
+            showNotif(msg.pedido.customer_name || 'cliente');
           }
         } catch(err) {}
       };
@@ -275,8 +272,7 @@
 
     function updateCounters() {
       document.getElementById('totalCommands').textContent = totalCommandsToday;
-      const conComida = [...Object.values(ordersEnProceso), ...Object.values(ordersHechas)].filter(tieneComida).length;
-      document.getElementById('receivedCommands').textContent = conComida;
+      document.getElementById('receivedCommands').textContent = Object.keys(ordersEnProceso).length + Object.keys(ordersHechas).length;
     }
 
     async function loadOrders() {
@@ -289,8 +285,7 @@
         dataEP.forEach(o => { ordersEnProceso[o.id] = o; });
         dataH.forEach(o => { ordersHechas[o.id] = o; });
         [...dataEP, ...dataH].sort((a,b) => new Date(a.created_at)-new Date(b.created_at)).forEach(o => assignNumber(o.id));
-        // Sólo se cuentan aquí las comandas que tienen algún plato de comida
-        totalCommandsToday = [...dataEP, ...dataH].filter(tieneComida).length;
+        totalCommandsToday = dataEP.length + dataH.length;
         updateCounters();
         renderBoard();
       } catch(err) { console.error(err); }
@@ -306,19 +301,10 @@
       renderBoard();
     }
 
-    // Sólo platos de comida: se excluyen las bebidas de esta vista (para eso está la vista de Barra)
-    function itemsComida(order) {
-      return (order.items || []).filter(i => i.nombre && i.tipo !== 'bebida');
-    }
-    function tieneComida(order) {
-      return itemsComida(order).length > 0;
-    }
-
     function renderBoard() {
       const board = document.getElementById('board');
       const orders = currentTab === 'en_proceso' ? ordersEnProceso : ordersHechas;
-      // Sólo se muestran en cocina las comandas que tengan al menos un plato de comida
-      let orderList = Object.values(orders).filter(tieneComida).sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
+      let orderList = Object.values(orders).sort((a,b) => new Date(a.created_at)-new Date(b.created_at));
 
       // Filtro búsqueda
       if (currentTab === 'hechos') {
@@ -331,7 +317,7 @@
         board.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">${currentTab === 'en_proceso' ? '✨' : '📭'}</div>
-            <div class="empty-state-text">${q ? `Sin resultados para "${q}"` : currentTab === 'en_proceso' ? 'Sin platos pendientes en cocina' : 'Sin comandas completadas'}</div>
+            <div class="empty-state-text">${q ? `Sin resultados para "${q}"` : currentTab === 'en_proceso' ? 'Sin comandas en proceso' : 'Sin comandas completadas'}</div>
           </div>`;
         return;
       }
@@ -343,7 +329,7 @@
           ? `<div class="pickup-time"><span class="pickup-time-label">🕐 Recogida</span><span class="pickup-time-value">${order.pickup_time.substring(0,5)}</span></div>`
           : '';
 
-        const itemsFiltered = itemsComida(order);
+        const itemsFiltered = (order.items||[]).filter(i => i.nombre);
         const itemsInner = itemsFiltered.map(i => `
           <div class="item">
             <div class="item-main"><div class="item-name">${i.nombre}</div><div class="item-qty">×${i.cantidad}</div></div>
@@ -419,7 +405,7 @@
         const ids = Object.keys(ordersHechas);
         await Promise.all(ids.map(id => fetch(`/api/orders/${id}`, { method: 'DELETE' })));
         ordersHechas = {};
-        totalCommandsToday = Object.values(ordersEnProceso).filter(tieneComida).length;
+        totalCommandsToday = Object.keys(ordersEnProceso).length;
         updateCounters(); renderBoard();
       } catch(err) { alert('Error al eliminar las comandas'); }
     }

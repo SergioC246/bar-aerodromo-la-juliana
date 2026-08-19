@@ -15,7 +15,8 @@ exports.getActiveOrders = async (req, res, next) => {
             'id',       lp.id,
             'nombre',   lp.notas,
             'cantidad', lp.cantidad,
-            'precio',   lp.precio_unitario
+            'precio',   lp.precio_unitario,
+            'tipo',     lp.tipo
           ) ORDER BY lp.id
         ) FILTER (WHERE lp.id IS NOT NULL) as items
       FROM pedidos p
@@ -47,7 +48,8 @@ exports.getReadyOrders = async (req, res, next) => {
             'id',       lp.id,
             'nombre',   lp.notas,
             'cantidad', lp.cantidad,
-            'precio',   lp.precio_unitario
+            'precio',   lp.precio_unitario,
+            'tipo',     lp.tipo
           ) ORDER BY lp.id
         ) FILTER (WHERE lp.id IS NOT NULL) as items
       FROM pedidos p
