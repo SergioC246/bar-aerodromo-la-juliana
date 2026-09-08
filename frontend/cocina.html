@@ -245,7 +245,10 @@
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${protocol}//${window.location.host}`);
-      ws.onopen = () => { updateStatusBadge(true); loadOrders(); };
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'identificar', rol: 'staff' }));
+        updateStatusBadge(true); loadOrders();
+      };
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);

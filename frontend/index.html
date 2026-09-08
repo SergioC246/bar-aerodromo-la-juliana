@@ -302,6 +302,15 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="sbg" id="readybg">
+  <div class="sbox">
+    <span class="sico">🍽️</span>
+    <div class="stitle" id="rTitle">Your order is ready!</div>
+    <div class="smsg" id="rMsg"></div>
+    <button class="sbtn" onclick="closeReadyModal()" id="rBtnClose">Great, thanks!</button>
+  </div>
+</div>
+
 <div class="cmtbg" id="cmtbg" onclick="cmtBgClick(event)">
   <div class="cmtbox">
     <div class="cmt-title" id="cmtTitle">Add a note?</div>
@@ -367,11 +376,13 @@ const T = {
   en:{items:"items",order:"Order",yourOrder:"Your Order",total:"Total",empty:"Your cart is empty",toastMsg:"Pay at the counter when collecting 🏧",counterTitle:"Payment at the counter",counterMsg:"Your order is prepared and confirmed here. Please go to the counter to pay and collect your food.",stripeTitle:"Card payment",stripeSub:"Coming soon",stripeDisabled:"Online payment not yet available",nameLabel:"👤 Your name",namePh:"Your name (so we can call you)",phoneLabel:"📱 Phone number",phonePh:"Your phone number",nameReq:"Please enter your name",phoneReq:"Please enter a valid phone number",pickup:"🕐 Pickup time (optional)",placeOrder:"Confirm Order →",ok:"Order Confirmed!",thanks:"Your order has been registered.",pickAt:"Pickup time: ",payNote:"Please go to the counter to pay and collect your order.",great:"Perfect, see you at the counter!",
     cmtTitle:"Add a note to {item}?",cmtSub:"Any extra you'd like, or something to leave out?",cmtPh:"e.g. no onion, extra sauce...",cmtSkip:"Skip",cmtSave:"Save note",addNote:"💬 Add a note",editNote:"edit",
     closedTitle:"Kitchen is closed",closedMsg:"Sorry, the kitchen is closed right now. If you'd like to keep enjoying our products, please head to the bar counter.",closedHoursLbl:"Kitchen hours: ",closedRetry:"Try again",closedAuto:"This screen updates automatically",
-    halfToast:"Half toast",fullToast:"Whole toast",fromPrice:"From",toastModalTitle:"Half toast or whole — {item}?",toastModalSub:"🥖 Half toast = one side of the baguette. Whole toast = both sides (double portion)."},
+    halfToast:"Half toast",fullToast:"Whole toast",fromPrice:"From",toastModalTitle:"Half toast or whole — {item}?",toastModalSub:"🥖 Half toast = one side of the baguette. Whole toast = both sides (double portion).",
+    orderReadyTitle:"Your order is ready! 🎉",orderReadyMsg:"Please come to the counter to collect it.",orderReadyBtn:"Great, thanks!"},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
     closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
-    halfToast:"Media tostada",fullToast:"Tostada entera",fromPrice:"Desde",toastModalTitle:"¿Media tostada o entera — {item}?",toastModalSub:"🥖 Media tostada = una sola cara del pan de baguette. Tostada entera = las dos caras del pan (ración doble)."}
+    halfToast:"Media tostada",fullToast:"Tostada entera",fromPrice:"Desde",toastModalTitle:"¿Media tostada o entera — {item}?",toastModalSub:"🥖 Media tostada = una sola cara del pan de baguette. Tostada entera = las dos caras del pan (ración doble).",
+    orderReadyTitle:"¡Tu pedido está listo! 🎉",orderReadyMsg:"Puedes pasar a recogerlo a la barra.",orderReadyBtn:"¡Genial, gracias!"}
 };
 const t = k => T[lang][k] || k;
 
@@ -931,7 +942,10 @@ async function placeOrder() {
       if (!res.ok) throw new Error('Error');
       return res.json();
     })
-    .then(() => showSuccess(name, phone, pickup))
+    .then(order => {
+      if (order && order.id) suscribirPedido(order.id);
+      showSuccess(name, phone, pickup);
+    })
     .catch(err => {
       btn.disabled=false; btn.textContent=t('placeOrder');
       if (err && err.closed) {
@@ -958,6 +972,90 @@ function showSuccess(name, phone, pickup) {
   if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
 }
 function closeSuccess() { document.getElementById('sbg').classList.remove('on'); }
+
+// ── AVISO DE "PEDIDO LISTO" ──
+// Nos suscribimos por WebSocket al pedido recién creado para que, en cuanto cocina/barra
+// lo marque como listo, el cliente reciba el aviso aquí mismo, sin recargar nada.
+let orderSocket = null;
+let pedidosPendientes = [];
+try { pedidosPendientes = JSON.parse(localStorage.getItem('pedidosPendientes') || '[]'); } catch(e) { pedidosPendientes = []; }
+
+function guardarPedidosPendientes() {
+  try { localStorage.setItem('pedidosPendientes', JSON.stringify(pedidosPendientes)); } catch(e) {}
+}
+
+function conectarSocketPedidos() {
+  if (orderSocket && (orderSocket.readyState === WebSocket.CONNECTING || orderSocket.readyState === WebSocket.OPEN)) return;
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  orderSocket = new WebSocket(`${protocol}//${window.location.host}`);
+
+  orderSocket.onopen = () => {
+    pedidosPendientes.forEach(id => orderSocket.send(JSON.stringify({ type: 'suscribir_pedido', pedidoId: id })));
+  };
+  orderSocket.onmessage = (event) => {
+    try {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'pedido_listo' && msg.pedido) {
+        pedidosPendientes = pedidosPendientes.filter(id => id !== msg.pedido.id);
+        guardarPedidosPendientes();
+        mostrarPedidoListo();
+      }
+    } catch (err) {}
+  };
+  orderSocket.onerror = () => { try { orderSocket.close(); } catch(e) {} };
+  orderSocket.onclose = () => {
+    // Sólo reintentamos si sigue habiendo pedidos por los que esperar
+    if (pedidosPendientes.length) setTimeout(conectarSocketPedidos, 3000);
+  };
+}
+
+function suscribirPedido(id) {
+  if (!pedidosPendientes.includes(id)) {
+    pedidosPendientes.push(id);
+    guardarPedidosPendientes();
+  }
+  if (orderSocket && orderSocket.readyState === WebSocket.OPEN) {
+    orderSocket.send(JSON.stringify({ type: 'suscribir_pedido', pedidoId: id }));
+  } else {
+    conectarSocketPedidos();
+  }
+  // Pedimos permiso de notificaciones del navegador para poder avisar aunque
+  // el cliente tenga la pestaña en segundo plano (si el navegador lo soporta).
+  if ('Notification' in window && Notification.permission === 'default') {
+    try { Notification.requestPermission(); } catch(e) {}
+  }
+}
+
+function playReadyChime() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.18, 0.36].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = i === 0 ? 660 : i === 1 ? 880 : 1100;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.5, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.35);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.35);
+    });
+  } catch(e) {}
+  if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch(e) {} }
+}
+
+function mostrarPedidoListo() {
+  playReadyChime();
+  document.getElementById('rTitle').textContent = t('orderReadyTitle');
+  document.getElementById('rMsg').textContent = t('orderReadyMsg');
+  document.getElementById('rBtnClose').textContent = t('orderReadyBtn');
+  document.getElementById('readybg').classList.add('on');
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(t('orderReadyTitle'), { body: t('orderReadyMsg') }); } catch(e) {}
+  }
+}
+function closeReadyModal() { document.getElementById('readybg').classList.remove('on'); }
 
 // ── HORARIO DE COCINA ──
 let closedPollTimer = null;
@@ -1049,6 +1147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const open = await checkKitchenStatus();
   if (open) loadMenu();
   else lockKitchenClosed();
+
+  // Si el cliente recarga la página mientras espera su pedido, retomamos la suscripción
+  if (pedidosPendientes.length) conectarSocketPedidos();
 });
 </script>
 </body>

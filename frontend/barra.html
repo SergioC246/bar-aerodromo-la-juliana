@@ -72,10 +72,14 @@
     .items-list { margin: 16px 0; padding: 16px; background: rgba(212,168,83,0.08); border-radius: 10px; }
     .item { padding: 14px 0; border-bottom: 1px solid var(--border); }
     .item:last-child { border-bottom: none; }
-    .item-main { display: flex; justify-content: space-between; align-items: center; font-size: 26px; }
+    .item-main { display: flex; justify-content: space-between; align-items: center; font-size: 26px; gap: 14px; }
     .item-name { flex: 1; font-weight: 700; }
+    .item-price { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 700; color: var(--gold); white-space: nowrap; }
     .item-qty { background: var(--gold); padding: 6px 18px; border-radius: 8px; margin: 0 0 0 16px; font-weight: 900; color: #0c0b09; font-size: 28px; }
     .item-comment { margin-top: 8px; padding: 10px 14px; background: rgba(201,74,58,0.15); border: 2px solid var(--red); border-radius: 8px; font-size: 18px; font-weight: 700; color: #ff8a75; }
+    .order-total { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; padding: 12px 16px; background: rgba(212,168,83,0.15); border: 2px solid var(--gold); border-radius: 10px; }
+    .order-total-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+    .order-total-amt { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 700; color: var(--gold); }
 
     .items-collapsed { display: none; }
     .items-collapsed.open { display: block; }
@@ -245,7 +249,10 @@
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${protocol}//${window.location.host}`);
-      ws.onopen = () => { updateStatusBadge(true); loadOrders(); };
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'identificar', rol: 'staff' }));
+        updateStatusBadge(true); loadOrders();
+      };
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
@@ -330,18 +337,31 @@
           : '';
 
         const itemsFiltered = (order.items||[]).filter(i => i.nombre);
+        const orderTotal = itemsFiltered.reduce((sum, i) => sum + (Number(i.precio) || 0) * (Number(i.cantidad) || 0), 0);
         const itemsInner = itemsFiltered.map(i => `
           <div class="item">
-            <div class="item-main"><div class="item-name">${i.nombre}</div><div class="item-qty">×${i.cantidad}</div></div>
+            <div class="item-main">
+              <div class="item-name">${i.nombre}</div>
+              <div class="item-price">${(Number(i.precio) || 0).toFixed(2)}€</div>
+              <div class="item-qty">×${i.cantidad}</div>
+            </div>
             ${i.comentario ? `<div class="item-comment">📝 ${escapeHtml(i.comentario)}</div>` : ''}
           </div>
         `).join('');
 
+        // El total SIEMPRE va visible (aunque las líneas estén colapsadas en "Hechos"),
+        // porque es justo en esa pantalla donde se cobra al cliente.
+        const totalHtml = itemsFiltered.length > 0 ? `
+          <div class="order-total">
+            <span class="order-total-label">Total a cobrar</span>
+            <span class="order-total-amt">${orderTotal.toFixed(2)}€</span>
+          </div>` : '';
+
         let itemsHtml = '';
         if (itemsFiltered.length > 0) {
           itemsHtml = currentTab === 'en_proceso'
-            ? `<div class="items-list">${itemsInner}</div>`
-            : `<div class="items-list items-collapsed" id="items-${order.id}">${itemsInner}</div>`;
+            ? `<div class="items-list">${itemsInner}</div>${totalHtml}`
+            : `${totalHtml}<div class="items-list items-collapsed" id="items-${order.id}">${itemsInner}</div>`;
         }
 
         const actionsHtml = currentTab === 'en_proceso' ? `

@@ -78,6 +78,13 @@ exports.updateOrderStatus = async (req, res, next) => {
     if (!updated) return res.status(404).json({ error: 'Order not found' });
 
     const order = await Order.getById(id);
+
+    // Si el pedido acaba de marcarse como listo, avisamos al cliente en tiempo real
+    if (status === 'listo') {
+      const emitirListo = req.app.get('emitPedidoListo');
+      if (emitirListo) emitirListo(order);
+    }
+
     res.json(order);
   } catch (err) {
     next(err);
