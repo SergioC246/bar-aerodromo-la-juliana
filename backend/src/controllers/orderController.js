@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const { getEstadoCocina } = require('../utils/horario');
+const { webpush, habilitado: pushHabilitado } = require('../config/webpush');
 
 const VALID_STATUSES = ['pendiente', 'en_cocina', 'listo', 'entregado'];
 
@@ -83,6 +84,24 @@ exports.updateOrderStatus = async (req, res, next) => {
     if (status === 'listo') {
       const emitirListo = req.app.get('emitPedidoListo');
       if (emitirListo) emitirListo(order);
+
+      // Y también por Web Push, para que le llegue aunque tenga la pestaña cerrada
+      if (pushHabilitado) {
+        try {
+          const subscription = await Order.getPushSubscription(id);
+          if (subscription) {
+            const payload = JSON.stringify({
+              title: '¡Tu pedido está listo! 🎉',
+              body: 'Puedes pasar a recogerlo a la barra.'
+            });
+            await webpush.sendNotification(subscription, payload);
+          }
+        } catch (pushErr) {
+          // Un fallo de push (suscripción caducada, navegador cerrado del todo, etc.)
+          // no debe romper la respuesta de la API: el pedido igualmente queda marcado como listo.
+          console.warn('⚠️  No se pudo enviar la notificación Web Push:', pushErr.message);
+        }
+      }
     }
 
     res.json(order);

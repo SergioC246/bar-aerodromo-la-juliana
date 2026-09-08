@@ -1015,10 +1015,43 @@ function suscribirPedido(id) {
   } else {
     conectarSocketPedidos();
   }
-  // Pedimos permiso de notificaciones del navegador para poder avisar aunque
-  // el cliente tenga la pestaña en segundo plano (si el navegador lo soporta).
-  if ('Notification' in window && Notification.permission === 'default') {
-    try { Notification.requestPermission(); } catch(e) {}
+  // Web Push: avisa al cliente aunque tenga la pestaña cerrada del todo.
+  // subscribe() ya se encarga de pedir el permiso de notificaciones si hace falta.
+  suscribirPush(id);
+}
+
+// ── WEB PUSH (funciona aunque el cliente cierre la pestaña) ──
+const VAPID_PUBLIC_KEY = 'BGoPo1iOcuszTnPnT-aAbhZMgkh_Nq2jZUPV736QM4PSAU5DGXHWDo30XJG_q_EXZKYLFHAWZ_Qx4seswIMhRtU';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+async function suscribirPush(pedidoId) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.register('/sw.js');
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pedidoId, subscription: sub })
+    });
+  } catch (err) {
+    // El cliente puede haber denegado el permiso, o el navegador no soportarlo (ej. iPhone sin
+    // instalar la web como app): no pasa nada, seguirá recibiendo el aviso en pantalla si
+    // mantiene la pestaña abierta gracias al WebSocket.
   }
 }
 

@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
   phone VARCHAR(20) NOT NULL,
   status VARCHAR(50) DEFAULT 'pendiente',
   pickup_time TIME,
+  push_subscription JSONB, -- suscripción Web Push del cliente, para avisarle cuando el pedido esté listo
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

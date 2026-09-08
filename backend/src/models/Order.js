@@ -74,6 +74,22 @@ class Order {
       throw new Error(`Database error: ${err.message}`);
     }
   }
+
+  // Guarda la suscripción Web Push del cliente para poder avisarle cuando su pedido esté listo
+  static async savePushSubscription(id, subscription) {
+    const query = `
+      UPDATE pedidos SET push_subscription = $1
+      WHERE id = $2
+      RETURNING id
+    `;
+    const result = await pool.query(query, [JSON.stringify(subscription), id]);
+    return result.rows[0];
+  }
+
+  static async getPushSubscription(id) {
+    const result = await pool.query('SELECT push_subscription FROM pedidos WHERE id = $1', [id]);
+    return result.rows[0] ? result.rows[0].push_subscription : null;
+  }
 }
 
 module.exports = Order;
