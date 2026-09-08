@@ -107,8 +107,24 @@
     .scroll-btn:hover { background: var(--gold); color: #0c0b09; border-color: var(--gold); }
 
     /* NOTIFICATION TOAST */
-    .notif-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); z-index: 999; background: var(--green); color: white; padding: 16px 28px; border-radius: 14px; font-size: 16px; font-weight: 700; box-shadow: 0 8px 32px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1); display: flex; align-items: center; gap: 12px; pointer-events: none; }
-    .notif-toast.show { transform: translateX(-50%) translateY(0); }
+    .notif-toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-140px) scale(0.9); z-index: 999; background: linear-gradient(135deg, var(--green), #2e7d32); color: white; padding: 22px 38px; border-radius: 16px; font-size: 22px; font-weight: 800; box-shadow: 0 12px 48px rgba(0,0,0,0.55), 0 0 0 4px rgba(76,175,80,0.35); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1); display: flex; align-items: center; gap: 14px; pointer-events: none; }
+    .notif-toast.show { transform: translateX(-50%) translateY(0) scale(1); animation: notifShake 0.5s ease-in-out 2; }
+    @keyframes notifShake { 0%,100%{ transform: translateX(-50%) translateY(0) scale(1) rotate(0deg); } 25%{ transform: translateX(-50%) translateY(0) scale(1.03) rotate(-1deg); } 75%{ transform: translateX(-50%) translateY(0) scale(1.03) rotate(1deg); } }
+
+    /* PANTALLAZO al llegar un pedido nuevo, para que se note aunque no se esté mirando el toast */
+    #screenFlash { position: fixed; inset: 0; z-index: 900; pointer-events: none; opacity: 0; background: radial-gradient(circle, rgba(212,168,83,0.30) 0%, rgba(201,74,58,0.16) 60%, transparent 100%); }
+    #screenFlash.flash { animation: flashPulse 1.1s ease-in-out 2; }
+    @keyframes flashPulse { 0%,100%{opacity:0} 20%,55%{opacity:1} 40%{opacity:0.15} }
+
+    /* TARJETA URGENTE: quedan 5 min o menos para la hora de recogida */
+    .order-card.urgent { border-color: var(--red); animation: urgentPulse 1.1s ease-in-out infinite; }
+    .order-card.urgent::before { background: var(--red); }
+    @keyframes urgentPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(201,74,58,0.55); transform: scale(1); }
+      50% { box-shadow: 0 0 0 16px rgba(201,74,58,0); transform: scale(1.015); }
+    }
+    .urgent-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--red); color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 12px; animation: urgentBlink 1s ease-in-out infinite; }
+    @keyframes urgentBlink { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
     /* SOUND TOGGLE */
     .sound-btn { background: var(--card2); border: 1px solid var(--border2); border-radius: 10px; color: var(--muted); padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
@@ -116,6 +132,9 @@
   </style>
 </head>
 <body>
+
+  <!-- PANTALLAZO nuevo pedido -->
+  <div id="screenFlash"></div>
 
   <!-- NOTIFICATION TOAST -->
   <div class="notif-toast" id="notifToast">🔔 ¡Nuevo pedido!</div>
@@ -181,6 +200,12 @@
     let nextOrderNumber = 1;
     let soundEnabled = true;
     let notifTimer = null;
+    let flashTimer = null;
+
+    // Pedidos ya marcados como "urgentes" (quedan ≤5 min para la recogida): se usan
+    // para pintar la tarjeta con la animación y para no repetir la alarma discreta.
+    let urgentOrders = new Set();
+    let alertedOrders = new Set();
 
     // Seguridad: el comentario lo escribe el cliente libremente, así que lo escapamos antes de mostrarlo
     function escapeHtml(text) {
@@ -188,21 +213,61 @@
       return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
-    // ── SONIDO ──
+    // ── SONIDO: PEDIDO NUEVO (estruendo, para que se note con música/ruido de fondo) ──
     function playNotif() {
       if (!soundEnabled) return;
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0, 0.15, 0.3].forEach((delay, i) => {
+        const now = ctx.currentTime;
+
+        // Golpe grave de impacto al principio
+        const thump = ctx.createOscillator();
+        const thumpGain = ctx.createGain();
+        thump.connect(thumpGain); thumpGain.connect(ctx.destination);
+        thump.type = 'square';
+        thump.frequency.setValueAtTime(180, now);
+        thump.frequency.exponentialRampToValueAtTime(45, now + 0.35);
+        thumpGain.gain.setValueAtTime(0.9, now);
+        thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        thump.start(now); thump.stop(now + 0.4);
+
+        // Sirena: barridos de frecuencia repetidos, tipo alarma, bien alta de volumen
+        const sweepDur = 0.5;
+        for (let i = 0; i < 3; i++) {
+          const t0 = now + 0.15 + i * sweepDur * 2;
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
           osc.connect(gain); gain.connect(ctx.destination);
-          osc.frequency.value = i === 0 ? 880 : i === 1 ? 1100 : 1320;
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(650, t0);
+          osc.frequency.linearRampToValueAtTime(1500, t0 + sweepDur);
+          osc.frequency.linearRampToValueAtTime(650, t0 + sweepDur * 2);
+          gain.gain.setValueAtTime(0.001, t0);
+          gain.gain.linearRampToValueAtTime(0.85, t0 + 0.05);
+          gain.gain.setValueAtTime(0.85, t0 + sweepDur * 2 - 0.05);
+          gain.gain.linearRampToValueAtTime(0.001, t0 + sweepDur * 2);
+          osc.start(t0); osc.stop(t0 + sweepDur * 2 + 0.05);
+        }
+      } catch(e) {}
+      if (navigator.vibrate) { try { navigator.vibrate([300, 100, 300, 100, 300]); } catch(e) {} }
+    }
+
+    // ── SONIDO: ALARMA DISCRETA (quedan ≤5 min para la hora de recogida de un pedido) ──
+    function playUrgentAlert() {
+      if (!soundEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = ctx.currentTime;
+        [0, 0.28].forEach(delay => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
           osc.type = 'sine';
-          gain.gain.setValueAtTime(0.4, ctx.currentTime + delay);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
-          osc.start(ctx.currentTime + delay);
-          osc.stop(ctx.currentTime + delay + 0.3);
+          osc.frequency.value = 740;
+          gain.gain.setValueAtTime(0.001, now + delay);
+          gain.gain.linearRampToValueAtTime(0.32, now + delay + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.24);
+          osc.start(now + delay); osc.stop(now + delay + 0.26);
         });
       } catch(e) {}
     }
@@ -214,13 +279,23 @@
       btn.classList.toggle('on', soundEnabled);
     }
 
-    // ── NOTIFICACIÓN VISUAL ──
+    // ── NOTIFICACIÓN VISUAL: PEDIDO NUEVO ──
     function showNotif(name) {
       const el = document.getElementById('notifToast');
-      el.textContent = `🔔 Nuevo pedido — ${name}`;
+      el.textContent = `🔔 ¡NUEVO PEDIDO! — ${name}`;
+      el.classList.remove('show'); void el.offsetWidth; // reinicia la animación si ya estaba mostrándose
       el.classList.add('show');
       clearTimeout(notifTimer);
-      notifTimer = setTimeout(() => el.classList.remove('show'), 4000);
+      notifTimer = setTimeout(() => el.classList.remove('show'), 4500);
+      triggerFlash();
+    }
+
+    function triggerFlash() {
+      const el = document.getElementById('screenFlash');
+      el.classList.remove('flash'); void el.offsetWidth;
+      el.classList.add('flash');
+      clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => el.classList.remove('flash'), 2400);
     }
 
     // ── RELOJ ──
@@ -263,6 +338,7 @@
             }
             updateCounters();
             renderBoard();
+            checkUrgentOrders();
           }
         } catch(err) {}
       };
@@ -295,6 +371,7 @@
         // Sólo se cuentan aquí las comandas que tienen algún plato de comida
         totalCommandsToday = [...dataEP, ...dataH].filter(tieneComida).length;
         updateCounters();
+        checkUrgentOrders();
         renderBoard();
       } catch(err) { console.error(err); }
     }
@@ -316,6 +393,39 @@
     function tieneComida(order) {
       return itemsComida(order).length > 0;
     }
+
+    // ── URGENCIA POR HORA DE RECOGIDA ──
+    // Calcula la fecha/hora exacta de recogida combinando el día del pedido con la hora indicada
+    function getPickupDeadline(order) {
+      if (!order.pickup_time) return null;
+      const [h, m] = order.pickup_time.split(':').map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
+      const d = new Date(order.created_at);
+      d.setHours(h, m, 0, 0);
+      return d;
+    }
+
+    function minutosParaRecogida(order) {
+      const deadline = getPickupDeadline(order);
+      if (!deadline) return null;
+      return Math.round((deadline - new Date()) / 60000);
+    }
+
+    // Revisa todos los pedidos en proceso y marca como urgentes los que tienen 5 min o menos
+    // para su hora de recogida. Suena la alarma discreta sólo la primera vez que se detecta.
+    function checkUrgentOrders() {
+      let cambios = false;
+      Object.values(ordersEnProceso).filter(tieneComida).forEach(order => {
+        const minutos = minutosParaRecogida(order);
+        if (minutos === null) return;
+        if (minutos <= 5) {
+          if (!urgentOrders.has(order.id)) { urgentOrders.add(order.id); cambios = true; }
+          if (!alertedOrders.has(order.id)) { alertedOrders.add(order.id); playUrgentAlert(); }
+        }
+      });
+      if (cambios) renderBoard();
+    }
+    setInterval(checkUrgentOrders, 15000);
 
     function renderBoard() {
       const board = document.getElementById('board');
@@ -346,6 +456,12 @@
           ? `<div class="pickup-time"><span class="pickup-time-label">🕐 Recogida</span><span class="pickup-time-value">${order.pickup_time.substring(0,5)}</span></div>`
           : '';
 
+        const isUrgent = currentTab === 'en_proceso' && urgentOrders.has(order.id);
+        const minutos = isUrgent ? minutosParaRecogida(order) : null;
+        const urgentBadge = isUrgent
+          ? `<div class="urgent-badge">⏰ ${minutos !== null && minutos > 0 ? `¡Faltan ${minutos} min!` : '¡Hora de recogida ya!'}</div>`
+          : '';
+
         const itemsFiltered = itemsComida(order);
         const itemsInner = itemsFiltered.map(i => `
           <div class="item">
@@ -374,13 +490,13 @@
         `;
 
         return `
-          <div class="order-card" id="card-${order.id}">
+          <div class="order-card${isUrgent ? ' urgent' : ''}" id="card-${order.id}">
             <div class="order-header">
               <div class="table-number">Comanda #${num}</div>
               <div class="order-time">${time}</div>
             </div>
             <div class="customer-name">${order.customer_name}</div>
-            ${pickupHtml}${itemsHtml}${actionsHtml}
+            ${urgentBadge}${pickupHtml}${itemsHtml}${actionsHtml}
           </div>`;
       }).join('');
     }
@@ -394,6 +510,7 @@
         if (res.ok) {
           delete ordersEnProceso[orderId];
           ordersHechas[orderId] = await res.json();
+          urgentOrders.delete(orderId); alertedOrders.delete(orderId);
           updateCounters(); renderBoard();
         }
       } catch(err) { alert('Error al actualizar pedido'); }
@@ -411,6 +528,7 @@
       if (!confirm('¿Eliminar esta comanda?')) return;
       if (isFromEnProceso) delete ordersEnProceso[orderId];
       else delete ordersHechas[orderId];
+      urgentOrders.delete(orderId); alertedOrders.delete(orderId);
       updateCounters(); renderBoard();
     }
 

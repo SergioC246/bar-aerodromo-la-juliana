@@ -783,12 +783,8 @@ function mkXF() {
 function esc(s) { return s.replace(/'/g,"\\'"); }
 
 function adjAndToast(id, name, price, delta, nombreEs, tipo) {
-  const wasEmpty = !cart[id] || cart[id].qty === 0;
   adj(id, name, price, delta, nombreEs, tipo);
-  if (delta > 0) {
-    showToast();
-    if (wasEmpty) openCommentModal(id);
-  }
+  if (delta > 0) showToast();
 }
 
 // nombreEs: nombre del producto SIEMPRE en español, independientemente del idioma
