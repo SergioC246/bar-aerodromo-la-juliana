@@ -311,6 +311,18 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="sbg" id="pushPromptbg">
+  <div class="sbox">
+    <span class="sico">🔔</span>
+    <div class="stitle" id="pushPromptTitle">Want us to notify you?</div>
+    <div class="smsg" id="pushPromptMsg"></div>
+    <div class="cmt-actions">
+      <button class="cmt-skip" id="pushPromptSkipBtn" onclick="rechazarAvisoPush()">Not now</button>
+      <button class="cmt-save" id="pushPromptAcceptBtn" onclick="aceptarAvisoPush()">🔔 Yes, notify me</button>
+    </div>
+  </div>
+</div>
+
 <div class="cmtbg" id="cmtbg" onclick="cmtBgClick(event)">
   <div class="cmtbox">
     <div class="cmt-title" id="cmtTitle">Add a note?</div>
@@ -377,12 +389,14 @@ const T = {
     cmtTitle:"Add a note to {item}?",cmtSub:"Any extra you'd like, or something to leave out?",cmtPh:"e.g. no onion, extra sauce...",cmtSkip:"Skip",cmtSave:"Save note",addNote:"💬 Add a note",editNote:"edit",
     closedTitle:"Kitchen is closed",closedMsg:"Sorry, the kitchen is closed right now. If you'd like to keep enjoying our products, please head to the bar counter.",closedHoursLbl:"Kitchen hours: ",closedRetry:"Try again",closedAuto:"This screen updates automatically",
     halfToast:"Half toast",fullToast:"Whole toast",fromPrice:"From",toastModalTitle:"Half toast or whole — {item}?",toastModalSub:"🥖 Half toast = one side of the baguette. Whole toast = both sides (double portion).",
-    orderReadyTitle:"Your order is ready! 🎉",orderReadyMsg:"Please come to the counter to collect it.",orderReadyBtn:"Great, thanks!"},
+    orderReadyTitle:"Your order is ready! 🎉",orderReadyMsg:"Please come to the counter to collect it.",orderReadyBtn:"Great, thanks!",
+    pushPromptTitle:"Want us to notify you?",pushPromptMsg:"We'll send a notification to this phone as soon as your order is ready — even if you close this page.",pushPromptAccept:"🔔 Yes, notify me",pushPromptSkip:"Not now"},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
     closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
     halfToast:"Media tostada",fullToast:"Tostada entera",fromPrice:"Desde",toastModalTitle:"¿Media tostada o entera — {item}?",toastModalSub:"🥖 Media tostada = una sola cara del pan de baguette. Tostada entera = las dos caras del pan (ración doble).",
-    orderReadyTitle:"¡Tu pedido está listo! 🎉",orderReadyMsg:"Puedes pasar a recogerlo a la barra.",orderReadyBtn:"¡Genial, gracias!"}
+    orderReadyTitle:"¡Tu pedido está listo! 🎉",orderReadyMsg:"Puedes pasar a recogerlo a la barra.",orderReadyBtn:"¡Genial, gracias!",
+    pushPromptTitle:"¿Quieres que te avisemos?",pushPromptMsg:"Te mandaremos un aviso a este móvil en cuanto tu pedido esté listo — aunque cierres esta pantalla.",pushPromptAccept:"🔔 Sí, avisadme",pushPromptSkip:"Ahora no"}
 };
 const t = k => T[lang][k] || k;
 
@@ -939,7 +953,10 @@ async function placeOrder() {
       return res.json();
     })
     .then(order => {
-      if (order && order.id) suscribirPedido(order.id);
+      if (order && order.id) {
+        suscribirPedido(order.id);
+        pedidoRecienCreado = order.id;
+      }
       showSuccess(name, phone, pickup);
     })
     .catch(err => {
@@ -967,13 +984,22 @@ function showSuccess(name, phone, pickup) {
   refreshBadge();
   if (curCatId !== null && curScreen === 'items') renderItems(curCatId, curSubKey);
 }
-function closeSuccess() { document.getElementById('sbg').classList.remove('on'); }
+function closeSuccess() {
+  document.getElementById('sbg').classList.remove('on');
+  // Preguntamos por el aviso de "pedido listo" DESPUÉS de cerrar el modal de éxito,
+  // para no apilar dos pantallas completas a la vez.
+  if (pedidoRecienCreado) {
+    ofrecerAvisoPush(pedidoRecienCreado);
+    pedidoRecienCreado = null;
+  }
+}
 
 // ── AVISO DE "PEDIDO LISTO" ──
 // Nos suscribimos por WebSocket al pedido recién creado para que, en cuanto cocina/barra
 // lo marque como listo, el cliente reciba el aviso aquí mismo, sin recargar nada.
 let orderSocket = null;
 let pedidosPendientes = [];
+let pedidoRecienCreado = null;
 try { pedidosPendientes = JSON.parse(localStorage.getItem('pedidosPendientes') || '[]'); } catch(e) { pedidosPendientes = []; }
 
 function guardarPedidosPendientes() {
@@ -1015,9 +1041,46 @@ function suscribirPedido(id) {
   } else {
     conectarSocketPedidos();
   }
-  // Web Push: avisa al cliente aunque tenga la pestaña cerrada del todo.
-  // subscribe() ya se encarga de pedir el permiso de notificaciones si hace falta.
-  suscribirPush(id);
+}
+
+// Decide si hace falta explicar el aviso de Web Push antes de pedir el permiso del navegador,
+// o si ya se puede suscribir directamente (porque el cliente ya lo tenía aceptado de antes).
+function ofrecerAvisoPush(pedidoId) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
+  const permiso = Notification.permission;
+  if (permiso === 'granted') {
+    // Ya lo tenía activado de una visita anterior: nos suscribimos sin volver a preguntar nada.
+    suscribirPush(pedidoId);
+  } else if (permiso === 'default') {
+    // Nunca se le ha pedido: mostramos primero NUESTRA propia explicación, para que quien
+    // acepte sepa para qué es. Así es mucho más probable que luego acepte el permiso real
+    // del navegador (en vez de rechazar en seco un aviso del sistema que no entiende).
+    mostrarPromptPush(pedidoId);
+  }
+  // Si está 'denied', no podemos volver a preguntar por JS — el cliente tendría que
+  // reactivarlo a mano desde los ajustes del navegador. No insistimos con ningún modal.
+}
+
+let pendingPushPedidoId = null;
+
+function mostrarPromptPush(pedidoId) {
+  pendingPushPedidoId = pedidoId;
+  document.getElementById('pushPromptTitle').textContent = t('pushPromptTitle');
+  document.getElementById('pushPromptMsg').textContent = t('pushPromptMsg');
+  document.getElementById('pushPromptSkipBtn').textContent = t('pushPromptSkip');
+  document.getElementById('pushPromptAcceptBtn').textContent = t('pushPromptAccept');
+  document.getElementById('pushPromptbg').classList.add('on');
+}
+
+function aceptarAvisoPush() {
+  document.getElementById('pushPromptbg').classList.remove('on');
+  if (pendingPushPedidoId) suscribirPush(pendingPushPedidoId);
+  pendingPushPedidoId = null;
+}
+
+function rechazarAvisoPush() {
+  document.getElementById('pushPromptbg').classList.remove('on');
+  pendingPushPedidoId = null;
 }
 
 // ── WEB PUSH (funciona aunque el cliente cierre la pestaña) ──
