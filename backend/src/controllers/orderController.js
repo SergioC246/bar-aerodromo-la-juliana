@@ -99,7 +99,13 @@ exports.updateOrderStatus = async (req, res, next) => {
         } catch (pushErr) {
           // Un fallo de push (suscripción caducada, navegador cerrado del todo, etc.)
           // no debe romper la respuesta de la API: el pedido igualmente queda marcado como listo.
-          console.warn('⚠️  No se pudo enviar la notificación Web Push:', pushErr.message);
+          // Sacamos el detalle real del error (statusCode/body) porque el mensaje genérico de
+          // la librería ("Received unexpected response code") no dice nada por sí solo.
+          console.warn(
+            '⚠️  No se pudo enviar la notificación Web Push:',
+            pushErr.statusCode ? `[${pushErr.statusCode}]` : '',
+            pushErr.body || pushErr.message
+          );
         }
       }
     }
