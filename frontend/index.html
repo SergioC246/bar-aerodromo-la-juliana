@@ -1036,13 +1036,20 @@ async function suscribirPush(pedidoId) {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try {
     const reg = await navigator.serviceWorker.register('/sw.js');
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
+
+    // Si ya había una suscripción de antes (por ejemplo, de una clave VAPID anterior),
+    // hay que darla de baja explícitamente: el navegador no la invalida solo, y si la
+    // reutilizamos sin más el servidor firma con la clave nueva pero el navegador sigue
+    // registrado con la vieja → el push queda rechazado (permission denied: invalid JWT).
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) {
+      try { await existing.unsubscribe(); } catch (e) {}
     }
+
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
     await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
