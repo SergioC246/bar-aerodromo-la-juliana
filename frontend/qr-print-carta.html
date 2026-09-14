@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Carta - Bar Aeródromo La Juliana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1a1610;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      gap: 16px;
+    }
+
+    .card {
+      background: #0c0b09;
+      border: 2px solid #d4a853;
+      border-radius: 20px;
+      padding: 32px 36px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(212,168,83,0.1);
+    }
+
+    .logo {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 1px solid rgba(212,168,83,0.5);
+      background: rgba(212,168,83,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 14px;
+    }
+
+    .brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #f2ede6;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+
+    .brand em {
+      color: #d4a853;
+      font-style: italic;
+      display: block;
+      font-size: 30px;
+    }
+
+    .divider {
+      width: 50px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4a853, transparent);
+      margin: 14px auto;
+    }
+
+    .instruction {
+      font-size: 13px;
+      color: #9a9080;
+      letter-spacing: 0.3px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .instruction strong {
+      color: #d4a853;
+      display: block;
+      font-size: 15px;
+      margin-bottom: 3px;
+    }
+
+    .qr-wrapper {
+      background: white;
+      border-radius: 14px;
+      padding: 16px;
+      display: inline-block;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    #qrcode canvas,
+    #qrcode img {
+      display: block;
+    }
+
+    .url {
+      font-size: 10px;
+      color: #5a5248;
+      word-break: break-all;
+      margin-bottom: 18px;
+      font-family: monospace;
+    }
+
+    .tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px;
+      color: #d4a853;
+      font-style: italic;
+      margin-bottom: 4px;
+    }
+
+    .sub {
+      font-size: 10px;
+      color: #5a5248;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .print-btn {
+      background: #d4a853;
+      color: #0c0b09;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 36px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .print-btn:hover {
+      background: #e8c87a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212,168,83,0.3);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #5a5248;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+        min-height: auto;
+        justify-content: flex-start;
+      }
+
+      .card {
+        background: white;
+        border: 2px solid #d4a853;
+        box-shadow: none;
+        max-width: 100%;
+        border-radius: 0;
+        padding: 24px;
+      }
+
+      .brand { color: #1a1610; }
+      .instruction { color: #666; }
+      .instruction strong { color: #c9a43c; }
+      .url { color: #aaa; }
+      .tagline { color: #c9a43c; }
+      .sub { color: #aaa; }
+      .print-btn, .hint { display: none; }
+
+      @page {
+        size: A5;
+        margin: 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">✈️</div>
+    <div class="brand">
+      Bar Aeródromo
+      <em>La Juliana</em>
+    </div>
+    <div class="divider"></div>
+    <div class="instruction">
+      <strong>📖 Escanea para ver la carta</strong>
+      Consulta nuestra carta completa desde el móvil.<br>Pide y paga en barra como siempre.
+    </div>
+    <div class="qr-wrapper">
+      <div id="qrcode"></div>
+    </div>
+    <div class="url" id="urlText"></div>
+    <div class="tagline">Solo consulta · Pide en barra</div>
+    <div class="sub">Menu only · Order at the counter</div>
+  </div>
+
+  <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Print</button>
+  <div class="hint">Tamaño A5 recomendado · Se puede plastificar</div>
+
+  <script>
+    // Mismo dominio que el QR de pedidos, pero con ?modo=carta: el index.html detecta este
+    // parámetro y oculta todo lo relacionado con pedir (carrito, botones de "+", checkout).
+    const url = 'https://bar-aerodromo-la-juliana.onrender.com/?modo=carta';
+    document.getElementById('urlText').textContent = url;
+    new QRCode(document.getElementById('qrcode'), {
+      text: url,
+      width: 200,
+      height: 200,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  </script>
+</body>
+</html>

@@ -224,9 +224,15 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 .loading-splash{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted);font-size:14px}
 .loading-spinner{width:32px;height:32px;border:3px solid var(--border);border-top:3px solid var(--gold);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+/* ── Modo "solo carta": sin botones de pedido, solo consulta ── */
+.carta-banner{display:none;position:sticky;top:0;z-index:150;background:linear-gradient(90deg,rgba(212,168,83,0.2),rgba(224,123,48,0.2));border-bottom:1px solid rgba(212,168,83,0.4);color:var(--gold2);font-size:12px;font-weight:600;text-align:center;padding:10px 16px;letter-spacing:0.2px;line-height:1.5}
+.carta-banner.on{display:block}
 </style>
 </head>
 <body>
+
+<div class="carta-banner" id="cartaBanner"></div>
 
 <div id="addToast">
   <div class="toast-inner">
@@ -381,6 +387,9 @@ function detectDefaultLang() {
   return nav.startsWith('es') ? 'es' : 'en';
 }
 let lang = detectDefaultLang(), cart = {}, curCatId = null, curSubKey = null, curScreen = 'items', MENU = [];
+// Modo "solo carta": QR distinto (?modo=carta) para bares que solo quieren que se consulte
+// el menú desde el móvil, pero que el pedido se haga y se pague en barra como siempre.
+const SOLO_CARTA = new URLSearchParams(window.location.search).get('modo') === 'carta';
 let toastTimer = null;
 let kitchenStatus = { abierta: true, hora_apertura: '', hora_cierre: '' };
 
@@ -390,13 +399,15 @@ const T = {
     closedTitle:"Kitchen is closed",closedMsg:"Sorry, the kitchen is closed right now. If you'd like to keep enjoying our products, please head to the bar counter.",closedHoursLbl:"Kitchen hours: ",closedRetry:"Try again",closedAuto:"This screen updates automatically",
     halfToast:"Half toast",fullToast:"Whole toast",fromPrice:"From",toastModalTitle:"Half toast or whole — {item}?",toastModalSub:"🥖 Half toast = one side of the baguette. Whole toast = both sides (double portion).",
     orderReadyTitle:"Your order is ready! 🎉",orderReadyMsg:"Please come to the counter to collect it.",orderReadyBtn:"Great, thanks!",
-    pushPromptTitle:"Want us to notify you?",pushPromptMsg:"We'll send a notification to this phone as soon as your order is ready — even if you close this page.",pushPromptAccept:"🔔 Yes, notify me",pushPromptSkip:"Not now"},
+    pushPromptTitle:"Want us to notify you?",pushPromptMsg:"We'll send a notification to this phone as soon as your order is ready — even if you close this page.",pushPromptAccept:"🔔 Yes, notify me",pushPromptSkip:"Not now",
+    cartaBannerMsg:"🍽️ You're browsing the menu — to order, please go to the counter."},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
     closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
     halfToast:"Media tostada",fullToast:"Tostada entera",fromPrice:"Desde",toastModalTitle:"¿Media tostada o entera — {item}?",toastModalSub:"🥖 Media tostada = una sola cara del pan de baguette. Tostada entera = las dos caras del pan (ración doble).",
     orderReadyTitle:"¡Tu pedido está listo! 🎉",orderReadyMsg:"Puedes pasar a recogerlo a la barra.",orderReadyBtn:"¡Genial, gracias!",
-    pushPromptTitle:"¿Quieres que te avisemos?",pushPromptMsg:"Te mandaremos un aviso a este móvil en cuanto tu pedido esté listo — aunque cierres esta pantalla.",pushPromptAccept:"🔔 Sí, avisadme",pushPromptSkip:"Ahora no"}
+    pushPromptTitle:"¿Quieres que te avisemos?",pushPromptMsg:"Te mandaremos un aviso a este móvil en cuanto tu pedido esté listo — aunque cierres esta pantalla.",pushPromptAccept:"🔔 Sí, avisadme",pushPromptSkip:"Ahora no",
+    cartaBannerMsg:"🍽️ Estás consultando la carta — para pedir, dirígete a la barra."}
 };
 const t = k => T[lang][k] || k;
 
@@ -447,9 +458,17 @@ function syncLangPills() {
   });
 }
 
+function actualizarBannerCarta() {
+  if (!SOLO_CARTA) return;
+  const el = document.getElementById('cartaBanner');
+  el.textContent = t('cartaBannerMsg');
+  el.classList.add('on');
+}
+
 function setLang(l) {
   lang = l;
   syncLangPills();
+  actualizarBannerCarta();
   renderSplash();
   if (curCatId !== null) {
     if (curScreen === 'subcats') renderSubcats(curCatId);
@@ -491,7 +510,7 @@ function openSec(catId) {
   curSubKey = null;
   document.getElementById('splash').style.display = 'none';
   document.getElementById('secView').style.display = 'block';
-  document.getElementById('qrBtn').style.display = 'flex';
+  document.getElementById('qrBtn').style.display = SOLO_CARTA ? 'none' : 'flex';
 
   const cat = MENU.find(c => c.id === catId);
   if (catHasSubs(cat)) {
@@ -613,7 +632,7 @@ function renderItems(catId, subKey) {
       if (!subs[key]) subs[key] = { nombre: p.subseccion, nombre_en: p.subseccion_en, items: [] };
       subs[key].items.push(p);
     });
-    if (cat.nombre === 'Entrantes' || cat.nombre_en === 'Starters') body.appendChild(mkXF());
+    if (!SOLO_CARTA && (cat.nombre === 'Entrantes' || cat.nombre_en === 'Starters')) body.appendChild(mkXF());
     Object.keys(subs).forEach(key => {
       const sub = subs[key];
       if (key !== '__none__') {
@@ -624,7 +643,7 @@ function renderItems(catId, subKey) {
       }
       sub.items.forEach(p => body.appendChild(mkItem(p, cat)));
     });
-    if (cat.nombre === 'Comidas' || cat.nombre_en === 'Mains') {
+    if (!SOLO_CARTA && (cat.nombre === 'Comidas' || cat.nombre_en === 'Mains')) {
       const st = document.createElement('div');
       st.className = 'ssub'; st.textContent = 'Extras';
       body.appendChild(st);
@@ -671,10 +690,10 @@ function mkItem(p, cat) {
     </div>
     <div class="ir">
       <div class="iprice">${parseFloat(p.precio).toFixed(2)}€</div>
-      <div class="qrow">
+      ${SOLO_CARTA ? '' : `<div class="qrow">
         ${qty > 0 ? `<button class="qb" onclick="adj('${id}','${esc(name)}',${p.precio},-1,'${esc(p.nombre)}','${tipo}')">−</button><span class="qn">${qty}</span>` : ''}
         <button class="${qty===0?'qadd':'qb'}" onclick="adjAndToast('${id}','${esc(name)}',${p.precio},1,'${esc(p.nombre)}','${tipo}')">+</button>
-      </div>
+      </div>`}
     </div>`;
   return d;
 }
@@ -727,9 +746,9 @@ function mkToastItem(p) {
     </div>
     <div class="ir">
       <div class="iprice">${t('fromPrice')} ${priceHalf.toFixed(2)}€</div>
-      <div class="qrow">
+      ${SOLO_CARTA ? '' : `<div class="qrow">
         <button class="qadd" onclick="openToastModal(${p.id})">+</button>
-      </div>
+      </div>`}
     </div>`;
   return d;
 }
@@ -1243,6 +1262,15 @@ function printQR() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  if (SOLO_CARTA) {
+    // Modo solo-consulta: sin carrito, sin bloqueo por horario de cocina (es solo para mirar
+    // la carta, el pedido se hace y se paga en barra como siempre).
+    document.querySelector('.cart-pill')?.style.setProperty('display', 'none');
+    actualizarBannerCarta();
+    loadMenu();
+    return;
+  }
+
   const open = await checkKitchenStatus();
   if (open) loadMenu();
   else lockKitchenClosed();
