@@ -117,9 +117,36 @@
     /* SOUND TOGGLE */
     .sound-btn { background: var(--card2); border: 1px solid var(--border2); border-radius: 10px; color: var(--muted); padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
     .sound-btn.on { border-color: var(--green); color: var(--green); background: rgba(76,175,80,0.1); }
+
+    /* MODAL DE CONFIRMACIÓN (reemplaza al confirm() nativo del navegador) */
+    .confirm-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 998; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px); }
+    .confirm-bg.on { display: flex; }
+    .confirm-box { background: var(--card); border: 1px solid var(--border2); border-radius: 18px; padding: 32px 28px; width: 100%; max-width: 380px; text-align: center; animation: confirmPop 0.25s cubic-bezier(0.175,0.885,0.32,1.275); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    @keyframes confirmPop { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .confirm-ico { font-size: 46px; display: block; margin-bottom: 12px; }
+    .confirm-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; color: var(--gold); margin-bottom: 10px; line-height: 1.3; }
+    .confirm-msg { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 26px; }
+    .confirm-actions { display: flex; gap: 10px; }
+    .confirm-cancel { flex: 1; background: none; border: 1px solid var(--border2); border-radius: 10px; color: var(--muted); padding: 13px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .confirm-cancel:hover { border-color: var(--border2); color: var(--text); background: var(--card2); }
+    .confirm-accept { flex: 1; background: var(--green); border: none; border-radius: 10px; color: #fff; padding: 13px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .confirm-accept:hover { background: #5cc260; }
   </style>
 </head>
 <body>
+
+  <!-- MODAL DE CONFIRMACIÓN: marcar comanda como lista -->
+  <div class="confirm-bg" id="confirmbg" onclick="if(event.target===this) cancelarConfirmListo()">
+    <div class="confirm-box">
+      <span class="confirm-ico">✅</span>
+      <div class="confirm-title" id="confirmTitle">¿Comanda lista?</div>
+      <div class="confirm-msg" id="confirmMsg"></div>
+      <div class="confirm-actions">
+        <button class="confirm-cancel" onclick="cancelarConfirmListo()">Cancelar</button>
+        <button class="confirm-accept" onclick="aceptarConfirmListo()">✓ Sí, está lista</button>
+      </div>
+    </div>
+  </div>
 
   <!-- NOTIFICATION TOAST -->
   <div class="notif-toast" id="notifToast">🔔 ¡Nuevo pedido!</div>
@@ -388,14 +415,32 @@
       }).join('');
     }
 
+    let pedidoPendienteListoId = null;
+
     async function markReady(orderId) {
       // Confirmación pedida por el cliente: como el cobro final se hace desde Barra,
       // un toque accidental aquí marca el pedido como listo (y avisa al cliente) sin querer.
       const pedido = ordersEnProceso[orderId];
       const num = orderNumberMap[orderId] || '?';
       const nombre = pedido ? pedido.customer_name : '';
-      const confirmMsg = `¿Seguro que la comanda #${num}${nombre ? ' (' + nombre + ')' : ''} está lista?\n\nSe avisará al cliente de que ya puede pasar a recogerla.`;
-      if (!confirm(confirmMsg)) return;
+      pedidoPendienteListoId = orderId;
+      document.getElementById('confirmTitle').textContent = `¿Comanda #${num} lista?`;
+      document.getElementById('confirmMsg').innerHTML =
+        (nombre ? `<strong style="color:var(--text)">${escapeHtml(nombre)}</strong><br>` : '') +
+        'Se avisará al cliente de que ya puede pasar a recogerla.';
+      document.getElementById('confirmbg').classList.add('on');
+    }
+
+    function cancelarConfirmListo() {
+      document.getElementById('confirmbg').classList.remove('on');
+      pedidoPendienteListoId = null;
+    }
+
+    async function aceptarConfirmListo() {
+      const orderId = pedidoPendienteListoId;
+      document.getElementById('confirmbg').classList.remove('on');
+      pedidoPendienteListoId = null;
+      if (!orderId) return;
 
       try {
         const res = await fetch(`/api/orders/${orderId}/status`, {
