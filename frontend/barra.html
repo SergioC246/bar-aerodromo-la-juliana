@@ -389,6 +389,14 @@
     }
 
     async function markReady(orderId) {
+      // Confirmación pedida por el cliente: como el cobro final se hace desde Barra,
+      // un toque accidental aquí marca el pedido como listo (y avisa al cliente) sin querer.
+      const pedido = ordersEnProceso[orderId];
+      const num = orderNumberMap[orderId] || '?';
+      const nombre = pedido ? pedido.customer_name : '';
+      const confirmMsg = `¿Seguro que la comanda #${num}${nombre ? ' (' + nombre + ')' : ''} está lista?\n\nSe avisará al cliente de que ya puede pasar a recogerla.`;
+      if (!confirm(confirmMsg)) return;
+
       try {
         const res = await fetch(`/api/orders/${orderId}/status`, {
           method: 'PATCH', headers: {'Content-Type':'application/json'},
