@@ -360,6 +360,20 @@ tr:hover td{background:rgba(255,255,255,0.015)}
   </div>
 </div>
 
+<!-- MODAL CONFIRMACIÓN DE BORRADO (categoría / producto) -->
+<div class="modal-bg" id="confirmDeleteBg">
+  <div class="modal" style="max-width:420px;text-align:center">
+    <div style="font-size:46px;margin-bottom:6px">⚠️</div>
+    <div class="modal-title" id="confirmDeleteTitle" style="margin-bottom:10px">¿Eliminar este elemento?</div>
+    <div id="confirmDeleteMsg" style="color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:6px"></div>
+    <div style="color:var(--red);font-size:12px;font-weight:600;margin-bottom:10px">Esta acción no se puede deshacer.</div>
+    <div class="modal-footer" style="justify-content:center">
+      <button class="btn-secondary" onclick="cerrarConfirmDelete()">Cancelar</button>
+      <button class="btn-danger" id="confirmDeleteBtn" style="padding:10px 20px;font-size:14px">🗑 Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL INFORME DEL DÍA -->
 <div class="modal-bg" id="informeModal">
   <div class="modal" style="max-width:680px">
@@ -486,6 +500,29 @@ function escapeHtml(text) {
   const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
   return String(text).replace(/[&<>"']/g, m => map[m]);
 }
+
+// ── CONFIRMACIÓN DE BORRADO (reemplaza al confirm() nativo, poco visible y fácil de
+// pulsar sin leer por costumbre) ──
+let confirmDeleteAction = null;
+
+function confirmarBorrado(titulo, mensajeHtml, onConfirm) {
+  document.getElementById('confirmDeleteTitle').textContent = titulo;
+  document.getElementById('confirmDeleteMsg').innerHTML = mensajeHtml;
+  confirmDeleteAction = onConfirm;
+  document.getElementById('confirmDeleteBg').classList.add('on');
+}
+
+function cerrarConfirmDelete() {
+  document.getElementById('confirmDeleteBg').classList.remove('on');
+  confirmDeleteAction = null;
+}
+
+document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+  const accion = confirmDeleteAction;
+  document.getElementById('confirmDeleteBg').classList.remove('on');
+  confirmDeleteAction = null;
+  if (accion) accion();
+});
 
 // ── AUTH ──
 async function doLogin() {
@@ -644,9 +681,16 @@ async function saveCategoria() {
 }
 
 async function deleteCategoria(id) {
-  if(!confirm('¿Eliminar esta categoría y todos sus productos?')) return;
-  try { await fetch(`/api/carta/categorias/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadMenu(); showToast('Categoría eliminada'); }
-  catch { showToast('Error eliminando categoría',true); }
+  const cat = categorias.find(c => c.id === id);
+  const nombre = cat ? cat.nombre : 'esta categoría';
+  confirmarBorrado(
+    '¿Eliminar categoría?',
+    `Se eliminará <strong style="color:var(--text)">${escapeHtml(nombre)}</strong> y TODOS sus productos.`,
+    async () => {
+      try { await fetch(`/api/carta/categorias/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadMenu(); showToast('Categoría eliminada'); }
+      catch { showToast('Error eliminando categoría',true); }
+    }
+  );
 }
 
 // ── PRODUCTOS CRUD ──
@@ -708,9 +752,16 @@ async function saveProducto() {
 }
 
 async function deleteProducto(id) {
-  if(!confirm('¿Eliminar este producto?')) return;
-  try { await fetch(`/api/carta/productos/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadMenu(); showToast('Producto eliminado'); }
-  catch { showToast('Error eliminando producto',true); }
+  let nombre = 'este producto';
+  categorias.forEach(cat => { const p = (cat.productos||[]).find(p=>p.id===id); if(p) nombre = p.nombre; });
+  confirmarBorrado(
+    '¿Eliminar producto?',
+    `Se eliminará <strong style="color:var(--text)">${escapeHtml(nombre)}</strong> de la carta. Tendrás que volver a crearlo si te equivocas.`,
+    async () => {
+      try { await fetch(`/api/carta/productos/${id}`,{method:'DELETE',headers:{Authorization:'Bearer '+token}}); await loadMenu(); showToast('Producto eliminado'); }
+      catch { showToast('Error eliminando producto',true); }
+    }
+  );
 }
 
 // ── PEDIDOS ──

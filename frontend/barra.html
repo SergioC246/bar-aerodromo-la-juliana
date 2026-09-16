@@ -88,6 +88,8 @@
     .btn { flex: 1; padding: 14px 16px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
     .btn-ready { background: var(--green); color: white; }
     .btn-ready:hover { background: #45a049; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(76,175,80,0.3); }
+    .btn-undo { background: rgba(212,168,83,0.12); color: var(--gold); border: 1px solid rgba(212,168,83,0.4); }
+    .btn-undo:hover { background: var(--gold); color: #0c0b09; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212,168,83,0.25); }
     .btn-remove { background: var(--red); color: white; }
     .btn-remove:hover { background: #b83f33; transform: translateY(-2px); }
     .btn-toggle { background: var(--card2); color: var(--gold); border: 2px solid var(--gold); }
@@ -399,6 +401,7 @@
         ` : `
           <div class="actions">
             ${itemsFiltered.length > 0 ? `<button class="btn btn-toggle" id="toggle-${order.id}" onclick="toggleItems('${order.id}')">👁 Ver platos</button>` : ''}
+            <button class="btn btn-undo" onclick="unmarkReady('${order.id}')">↩ No hecho</button>
             <button class="btn btn-remove" onclick="removeOrder('${order.id}', false)">🗑 Limpiar</button>
           </div>
         `;
@@ -450,6 +453,22 @@
         if (res.ok) {
           delete ordersEnProceso[orderId];
           ordersHechas[orderId] = await res.json();
+          updateCounters(); renderBoard();
+        }
+      } catch(err) { alert('Error al actualizar pedido'); }
+    }
+
+    // Por si se marcó "Listo" por error: la devuelve a "En Proceso". No reenvía ningún
+    // aviso al cliente (el push/WS solo se dispara al pasar a "listo", no al revertir).
+    async function unmarkReady(orderId) {
+      try {
+        const res = await fetch(`/api/orders/${orderId}/status`, {
+          method: 'PATCH', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({status:'pendiente'})
+        });
+        if (res.ok) {
+          delete ordersHechas[orderId];
+          ordersEnProceso[orderId] = await res.json();
           updateCounters(); renderBoard();
         }
       } catch(err) { alert('Error al actualizar pedido'); }
