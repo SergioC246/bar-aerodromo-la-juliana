@@ -341,6 +341,15 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="sbg" id="errorPedidobg">
+  <div class="sbox">
+    <span class="sico">⚠️</span>
+    <div class="stitle" id="errorPedidoTitle">Something went wrong</div>
+    <div class="smsg" id="errorPedidoMsg"></div>
+    <button class="sbtn" onclick="cerrarErrorPedido()" id="errorPedidoBtn">Try again</button>
+  </div>
+</div>
+
 <div class="cmtbg" id="cmtbg" onclick="cmtBgClick(event)">
   <div class="cmtbox">
     <div class="cmt-title" id="cmtTitle">Add a note?</div>
@@ -422,7 +431,8 @@ const T = {
     pushPromptTitle:"Want us to notify you?",pushPromptMsg:"We'll send a notification to this phone as soon as your order is ready — even if you close this page.",pushPromptAccept:"🔔 Yes, notify me",pushPromptSkip:"Not now",
     cartaBannerMsg:"🍽️ You're browsing the menu — to order, please go to the counter.",
     pickupPastErr:"That time has already passed — please pick a later time.",
-    pickupWarnTitle:"Is that pickup time right?",pickupWarnMsg:"You picked {time} as your pickup time — that's over 6 hours from now. Is that correct?",pickupWarnFix:"Fix it",pickupWarnOk:"Yes, that's right"},
+    pickupWarnTitle:"Is that pickup time right?",pickupWarnMsg:"You picked {time} as your pickup time — that's over 6 hours from now. Is that correct?",pickupWarnFix:"Fix it",pickupWarnOk:"Yes, that's right",
+    errorPedidoTitle:"Something went wrong",errorPedidoMsg:"We couldn't send your order. Please check your connection and try again.",errorPedidoBtn:"Try again"},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
     closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
@@ -431,7 +441,8 @@ const T = {
     pushPromptTitle:"¿Quieres que te avisemos?",pushPromptMsg:"Te mandaremos un aviso a este móvil en cuanto tu pedido esté listo — aunque cierres esta pantalla.",pushPromptAccept:"🔔 Sí, avisadme",pushPromptSkip:"Ahora no",
     cartaBannerMsg:"🍽️ Estás consultando la carta — para pedir, dirígete a la barra.",
     pickupPastErr:"Esa hora ya ha pasado — elige una hora posterior.",
-    pickupWarnTitle:"¿Es correcta esa hora de recogida?",pickupWarnMsg:"Has puesto las {time} como hora de recogida — eso es dentro de más de 6 horas. ¿Es correcto?",pickupWarnFix:"Corregir hora",pickupWarnOk:"Sí, es correcta"}
+    pickupWarnTitle:"¿Es correcta esa hora de recogida?",pickupWarnMsg:"Has puesto las {time} como hora de recogida — eso es dentro de más de 6 horas. ¿Es correcto?",pickupWarnFix:"Corregir hora",pickupWarnOk:"Sí, es correcta",
+    errorPedidoTitle:"Algo ha fallado",errorPedidoMsg:"No hemos podido enviar tu pedido. Comprueba tu conexión e inténtalo de nuevo.",errorPedidoBtn:"Reintentar"}
 };
 const t = k => T[lang][k] || k;
 
@@ -1101,9 +1112,20 @@ function enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal) {
         if (pickupErr) { pickupErr.textContent = t('pickupPastErr'); pickupErr.style.display = 'block'; }
         document.getElementById('pTime')?.focus();
       } else {
-        alert(lang==='es'?'Error al enviar el pedido. Inténtalo de nuevo.':'Error sending order. Please try again.');
+        mostrarErrorPedido();
       }
     });
+}
+
+function mostrarErrorPedido() {
+  document.getElementById('errorPedidoTitle').textContent = t('errorPedidoTitle');
+  document.getElementById('errorPedidoMsg').textContent = t('errorPedidoMsg');
+  document.getElementById('errorPedidoBtn').textContent = t('errorPedidoBtn');
+  document.getElementById('errorPedidobg').classList.add('on');
+}
+
+function cerrarErrorPedido() {
+  document.getElementById('errorPedidobg').classList.remove('on');
 }
 
 function showSuccess(name, phone, pickup) {
