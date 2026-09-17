@@ -50,4 +50,4 @@ async function getEstadoCocina() {
   };
 }
 
-module.exports = { getEstadoCocina, getRawHorario, isWithinRange, TIMEZONE };
+module.exports = { getEstadoCocina, getRawHorario, isWithinRange, getCurrentTimeInTZ, TIMEZONE };

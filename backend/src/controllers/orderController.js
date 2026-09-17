@@ -1,8 +1,13 @@
 const Order = require('../models/Order');
-const { getEstadoCocina } = require('../utils/horario');
+const { getEstadoCocina, getCurrentTimeInTZ } = require('../utils/horario');
 const { webpush, habilitado: pushHabilitado } = require('../config/webpush');
 
 const VALID_STATUSES = ['pendiente', 'en_cocina', 'listo', 'entregado'];
+
+function horaAMinutos(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
 
 // Red de seguridad contra pedidos duplicados: si el mismo intento de pedido (misma
 // idempotencyKey generada por el cliente) llega más de una vez en poco tiempo —por doble
@@ -33,6 +38,16 @@ exports.createOrder = async (req, res, next) => {
 
     if (!/^[\d\s\-\+\(\)]{7,}$/.test(phone)) {
       return res.status(400).json({ error: 'Invalid phone number' });
+    }
+
+    // Red de seguridad por si alguien se salta la validación del front-end: nunca se
+    // acepta un pedido para una hora de recogida que ya ha pasado hoy.
+    if (pickupTime) {
+      const minutosAhora = horaAMinutos(getCurrentTimeInTZ());
+      const minutosPickup = horaAMinutos(pickupTime.substring(0, 5));
+      if (minutosPickup - minutosAhora < -1) {
+        return res.status(400).json({ error: 'La hora de recogida ya ha pasado' });
+      }
     }
 
     if (idempotencyKey) {

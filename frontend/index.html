@@ -329,6 +329,18 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="sbg" id="pickupWarnbg">
+  <div class="sbox">
+    <span class="sico">🕐</span>
+    <div class="stitle" id="pickupWarnTitle">Is that pickup time right?</div>
+    <div class="smsg" id="pickupWarnMsg"></div>
+    <div class="cmt-actions">
+      <button class="cmt-skip" id="pickupWarnFixBtn" onclick="corregirHoraRecogida()">Fix it</button>
+      <button class="cmt-save" id="pickupWarnOkBtn" onclick="confirmarHoraRecogida()">Yes, that's right</button>
+    </div>
+  </div>
+</div>
+
 <div class="cmtbg" id="cmtbg" onclick="cmtBgClick(event)">
   <div class="cmtbox">
     <div class="cmt-title" id="cmtTitle">Add a note?</div>
@@ -408,14 +420,18 @@ const T = {
     halfToast:"Half toast",fullToast:"Whole toast",fromPrice:"From",toastModalTitle:"Half toast or whole — {item}?",toastModalSub:"🥖 Half toast = one side of the baguette. Whole toast = both sides (double portion).",
     orderReadyTitle:"Your order is ready! 🎉",orderReadyMsg:"Please come to the counter to collect it.",orderReadyBtn:"Great, thanks!",
     pushPromptTitle:"Want us to notify you?",pushPromptMsg:"We'll send a notification to this phone as soon as your order is ready — even if you close this page.",pushPromptAccept:"🔔 Yes, notify me",pushPromptSkip:"Not now",
-    cartaBannerMsg:"🍽️ You're browsing the menu — to order, please go to the counter."},
+    cartaBannerMsg:"🍽️ You're browsing the menu — to order, please go to the counter.",
+    pickupPastErr:"That time has already passed — please pick a later time.",
+    pickupWarnTitle:"Is that pickup time right?",pickupWarnMsg:"You picked {time} as your pickup time — that's over 6 hours from now. Is that correct?",pickupWarnFix:"Fix it",pickupWarnOk:"Yes, that's right"},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
     closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
     halfToast:"Media tostada",fullToast:"Tostada entera",fromPrice:"Desde",toastModalTitle:"¿Media tostada o entera — {item}?",toastModalSub:"🥖 Media tostada = una sola cara del pan de baguette. Tostada entera = las dos caras del pan (ración doble).",
     orderReadyTitle:"¡Tu pedido está listo! 🎉",orderReadyMsg:"Puedes pasar a recogerlo a la barra.",orderReadyBtn:"¡Genial, gracias!",
     pushPromptTitle:"¿Quieres que te avisemos?",pushPromptMsg:"Te mandaremos un aviso a este móvil en cuanto tu pedido esté listo — aunque cierres esta pantalla.",pushPromptAccept:"🔔 Sí, avisadme",pushPromptSkip:"Ahora no",
-    cartaBannerMsg:"🍽️ Estás consultando la carta — para pedir, dirígete a la barra."}
+    cartaBannerMsg:"🍽️ Estás consultando la carta — para pedir, dirígete a la barra.",
+    pickupPastErr:"Esa hora ya ha pasado — elige una hora posterior.",
+    pickupWarnTitle:"¿Es correcta esa hora de recogida?",pickupWarnMsg:"Has puesto las {time} como hora de recogida — eso es dentro de más de 6 horas. ¿Es correcto?",pickupWarnFix:"Corregir hora",pickupWarnOk:"Sí, es correcta"}
 };
 const t = k => T[lang][k] || k;
 
@@ -926,7 +942,7 @@ function buildDrawer() {
   html += `<div class="form-block"><div class="stripe-disabled"><span class="sd-ico">💳</span><div class="sd-text"><div class="sd-title">${t('stripeTitle')}</div><div class="sd-sub">${t('stripeDisabled')}</div></div><span class="sd-badge">${t('stripeSub')}</span></div></div>`;
   html += `<div class="form-block"><label class="flabel">${t('nameLabel')}</label><input class="finput" id="custName" type="text" placeholder="${t('namePh')}" autocomplete="given-name" maxlength="40"><div class="req-err" id="nameErr">${t('nameReq')}</div></div>`;
   html += `<div class="form-block"><label class="flabel">${t('phoneLabel')}</label><input class="finput" id="custPhone" type="tel" placeholder="${t('phonePh')}" autocomplete="tel" maxlength="20" inputmode="numeric"><div class="req-err" id="phoneErr">${t('phoneReq')}</div></div>`;
-  html += `<div class="form-block" style="margin-bottom:8px"><label class="flabel">${t('pickup')}</label><input type="time" class="tinput" id="pTime" min="07:00" max="23:00"></div>`;
+  html += `<div class="form-block" style="margin-bottom:8px"><label class="flabel">${t('pickup')}</label><input type="time" class="tinput" id="pTime" min="07:00" max="23:00"><div class="req-err" id="pickupErr"></div></div>`;
 
   body.innerHTML = html;
   ft.style.display = 'block';
@@ -944,6 +960,7 @@ function delItem(id) {
 }
 
 let enviandoPedido = false;
+let pedidoPendienteDatos = null; // guarda los datos mientras se espera la respuesta del modal de hora
 
 async function placeOrder() {
   // Bloqueo inmediato: si ya hay un envío en curso (por ejemplo, varios toques seguidos
@@ -969,14 +986,34 @@ async function placeOrder() {
   const phoneInput = document.getElementById('custPhone');
   const nameErr    = document.getElementById('nameErr');
   const phoneErr   = document.getElementById('phoneErr');
+  const pickupInput = document.getElementById('pTime');
+  const pickupErr  = document.getElementById('pickupErr');
   const name  = nameInput?.value.trim() || '';
   const phone = phoneInput?.value.trim() || '';
+  const pickup = pickupInput?.value || '';
   let valid = true;
 
   if (!name) { if (nameErr) nameErr.style.display='block'; if (nameInput) nameInput.focus(); valid=false; }
   else { if (nameErr) nameErr.style.display='none'; }
   if (!phone || phone.replace(/\D/g,'').length < 6) { if (phoneErr) phoneErr.style.display='block'; if (valid && phoneInput) phoneInput.focus(); valid=false; }
   else { if (phoneErr) phoneErr.style.display='none'; }
+
+  // Hora de recogida: nunca se puede pedir para una hora que ya pasó hoy (con 1 minuto de
+  // margen, por si el reloj del cliente va un poco desajustado).
+  if (pickupErr) pickupErr.style.display = 'none';
+  let minutosHastaRecogida = null;
+  if (pickup) {
+    const [ph, pm] = pickup.split(':').map(Number);
+    const pickupDate = new Date();
+    pickupDate.setHours(ph, pm, 0, 0);
+    minutosHastaRecogida = (pickupDate - new Date()) / 60000;
+    if (minutosHastaRecogida < -1) {
+      if (pickupErr) { pickupErr.textContent = t('pickupPastErr'); pickupErr.style.display = 'block'; }
+      if (valid && pickupInput) pickupInput.focus();
+      valid = false;
+    }
+  }
+
   if (!valid) {
     enviandoPedido = false;
     btn.disabled = false;
@@ -984,7 +1021,44 @@ async function placeOrder() {
     return;
   }
 
-  const pickup = document.getElementById('pTime')?.value || '';
+  // Si pide para dentro de más de 6 horas, seguramente sea un despiste con el selector de
+  // hora (AM/PM, etc.) — se lo confirmamos antes de seguir, en vez de enviarlo sin más.
+  if (minutosHastaRecogida !== null && minutosHastaRecogida > 360) {
+    pedidoPendienteDatos = { name, phone, pickup, btn, textoOriginal };
+    document.getElementById('pickupWarnTitle').textContent = t('pickupWarnTitle');
+    document.getElementById('pickupWarnMsg').textContent = t('pickupWarnMsg').replace('{time}', pickup);
+    document.getElementById('pickupWarnFixBtn').textContent = t('pickupWarnFix');
+    document.getElementById('pickupWarnOkBtn').textContent = t('pickupWarnOk');
+    document.getElementById('pickupWarnbg').classList.add('on');
+    return; // enviandoPedido sigue en true hasta que el cliente elija en el modal
+  }
+
+  enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal);
+}
+
+// El cliente decide corregir la hora: cerramos el modal, reactivamos el botón y
+// dejamos el foco en el campo de hora para que la cambie.
+function corregirHoraRecogida() {
+  document.getElementById('pickupWarnbg').classList.remove('on');
+  if (pedidoPendienteDatos) {
+    pedidoPendienteDatos.btn.disabled = false;
+    pedidoPendienteDatos.btn.textContent = pedidoPendienteDatos.textoOriginal;
+  }
+  pedidoPendienteDatos = null;
+  enviandoPedido = false;
+  document.getElementById('pTime')?.focus();
+}
+
+// El cliente confirma que la hora es correcta: seguimos con el envío normal.
+function confirmarHoraRecogida() {
+  document.getElementById('pickupWarnbg').classList.remove('on');
+  if (!pedidoPendienteDatos) return;
+  const { name, phone, pickup, btn, textoOriginal } = pedidoPendienteDatos;
+  pedidoPendienteDatos = null;
+  enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal);
+}
+
+function enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal) {
   const items = Object.values(cart).map(item => ({ nombre: item.nombreEs || item.name, cantidad: item.qty, precio: item.price, comentario: item.comment || null, tipo: item.tipo || 'comida' }));
   // Clave única por intento de pedido: si por lo que sea el navegador reintenta el envío
   // (mala conexión, doble toque que se cuele, etc.), el servidor puede reconocer que es
@@ -996,6 +1070,10 @@ async function placeOrder() {
       if (res.status === 403) {
         const data = await res.json().catch(() => ({}));
         throw { closed: true, horario: data.horario };
+      }
+      if (res.status === 400) {
+        const data = await res.json().catch(() => ({}));
+        throw { badRequest: true, message: data.error };
       }
       if (!res.ok) throw new Error('Error');
       return res.json();
@@ -1018,6 +1096,10 @@ async function placeOrder() {
       if (err && err.closed) {
         if (err.horario) kitchenStatus = err.horario;
         lockKitchenClosed();
+      } else if (err && err.badRequest) {
+        const pickupErr = document.getElementById('pickupErr');
+        if (pickupErr) { pickupErr.textContent = t('pickupPastErr'); pickupErr.style.display = 'block'; }
+        document.getElementById('pTime')?.focus();
       } else {
         alert(lang==='es'?'Error al enviar el pedido. Inténtalo de nuevo.':'Error sending order. Please try again.');
       }
