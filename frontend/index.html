@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Sentry: monitorización de errores del cliente (proyecto bar-aerodromo-frontend) -->
+<script src="https://js-de.sentry-cdn.com/acfa4b5de2e389efe6f917bf908b155f.min.js" crossorigin="anonymous"></script>
+<script>
+  Sentry.onLoad(function () {
+    Sentry.init({
+      environment: (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'development' : 'production',
+      sendDefaultPii: false,
+      beforeSend(event) {
+        // Los pedidos llevan nombre y teléfono del cliente: nos aseguramos de que nunca
+        // viajen a Sentry dentro del cuerpo de una petición ni de las cookies.
+        if (event.request) { delete event.request.data; delete event.request.cookies; }
+        return event;
+      }
+    });
+    Sentry.setTag('pagina', 'index');
+  });
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Bar Aeródromo La Juliana</title>
