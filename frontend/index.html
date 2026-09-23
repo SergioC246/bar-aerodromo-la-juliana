@@ -228,11 +228,30 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
 /* ── Modo "solo carta": sin botones de pedido, solo consulta ── */
 .carta-banner{display:none;position:sticky;top:0;z-index:150;background:linear-gradient(90deg,rgba(212,168,83,0.2),rgba(224,123,48,0.2));border-bottom:1px solid rgba(212,168,83,0.4);color:var(--gold2);font-size:12px;font-weight:600;text-align:center;padding:10px 16px;letter-spacing:0.2px;line-height:1.5}
 .carta-banner.on{display:block}
+
+/* ── Banner de consentimiento de cookies (Google Analytics) ── */
+.cookie-banner{display:none;position:fixed;left:0;right:0;bottom:0;z-index:400;background:var(--card);border-top:1px solid var(--border2);padding:16px 18px;flex-direction:column;gap:12px;box-shadow:0 -8px 32px rgba(0,0,0,0.4)}
+.cookie-banner.on{display:flex}
+.cookie-text{font-size:12px;color:var(--muted);line-height:1.5}
+.cookie-actions{display:flex;gap:10px}
+.cookie-decline{flex:1;background:none;border:1px solid var(--border2);border-radius:var(--rs);color:var(--muted);padding:11px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.cookie-decline:hover{color:var(--text);background:var(--card2)}
+.cookie-accept{flex:1;background:var(--gold);border:none;border-radius:var(--rs);color:#0c0b09;padding:11px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s}
+.cookie-accept:hover{background:var(--gold2)}
+@media(min-width:560px){.cookie-banner{flex-direction:row;align-items:center;padding:14px 24px}.cookie-text{flex:1}.cookie-actions{flex-shrink:0}.cookie-decline,.cookie-accept{flex:none;padding:10px 22px}}
 </style>
 </head>
 <body>
 
 <div class="carta-banner" id="cartaBanner"></div>
+
+<div class="cookie-banner" id="cookieBanner">
+  <div class="cookie-text" id="cookieText">🍪 Usamos Google Analytics para entender cómo se usa la carta y mejorar el servicio. No usamos esta información para publicidad.</div>
+  <div class="cookie-actions">
+    <button class="cookie-decline" onclick="rechazarCookies()" id="cookieDeclineBtn">Rechazar</button>
+    <button class="cookie-accept" onclick="aceptarCookies()" id="cookieAcceptBtn">Aceptar</button>
+  </div>
+</div>
 
 <div id="addToast">
   <div class="toast-inner">
@@ -419,6 +438,69 @@ function generarIdempotencyKey() {
   return 'idk-' + Date.now() + '-' + Math.random().toString(36).slice(2);
 }
 let pedidoIdempotencyKey = generarIdempotencyKey();
+
+// ── GOOGLE ANALYTICS (GA4) ──
+// Solo se carga si el cliente acepta el banner de cookies. Sin consentimiento, gtag.js
+// no se llega ni a descargar — cero seguimiento por defecto.
+const GA_MEASUREMENT_ID = 'G-C68K5VH8YP';
+let gaConsentimiento = null; // 'granted' | 'denied' | null (aún no decidido)
+try { gaConsentimiento = localStorage.getItem('ga_consent'); } catch(e) {}
+let cocinaClosedTrackeada = false;
+
+function cargarGoogleAnalytics() {
+  if (window.gaCargado) return;
+  window.gaCargado = true;
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(script);
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ window.dataLayer.push(arguments); }
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', GA_MEASUREMENT_ID, { anonymize_ip: true });
+}
+
+function trackEvent(nombre, params) {
+  if (gaConsentimiento !== 'granted' || typeof window.gtag !== 'function') return;
+  try { window.gtag('event', nombre, params || {}); } catch(e) {}
+}
+
+function aceptarCookies() {
+  gaConsentimiento = 'granted';
+  try { localStorage.setItem('ga_consent', 'granted'); } catch(e) {}
+  document.getElementById('cookieBanner').classList.remove('on');
+  cargarGoogleAnalytics();
+  trackEvent('carta_abierta', { modo: SOLO_CARTA ? 'solo_carta' : 'pedido' });
+}
+
+function rechazarCookies() {
+  gaConsentimiento = 'denied';
+  try { localStorage.setItem('ga_consent', 'denied'); } catch(e) {}
+  document.getElementById('cookieBanner').classList.remove('on');
+}
+
+function actualizarTextoCookies() {
+  document.getElementById('cookieText').textContent = t('cookieText');
+  document.getElementById('cookieAcceptBtn').textContent = t('cookieAccept');
+  document.getElementById('cookieDeclineBtn').textContent = t('cookieDecline');
+}
+
+function inicializarAnalytics() {
+  actualizarTextoCookies();
+  if (gaConsentimiento === 'granted') {
+    cargarGoogleAnalytics();
+    trackEvent('carta_abierta', { modo: SOLO_CARTA ? 'solo_carta' : 'pedido' });
+  } else if (gaConsentimiento === null) {
+    document.getElementById('cookieBanner').classList.add('on');
+  }
+  // Si es 'denied', no hacemos nada: ni banner ni carga de GA.
+}
+
+function totalCarrito() {
+  return Object.values(cart).reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
 let toastTimer = null;
 let kitchenStatus = { abierta: true, hora_apertura: '', hora_cierre: '' };
 
@@ -432,7 +514,8 @@ const T = {
     cartaBannerMsg:"🍽️ You're browsing the menu — to order, please go to the counter.",
     pickupPastErr:"That time has already passed — please pick a later time.",
     pickupWarnTitle:"Is that pickup time right?",pickupWarnMsg:"You picked {time} as your pickup time — that's over 6 hours from now. Is that correct?",pickupWarnFix:"Fix it",pickupWarnOk:"Yes, that's right",
-    errorPedidoTitle:"Something went wrong",errorPedidoMsg:"We couldn't send your order. Please check your connection and try again.",errorPedidoBtn:"Try again"},
+    errorPedidoTitle:"Something went wrong",errorPedidoMsg:"We couldn't send your order. Please check your connection and try again.",errorPedidoBtn:"Try again",
+    cookieText:"🍪 We use Google Analytics to understand how the menu is used and improve the service. We don't use this for advertising.",cookieAccept:"Accept",cookieDecline:"Decline"},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
     cmtTitle:"¿Añadir un comentario a {item}?",cmtSub:"¿Algún extra que quieras añadir o algo que prefieras quitar?",cmtPh:"ej. sin cebolla, salsa extra...",cmtSkip:"Omitir",cmtSave:"Guardar comentario",addNote:"💬 Añadir comentario",editNote:"editar",
     closedTitle:"Cocina cerrada",closedMsg:"Lo sentimos, la cocina está cerrada en este momento. Si quieres seguir disfrutando de nuestros productos, dirígete a la barra.",closedHoursLbl:"Horario de cocina: ",closedRetry:"Reintentar",closedAuto:"Esta pantalla se actualiza automáticamente",
@@ -442,7 +525,8 @@ const T = {
     cartaBannerMsg:"🍽️ Estás consultando la carta — para pedir, dirígete a la barra.",
     pickupPastErr:"Esa hora ya ha pasado — elige una hora posterior.",
     pickupWarnTitle:"¿Es correcta esa hora de recogida?",pickupWarnMsg:"Has puesto las {time} como hora de recogida — eso es dentro de más de 6 horas. ¿Es correcto?",pickupWarnFix:"Corregir hora",pickupWarnOk:"Sí, es correcta",
-    errorPedidoTitle:"Algo ha fallado",errorPedidoMsg:"No hemos podido enviar tu pedido. Comprueba tu conexión e inténtalo de nuevo.",errorPedidoBtn:"Reintentar"}
+    errorPedidoTitle:"Algo ha fallado",errorPedidoMsg:"No hemos podido enviar tu pedido. Comprueba tu conexión e inténtalo de nuevo.",errorPedidoBtn:"Reintentar",
+    cookieText:"🍪 Usamos Google Analytics para entender cómo se usa la carta y mejorar el servicio. No usamos esta información para publicidad.",cookieAccept:"Aceptar",cookieDecline:"Rechazar"}
 };
 const t = k => T[lang][k] || k;
 
@@ -504,6 +588,7 @@ function setLang(l) {
   lang = l;
   syncLangPills();
   actualizarBannerCarta();
+  actualizarTextoCookies();
   renderSplash();
   if (curCatId !== null) {
     if (curScreen === 'subcats') renderSubcats(curCatId);
@@ -548,6 +633,7 @@ function openSec(catId) {
   document.getElementById('qrBtn').style.display = SOLO_CARTA ? 'none' : 'flex';
 
   const cat = MENU.find(c => c.id === catId);
+  trackEvent('categoria_vista', { categoria: cat ? (cat.nombre_en || cat.nombre) : String(catId) });
   if (catHasSubs(cat)) {
     curScreen = 'subcats';
     renderSubcats(catId);
@@ -852,7 +938,10 @@ function esc(s) { return s.replace(/'/g,"\\'"); }
 
 function adjAndToast(id, name, price, delta, nombreEs, tipo) {
   adj(id, name, price, delta, nombreEs, tipo);
-  if (delta > 0) showToast();
+  if (delta > 0) {
+    showToast();
+    trackEvent('item_anadido_carrito', { item: nombreEs || name, precio: price, tipo: tipo || 'comida' });
+  }
 }
 
 // nombreEs: nombre del producto SIEMPRE en español, independientemente del idioma
@@ -914,7 +1003,12 @@ function refreshBadge() {
   b.textContent = n; b.classList.toggle('on', n>0);
 }
 
-function openCart() { buildDrawer(); document.getElementById('dbg').classList.add('on'); document.body.style.overflow='hidden'; }
+function openCart() {
+  buildDrawer();
+  document.getElementById('dbg').classList.add('on');
+  document.body.style.overflow='hidden';
+  trackEvent('carrito_abierto', { items: Object.values(cart).reduce((s,i)=>s+i.qty,0), valor: totalCarrito() });
+}
 function closeCart() { document.getElementById('dbg').classList.remove('on'); document.body.style.overflow=''; }
 function bgClick(e) { if (e.target===document.getElementById('dbg')) closeCart(); }
 
@@ -979,6 +1073,7 @@ async function placeOrder() {
   // desde el primer instante, antes de comprobar nada por red.
   if (enviandoPedido) return;
   enviandoPedido = true;
+  trackEvent('pedido_iniciado', { items: Object.values(cart).reduce((s,i)=>s+i.qty,0), valor: totalCarrito() });
 
   const btn = document.getElementById('orderBtn');
   const textoOriginal = btn.textContent;
@@ -1094,6 +1189,12 @@ function enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal) {
         suscribirPedido(order.id);
         pedidoRecienCreado = order.id;
       }
+      trackEvent('pedido_completado', {
+        valor: items.reduce((s,i)=>s+i.precio*i.cantidad,0),
+        moneda: 'EUR',
+        items: items.reduce((s,i)=>s+i.cantidad,0),
+        con_hora_recogida: !!pickup
+      });
       // Pedido enviado con éxito: liberamos el candado y generamos una clave nueva
       // para el PRÓXIMO pedido que haga (este ya quedó registrado, si repite el toque
       // por error el servidor lo reconocería igualmente como el mismo intento).
@@ -1234,11 +1335,13 @@ function aceptarAvisoPush() {
   document.getElementById('pushPromptbg').classList.remove('on');
   if (pendingPushPedidoId) suscribirPush(pendingPushPedidoId);
   pendingPushPedidoId = null;
+  trackEvent('push_notif_aceptado', {});
 }
 
 function rechazarAvisoPush() {
   document.getElementById('pushPromptbg').classList.remove('on');
   pendingPushPedidoId = null;
+  trackEvent('push_notif_rechazado', {});
 }
 
 // ── WEB PUSH (funciona aunque el cliente cierre la pestaña) ──
@@ -1338,6 +1441,7 @@ function lockKitchenClosed() {
   document.getElementById('qrBtn').style.display = 'none';
   document.body.style.overflow = 'hidden';
   syncLangPills();
+  if (!cocinaClosedTrackeada) { cocinaClosedTrackeada = true; trackEvent('cocina_cerrada_vista', {}); }
 
   document.getElementById('closedTitle').textContent = t('closedTitle');
   let msg = t('closedMsg');
@@ -1360,6 +1464,7 @@ function lockKitchenClosed() {
 function unlockKitchen() {
   clearInterval(closedPollTimer);
   closedPollTimer = null;
+  cocinaClosedTrackeada = false;
   document.body.style.overflow = '';
   document.getElementById('closedbg').classList.remove('on');
   document.getElementById('qrBtn').style.display = curCatId !== null ? 'flex' : 'none';
@@ -1401,6 +1506,8 @@ function printQR() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  inicializarAnalytics();
+
   if (SOLO_CARTA) {
     // Modo solo-consulta: sin carrito, sin bloqueo por horario de cocina (es solo para mirar
     // la carta, el pedido se hace y se paga en barra como siempre).
