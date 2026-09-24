@@ -377,6 +377,18 @@ input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(0.6)}
   </div>
 </div>
 
+<div class="sbg" id="noPickupbg">
+  <div class="sbox">
+    <span class="sico">⏱️</span>
+    <div class="stitle" id="noPickupTitle">Pick it up as soon as possible?</div>
+    <div class="smsg" id="noPickupMsg"></div>
+    <div class="cmt-actions">
+      <button class="cmt-skip" id="noPickupFixBtn" onclick="elegirHoraRecogida()">Pick a time</button>
+      <button class="cmt-save" id="noPickupOkBtn" onclick="confirmarSinHora()">Yes, ASAP</button>
+    </div>
+  </div>
+</div>
+
 <div class="sbg" id="errorPedidobg">
   <div class="sbox">
     <span class="sico">⚠️</span>
@@ -531,6 +543,7 @@ const T = {
     cartaBannerMsg:"🍽️ You're browsing the menu — to order, please go to the counter.",
     pickupPastErr:"That time has already passed — please pick a later time.",
     pickupWarnTitle:"Is that pickup time right?",pickupWarnMsg:"You picked {time} as your pickup time — that's over 6 hours from now. Is that correct?",pickupWarnFix:"Fix it",pickupWarnOk:"Yes, that's right",
+    noPickupTitle:"Pick it up as soon as possible?",noPickupMsg:"You haven't set a pickup time — that means we'll understand you want it ready and picked up right away, as soon as possible. Is that right?",noPickupFix:"Pick a time",noPickupOk:"Yes, ASAP",
     errorPedidoTitle:"Something went wrong",errorPedidoMsg:"We couldn't send your order. Please check your connection and try again.",errorPedidoBtn:"Try again",
     cookieText:"🍪 We use Google Analytics to understand how the menu is used and improve the service. We don't use this for advertising.",cookieAccept:"Accept",cookieDecline:"Decline"},
   es:{items:"platos",order:"Pedido",yourOrder:"Tu Pedido",total:"Total",empty:"Tu carrito está vacío",toastMsg:"Paga en caja al recoger tu pedido 🏧",counterTitle:"Pago en caja",counterMsg:"Tu pedido queda registrado aquí. Dirígete a la barra para pagar y recoger tu comida.",stripeTitle:"Pago con tarjeta",stripeSub:"Próximamente",stripeDisabled:"Pago online no disponible aún",nameLabel:"👤 Tu nombre",namePh:"Tu nombre (para llamarte)",phoneLabel:"📱 Teléfono",phonePh:"Tu número de teléfono",nameReq:"Por favor escribe tu nombre",phoneReq:"Por favor escribe un teléfono válido",pickup:"🕐 Hora de recogida (opcional)",placeOrder:"Confirmar Pedido →",ok:"¡Pedido Confirmado!",thanks:"Tu pedido ha sido registrado.",pickAt:"Hora de recogida: ",payNote:"Dirígete a la barra para pagar y recoger tu pedido.",great:"¡Perfecto, nos vemos en caja!",
@@ -542,6 +555,7 @@ const T = {
     cartaBannerMsg:"🍽️ Estás consultando la carta — para pedir, dirígete a la barra.",
     pickupPastErr:"Esa hora ya ha pasado — elige una hora posterior.",
     pickupWarnTitle:"¿Es correcta esa hora de recogida?",pickupWarnMsg:"Has puesto las {time} como hora de recogida — eso es dentro de más de 6 horas. ¿Es correcto?",pickupWarnFix:"Corregir hora",pickupWarnOk:"Sí, es correcta",
+    noPickupTitle:"¿Recogida lo antes posible?",noPickupMsg:"No has indicado una hora de recogida — eso significa que entenderemos que quieres el pedido listo y recogerlo cuanto antes, ahora mismo. ¿Es correcto?",noPickupFix:"Elegir una hora",noPickupOk:"Sí, lo antes posible",
     errorPedidoTitle:"Algo ha fallado",errorPedidoMsg:"No hemos podido enviar tu pedido. Comprueba tu conexión e inténtalo de nuevo.",errorPedidoBtn:"Reintentar",
     cookieText:"🍪 Usamos Google Analytics para entender cómo se usa la carta y mejorar el servicio. No usamos esta información para publicidad.",cookieAccept:"Aceptar",cookieDecline:"Rechazar"}
 };
@@ -1156,6 +1170,41 @@ async function placeOrder() {
     return; // enviandoPedido sigue en true hasta que el cliente elija en el modal
   }
 
+  // Si NO ha puesto hora de recogida, se lo confirmamos: sin hora, el sistema lo entiende
+  // como "lo antes posible" (ahora mismo) — mucha gente no se da cuenta de esto y luego
+  // le sorprende que la cocina lo trate como urgente.
+  if (!pickup) {
+    pedidoPendienteDatos = { name, phone, pickup, btn, textoOriginal };
+    document.getElementById('noPickupTitle').textContent = t('noPickupTitle');
+    document.getElementById('noPickupMsg').textContent = t('noPickupMsg');
+    document.getElementById('noPickupFixBtn').textContent = t('noPickupFix');
+    document.getElementById('noPickupOkBtn').textContent = t('noPickupOk');
+    document.getElementById('noPickupbg').classList.add('on');
+    return; // enviandoPedido sigue en true hasta que el cliente elija en el modal
+  }
+
+  enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal);
+}
+
+// El cliente decide elegir una hora: cerramos el modal, reactivamos el botón y
+// dejamos el foco en el campo de hora.
+function elegirHoraRecogida() {
+  document.getElementById('noPickupbg').classList.remove('on');
+  if (pedidoPendienteDatos) {
+    pedidoPendienteDatos.btn.disabled = false;
+    pedidoPendienteDatos.btn.textContent = pedidoPendienteDatos.textoOriginal;
+  }
+  pedidoPendienteDatos = null;
+  enviandoPedido = false;
+  document.getElementById('pTime')?.focus();
+}
+
+// El cliente confirma que quiere el pedido lo antes posible (sin hora concreta).
+function confirmarSinHora() {
+  document.getElementById('noPickupbg').classList.remove('on');
+  if (!pedidoPendienteDatos) return;
+  const { name, phone, pickup, btn, textoOriginal } = pedidoPendienteDatos;
+  pedidoPendienteDatos = null;
   enviarPedidoAlServidor(name, phone, pickup, btn, textoOriginal);
 }
 
