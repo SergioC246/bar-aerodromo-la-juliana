@@ -1,21 +1,22 @@
 const express = require('express');
 const router = express.Router();
 const menuController = require('../controllers/menuController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Menú público
+// Menú público (clientes)
 router.get('/', menuController.getMenuCompleto);
 
-// Menú para admin (incluye no disponibles)
-router.get('/admin', menuController.getMenuAdmin);
+// Menú para admin (incluye no disponibles) - PROTEGIDO
+router.get('/admin', authMiddleware, menuController.getMenuAdmin);
 
-// Categorías
-router.post('/categorias', menuController.createCategoria);
-router.put('/categorias/:id', menuController.updateCategoria);
-router.delete('/categorias/:id', menuController.deleteCategoria);
+// Categorías - PROTEGIDAS
+router.post('/categorias', authMiddleware, menuController.createCategoria);
+router.put('/categorias/:id', authMiddleware, menuController.updateCategoria);
+router.delete('/categorias/:id', authMiddleware, menuController.deleteCategoria);
 
-// Productos
-router.post('/productos', menuController.createProducto);
-router.put('/productos/:id', menuController.updateProducto);
-router.delete('/productos/:id', menuController.deleteProducto);
+// Productos - PROTEGIDOS
+router.post('/productos', authMiddleware, menuController.createProducto);
+router.put('/productos/:id', authMiddleware, menuController.updateProducto);
+router.delete('/productos/:id', authMiddleware, menuController.deleteProducto);
 
 module.exports = router;
