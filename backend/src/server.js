@@ -3,6 +3,7 @@ const app = require('./app');
 const initDb = require('./config/initDb');
 const { WebSocketServer } = require('ws');
 const http = require('http');
+const jwt = require('jsonwebtoken');
 
 const PORT = process.env.PORT || 5000;
 
@@ -34,6 +35,13 @@ wss.on('connection', (ws) => {
 
     // Las pantallas de cocina/barra se identifican como staff para recibir 'nuevo_pedido'
     if (msg.type === 'identificar' && msg.rol === 'staff') {
+      try {
+        jwt.verify(msg.token, process.env.JWT_SECRET);
+      } catch (err) {
+        // Sin token válido no se recibe ningún pedido
+        console.log('⛔ Intento de identificación de staff sin token válido');
+        return;
+      }
       cocina.add(ws);
       console.log('🍳 Staff conectado. Total:', cocina.size);
       return;
