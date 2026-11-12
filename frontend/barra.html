@@ -219,6 +219,7 @@
     <button class="scroll-btn" onclick="window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})" title="Ir abajo">↓</button>
   </div>
 
+  <script src="/staff-auth.js"></script>
   <script>
     let ws = null;
     let ordersEnProceso = {};
@@ -290,11 +291,18 @@
     }
 
     // ── WEBSOCKET ──
+    function identificarse() {
+      if (ws && ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: 'identificar', rol: 'staff', token: staffAuth.getToken() }));
+      }
+    }
+    staffAuth.alEntrar(identificarse);
+
     function connect() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${protocol}//${window.location.host}`);
       ws.onopen = () => {
-        ws.send(JSON.stringify({ type: 'identificar', rol: 'staff' }));
+        identificarse();
         updateStatusBadge(true); loadOrders();
       };
       ws.onmessage = (event) => {
@@ -328,7 +336,7 @@
 
     async function loadOrders() {
       try {
-        const [resEP, resH] = await Promise.all([fetch('/api/cocina/comandas'), fetch('/api/cocina/listas')]);
+        const [resEP, resH] = await Promise.all([staffAuth.authFetch('/api/cocina/comandas'), staffAuth.authFetch('/api/cocina/listas')]);
         const dataEP = await resEP.json();
         const dataH = await resH.json();
         ordersEnProceso = {};
@@ -385,7 +393,7 @@
         const itemsInner = itemsFiltered.map(i => `
           <div class="item">
             <div class="item-main">
-              <div class="item-name">${i.nombre}</div>
+              <div class="item-name">${escapeHtml(i.nombre)}</div>
               <div class="item-price">${(Number(i.precio) || 0).toFixed(2)}€</div>
               <div class="item-qty">×${i.cantidad}</div>
             </div>
@@ -427,7 +435,7 @@
               <div class="table-number">Comanda #${num}</div>
               <div class="order-time">${time}</div>
             </div>
-            <div class="customer-name">${order.customer_name}</div>
+            <div class="customer-name">${escapeHtml(order.customer_name)}</div>
             ${pickupHtml}${itemsHtml}${actionsHtml}
           </div>`;
       }).join('');
@@ -461,7 +469,7 @@
       if (!orderId) return;
 
       try {
-        const res = await fetch(`/api/orders/${orderId}/status`, {
+        const res = await staffAuth.authFetch(`/api/orders/${orderId}/status`, {
           method: 'PATCH', headers: {'Content-Type':'application/json'},
           body: JSON.stringify({status:'listo'})
         });
@@ -477,7 +485,7 @@
     // aviso al cliente (el push/WS solo se dispara al pasar a "listo", no al revertir).
     async function unmarkReady(orderId) {
       try {
-        const res = await fetch(`/api/orders/${orderId}/status`, {
+        const res = await staffAuth.authFetch(`/api/orders/${orderId}/status`, {
           method: 'PATCH', headers: {'Content-Type':'application/json'},
           body: JSON.stringify({status:'pendiente'})
         });
@@ -510,7 +518,7 @@
       if (!confirm(`¿Eliminar las ${count} comandas completadas de hoy? Esta acción no se puede deshacer.`)) return;
       try {
         const ids = Object.keys(ordersHechas);
-        await Promise.all(ids.map(id => fetch(`/api/orders/${id}`, { method: 'DELETE' })));
+        await Promise.all(ids.map(id => staffAuth.authFetch(`/api/orders/${id}`, { method: 'DELETE' })));
         ordersHechas = {};
         totalCommandsToday = Object.keys(ordersEnProceso).length;
         updateCounters(); renderBoard();
