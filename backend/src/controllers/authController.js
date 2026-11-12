@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/database');
+const crypto = require('crypto');
 
 if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
@@ -53,4 +54,36 @@ exports.createAdmin = async (req, res, next) => {
     if (err.code === '23505') return res.status(409).json({ error: 'Usuario ya existe' });
     next(err);
   }
+};
+
+// Acceso "personal" (cocina/barra): una contraseña compartida guardada en la variable
+// de entorno STAFF_PASSWORD. Si no está configurada, este acceso queda desactivado
+// (nunca tumba la aplicación).
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD;
+
+function iguales(a, b) {
+  const ha = crypto.createHash('sha256').update(String(a)).digest();
+  const hb = crypto.createHash('sha256').update(String(b)).digest();
+  return crypto.timingSafeEqual(ha, hb);
+}
+
+exports.staffLogin = (req, res) => {
+  if (!STAFF_PASSWORD) {
+    return res.status(503).json({ error: 'Acceso de personal no configurado' });
+  }
+  const { password } = req.body;
+  if (!password) return res.status(400).json({ error: 'Contraseña requerida' });
+  if (!iguales(password, STAFF_PASSWORD)) {
+    return res.status(401).json({ error: 'Credenciales incorrectas' });
+  }
+  const token = jwt.sign({ rol: 'staff', username: 'personal' }, JWT_SECRET, { expiresIn: '12h' });
+  res.json({ token, username: 'personal', rol: 'staff' });
+};
+
+// Renueva la sesión: recibe un token todavía válido y devuelve otro nuevo de 12 h.
+exports.refresh = (req, res) => {
+  const { id, username, rol } = req.admin;
+  const payload = rol === 'staff' ? { rol: 'staff', username } : { id, username, rol: 'admin' };
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '12h' });
+  res.json({ token, username, rol: payload.rol });
 };
