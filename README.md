@@ -1,204 +1,223 @@
-# 🍻 Bar Aeródromo La Juliana — Carta Digital
+# 🍻 Bar Aeródromo La Juliana — Digital Menu & Order Management
 
-Sistema de carta digital con pedidos en mesa para el Bar Aeródromo La Juliana. Los clientes escanean un código QR desde su mesa, consultan la carta, realizan su pedido y este llega directamente a cocina como una comanda. El pago se gestiona en caja.
+A web app built for a real bar and running in production. Customers browse the menu from their phone (bilingual ES/EN), place an order and choose a pickup time. The order reaches the **kitchen** and **bar** screens **in real time**, and the customer is notified when it's ready. An admin panel lets the owner manage the menu, kitchen hours and view statistics.
 
----
-
-## 📋 Descripción del flujo
-
-```
-Cliente escanea QR  →  Carta digital  →  Realiza pedido  →  Comanda en cocina  →  Pago en caja
-```
-
-1. **QR por mesa** — Cada mesa tiene un código QR único que identifica la mesa y abre la carta digital.
-2. **Carta digital** — El cliente navega por las categorías, añade productos al pedido y lo confirma.
-3. **Comanda en cocina** — El pedido llega al panel de cocina en tiempo real con el número de mesa.
-4. **Pago en caja** — El cliente solicita la cuenta; el camarero ve el resumen del pedido y procesa el cobro.
+**🌐 Live:** [bar-aerodromo-la-juliana.onrender.com](https://bar-aerodromo-la-juliana.onrender.com)
 
 ---
 
-## 🛠️ Stack tecnológico
+## ✨ Features
 
-| Capa | Tecnología |
-|------|------------|
-| Frontend | HTML, CSS, JavaScript (Vanilla) |
+**Customer (mobile, no sign-up)**
+- Menu by categories and subsections, in **Spanish and English**.
+- Cart with per-item comments and a **pickup time** (past or unreasonably distant times are rejected).
+- **Kitchen closed** notice based on the configured schedule.
+- **"Order ready" alert** in real time (WebSocket) and via **push notification**, even if the tab is closed.
+- **Menu-only mode** (`/?modo=carta`) for a QR code that lets people browse but not order.
+- **Duplicate order protection** (double taps, flaky connections).
+
+**Kitchen & bar (tablet, staff access)**
+- **Kitchen** screen: orders in progress and done, sound and visual alert for every new order, alarm when pickup time approaches.
+- **Bar** screen: same view with prices and total to charge, confirmation before marking an order as ready, and an undo button.
+- **Shared staff password** remembered by the device: typed once, the session then renews itself during the shift.
+
+**Administration**
+- Create, edit and delete categories and products (with English translations).
+- Order list with status and date filters.
+- Configurable kitchen hours (supports schedules that cross midnight).
+- Reports: daily revenue, best-selling dishes, orders per hour and an **all-time ranking**.
+- Printable **QR code** generators (`qr-print.html`, `qr-print-carta.html`).
+
+---
+
+## 🛠️ Tech stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | Plain HTML, CSS and JavaScript (served by the backend) |
 | Backend | Node.js + Express |
-| Base de datos | PostgreSQL |
-| QR | [qrcode.js](https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js) |
+| Real time | WebSockets (`ws`) |
+| Database | PostgreSQL (`pg`) |
+| Auth | JWT (`jsonwebtoken`), `bcryptjs` for the admin |
+| Notifications | Web Push with VAPID (`web-push`) and a Service Worker |
+| Security | `express-rate-limit`, input validation, output escaping |
+| Monitoring | Sentry (client errors) and Google Analytics only after cookie consent |
+| Deployment | Render (web service + managed PostgreSQL) |
 
 ---
 
-## 📁 Estructura del proyecto
+## 🧭 Architecture
+
+```
+ Customer (phone) ──POST /api/orders──▶  Express API  ──▶ PostgreSQL
+        ▲                                    │
+        │ pedido_listo (WebSocket / Push)    │ nuevo_pedido (WebSocket, staff with valid token only)
+        │                                    ▼
+        └─────────────────────────  Kitchen / Bar (tablet)
+                                     Admin (web panel)
+```
+
+---
+
+## 🔐 Security
+
+Three access levels, enforced **on the server** (not just by hiding buttons):
+
+| Level | Who | What they can do |
+|-------|-----|------------------|
+| Public | Customers | View the menu and hours, **create** an order |
+| Staff | Kitchen and bar | View and update orders and tickets |
+| Admin | Owner / manager | Everything above, plus menu, hours and reports |
+
+- 12-hour JWT with automatic renewal for staff; a staff token is not accepted on admin routes.
+- Staff password compared in constant time; login rate limit (5 failures / 15 min per IP).
+- The WebSocket only pushes orders to screens that present a valid token.
+- Customer-supplied data (name, comments) is escaped before rendering to prevent XSS.
+- `trust proxy` is configured so rate limiting uses the real client IP behind Render.
+- Secrets live only in environment variables; none are hard-coded.
+
+---
+
+## 📁 Project structure
 
 ```
 bar-aerodromo-la-juliana/
 ├── backend/
 │   ├── src/
-│   │   ├── routes/         # Rutas de la API (carta, pedidos, mesas)
-│   │   ├── controllers/    # Lógica de negocio
-│   │   ├── models/         # Modelos de PostgreSQL
-│   │   └── middleware/     # Autenticación, errores
-│   └── server.js           # Punto de entrada del servidor
-├── src/                    # Assets del frontend (CSS, imágenes)
-├── database.sql            # Schema de la base de datos
-├── index.html              # Aplicación frontend (carta digital)
-├── package.json
-├── .env.example
+│   │   ├── config/        # Database, initial schema (initDb) and Web Push
+│   │   ├── controllers/   # Logic for each resource
+│   │   ├── middleware/    # Role-based auth, rate limiting, error handling
+│   │   ├── models/        # Order queries
+│   │   ├── routes/        # API routes
+│   │   ├── utils/         # Kitchen hours and timezone helpers
+│   │   ├── app.js         # Express setup
+│   │   └── server.js      # HTTP + WebSocket server
+│   ├── .env.example
+│   └── package.json
+├── frontend/
+│   ├── index.html         # Menu and ordering (customers)
+│   ├── cocina.html        # Kitchen screen
+│   ├── barra.html         # Bar screen
+│   ├── admin.html         # Admin panel
+│   ├── staff-auth.js      # Staff access (shared by kitchen and bar)
+│   ├── qr-print*.html     # QR generators
+│   └── sw.js              # Service Worker (push notifications)
 └── README.md
 ```
 
 ---
 
-## 🗃️ Modelo de datos
+## 🚀 Running locally
 
-```sql
--- Mesas
-mesas (id, numero, qr_token, activa)
-
--- Carta
-categorias (id, nombre, orden)
-productos (id, categoria_id, nombre, descripcion, precio, disponible, imagen_url)
-
--- Pedidos
-pedidos (id, mesa_id, estado, created_at, updated_at)
-  -- estados: 'pendiente' | 'en_cocina' | 'listo' | 'pagado'
-
-lineas_pedido (id, pedido_id, producto_id, cantidad, precio_unitario, notas)
-```
-
----
-
-## 🚀 Instalación y puesta en marcha
-
-### Requisitos previos
-
-- Node.js v18+
-- PostgreSQL 14+
-
-### 1. Clonar el repositorio
+**Requirements:** Node.js 18+ and PostgreSQL.
 
 ```bash
-git clone https://github.com/tu-usuario/bar-aerodromo-la-juliana.git
-cd bar-aerodromo-la-juliana
-```
-
-### 2. Instalar dependencias
-
-```bash
+git clone https://github.com/SergioC246/bar-aerodromo-la-juliana.git
+cd bar-aerodromo-la-juliana/backend
 npm install
+cp .env.example .env      # PowerShell: Copy-Item .env.example .env
 ```
 
-### 3. Configurar variables de entorno
+Edit `.env` with your values (see the table below), then start the server:
 
 ```bash
-cp .env.example .env
+npm run dev    # development, restarts on save
+npm start      # production
 ```
 
-Edita el archivo `.env` con tus valores:
+The app runs at `http://localhost:5000`. **Tables are created automatically** on startup (`initDb`); just create an empty database in your local PostgreSQL first.
 
-```env
-PORT=3000
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=bar_juliana
-DB_USER=tu_usuario
-DB_PASSWORD=tu_contraseña
-```
+**Creating the admin user:** the sign-up route is intentionally commented out in `backend/src/routes/auth.js`. To create the first admin, uncomment `router.post('/create', …)`, send a `POST /api/auth/create` with `{ "username", "password", "secretKey": <ADMIN_SECRET> }`, then comment it out again.
 
-### 4. Crear la base de datos
+> ⚠️ Use a **local** database, separate from production, while developing.
 
-```bash
-psql -U tu_usuario -c "CREATE DATABASE bar_juliana;"
-psql -U tu_usuario -d bar_juliana -f database.sql
-```
+### Environment variables
 
-### 5. Arrancar el servidor
-
-```bash
-# Desarrollo (con hot-reload)
-npm run dev
-
-# Producción
-npm start
-```
-
-La app estará disponible en `http://localhost:3000`
+| Variable | Required | Description |
+|----------|:--------:|-------------|
+| `PORT` | No | Server port (default 5000) |
+| `NODE_ENV` | No | `development` disables the login rate limit |
+| `DATABASE_URL` | One of the two | Full connection string (used on Render) |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | One of the two | Separate connection settings for local development |
+| `JWT_SECRET` | **Yes** | Key used to sign tokens. Generate with `openssl rand -base64 32` |
+| `ADMIN_SECRET` | **Yes** | Key protecting admin creation |
+| `STAFF_PASSWORD` | For kitchen & bar | Shared staff password. If unset, staff access is disabled |
+| `CORS_ORIGIN` | Recommended | Allowed origin (any origin if unset) |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For notifications | Web Push keys. Generate with `npx web-push generate-vapid-keys` |
 
 ---
 
-## 📡 API Endpoints
+## 📡 API
 
-### Carta
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/carta` | Devuelve todas las categorías con sus productos |
-| `GET` | `/api/carta/categorias` | Lista de categorías |
-| `GET` | `/api/productos/:id` | Detalle de un producto |
+**Public**
 
-### Pedidos
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `POST` | `/api/pedidos` | Crear nuevo pedido |
-| `GET` | `/api/pedidos/:id` | Consultar estado de un pedido |
-| `PATCH` | `/api/pedidos/:id/estado` | Actualizar estado (cocina / caja) |
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/carta` | Full menu with available categories and products |
+| `GET` | `/api/horario` | Whether the kitchen is open, and its hours |
+| `POST` | `/api/orders` | Create an order |
+| `GET` | `/api/push/public-key` | Public key for push subscriptions |
+| `POST` | `/api/push/subscribe` | Attach a push subscription to an order |
+| `GET` | `/api/health` | Service health check |
 
-### Mesas
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/mesas/:token` | Identificar mesa por token QR |
+**Authentication**
 
-### Cocina (panel)
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `GET` | `/api/cocina/comandas` | Pedidos activos en cocina |
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/auth/login` | Admin login (username and password) |
+| `POST` | `/api/auth/staff-login` | Staff access (shared password) |
+| `POST` | `/api/auth/refresh` | Renew a still-valid token |
+
+**Staff or admin** (header `Authorization: Bearer <token>`)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/orders` | Orders, filterable by `status` and `date` |
+| `GET` | `/api/orders/:id` | A single order |
+| `PATCH` | `/api/orders/:id/status` | Change status (`pendiente`, `en_cocina`, `listo`, `entregado`) |
+| `DELETE` | `/api/orders/:id` | Delete an order |
+| `GET` | `/api/cocina/comandas` | Tickets in progress |
+| `GET` | `/api/cocina/listas` | Tickets already prepared |
+
+**Admin only**
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/carta/admin` | Full menu, including unavailable items |
+| `POST` `PUT` `DELETE` | `/api/carta/categorias[/:id]` | Manage categories |
+| `POST` `PUT` `DELETE` | `/api/carta/productos[/:id]` | Manage products |
+| `PUT` | `/api/horario` | Change kitchen hours |
+| `GET` | `/api/stats/dia` | Daily summary and dishes sold |
+| `GET` | `/api/stats/historico` | All-time dish ranking |
+
+**WebSocket** (same port): staff send `{ type: "identificar", rol: "staff", token }` and receive `nuevo_pedido`; customers send `{ type: "suscribir_pedido", pedidoId }` and receive `pedido_listo`.
 
 ---
 
-## 🖨️ Generación de códigos QR
-
-Cada mesa tiene un QR único que incluye su token en la URL:
+## 🗃️ Data model
 
 ```
-https://tu-dominio.com/?mesa=TOKEN_UNICO
+categorias     (id, nombre, nombre_en, emoji, orden)
+productos      (id, categoria_id → categorias, nombre, nombre_en, descripcion, descripcion_es,
+                subseccion, subseccion_en, notas, precio, disponible, orden, imagen_url)
+pedidos        (id UUID, customer_name, phone, status, pickup_time, push_subscription, created_at, updated_at)
+lineas_pedido  (id, pedido_id → pedidos, producto_id → productos, cantidad, precio_unitario,
+                notas, comentario_cliente, tipo)
+admins         (id, username, password_hash)
+horario_cocina (id = 1, hora_apertura, hora_cierre, activo)
 ```
 
-Para imprimir el QR de una mesa, accede al panel de administración o usa la función `printQR()` disponible en el frontend.
+Table and field names are in Spanish because they mirror the business domain.
 
 ---
 
-## 🧑‍🍳 Panel de cocina
+## ☁️ Deployment
 
-El panel de cocina muestra en tiempo real los pedidos con estado `en_cocina`, con:
-
-- Número de mesa
-- Productos y cantidades
-- Hora de entrada del pedido
-- Botón para marcar como **listo**
+The web service runs on **Render** and deploys automatically from the `main` branch, with environment variables configured in the Render dashboard. The business timezone (`Europe/Madrid`) is defined in `backend/src/utils/horario.js`.
 
 ---
 
-## 💳 Flujo de caja
+## 👤 Author
 
-1. El cliente solicita la cuenta.
-2. El camarero busca el pedido por número de mesa.
-3. Se muestra el resumen con total.
-4. Al cobrar, el pedido pasa a estado `pagado`.
-
----
-
-## 📝 Variables de entorno
-
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
-| `PORT` | Puerto del servidor | `3000` |
-| `DB_HOST` | Host de PostgreSQL | `localhost` |
-| `DB_PORT` | Puerto de PostgreSQL | `5432` |
-| `DB_NAME` | Nombre de la base de datos | `bar_juliana` |
-| `DB_USER` | Usuario de PostgreSQL | `postgres` |
-| `DB_PASSWORD` | Contraseña de PostgreSQL | `••••••••` |
-
----
-
-## 👤 Autor
-
-Proyecto desarrollado por **Sergio Córdoba** para el Bar Aeródromo La Juliana.
+Built by **Sergio Córdoba** for Bar Aeródromo La Juliana.
+[GitHub](https://github.com/SergioC246) · [Portfolio](https://sergioc246.github.io)
