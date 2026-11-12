@@ -340,6 +340,7 @@ tr:hover td{background:rgba(255,255,255,0.015)}
             </table>
           </div>
         </div>
+        <div id="rankingPager" style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px"></div>
       </div>
 
       <!-- TAB HORARIO -->
@@ -888,6 +889,41 @@ async function openInformeDia() {
   } catch { showToast('Error cargando informe', true); }
 }
 
+const RANKING_PAGE_SIZE = 15;
+let rankingData = [];
+let rankingPage = 0;
+
+function renderRanking() {
+  const total = rankingData.length;
+  const pages = Math.max(1, Math.ceil(total / RANKING_PAGE_SIZE));
+  rankingPage = Math.min(Math.max(rankingPage, 0), pages - 1);
+  const start = rankingPage * RANKING_PAGE_SIZE;
+  const slice = rankingData.slice(start, start + RANKING_PAGE_SIZE);
+
+  document.getElementById('rankingTable').innerHTML = slice.length
+    ? slice.map((p, i) => `
+        <tr>
+          <td><strong style="color:var(--gold)">${start + i + 1}</strong></td>
+          <td><strong>${p.nombre}</strong></td>
+          <td><span style="color:var(--gold);font-weight:700;font-size:18px">${p.total_cantidad}</span></td>
+          <td style="color:var(--muted)">${p.veces_pedido} comandas</td>
+          <td><strong style="color:var(--green)">${parseFloat(p.total_importe).toFixed(2)}€</strong></td>
+        </tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Sin datos históricos</td></tr>';
+
+  const pager = document.getElementById('rankingPager');
+  if (total <= RANKING_PAGE_SIZE) { pager.innerHTML = ''; return; }
+  pager.innerHTML = `
+    <button class="btn-secondary" onclick="cambiarPaginaRanking(-1)" ${rankingPage === 0 ? 'disabled style="opacity:.4;cursor:default"' : ''}>←</button>
+    <span style="color:var(--muted);font-size:13px">${start + 1}–${start + slice.length} de ${total}</span>
+    <button class="btn-secondary" onclick="cambiarPaginaRanking(1)" ${rankingPage >= pages - 1 ? 'disabled style="opacity:.4;cursor:default"' : ''}>→</button>`;
+}
+
+function cambiarPaginaRanking(delta) {
+  rankingPage += delta;
+  renderRanking();
+}
+
 async function loadHistorico() {
   document.getElementById('rankingTable').innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div> Cargando...</div></td></tr>';
   try {
@@ -909,16 +945,9 @@ async function loadHistorico() {
         </div>
       </div>`;
 
-    document.getElementById('rankingTable').innerHTML = data.ranking.length
-      ? data.ranking.map((p, i) => `
-          <tr>
-            <td><strong style="color:var(--gold)">${i + 1}</strong></td>
-            <td><strong>${p.nombre}</strong></td>
-            <td><span style="color:var(--gold);font-weight:700;font-size:18px">${p.total_cantidad}</span></td>
-            <td style="color:var(--muted)">${p.veces_pedido} comandas</td>
-            <td><strong style="color:var(--green)">${parseFloat(p.total_importe).toFixed(2)}€</strong></td>
-          </tr>`).join('')
-      : '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Sin datos históricos</td></tr>';
+    rankingData = data.ranking || [];
+    rankingPage = 0;
+    renderRanking();
   } catch { showToast('Error cargando ranking', true); }
 }
 
